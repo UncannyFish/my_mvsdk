@@ -490,7 +490,7 @@ void CG_DrawHUDLeftFrame1(float x, float y)
 {
 	// Inner gray wire frame
 	trap_R_SetColor( hudTintColor );
-	CG_DrawPic(   x, y, 80, 80, cgs.media.HUDInnerLeft );			
+	CG_DrawPic( x, y, 80, 80, cgs.media.HUDInnerLeft );			
 }
 
 /*
@@ -502,107 +502,39 @@ void CG_DrawHUDLeftFrame2(float x, float y)
 {
 	// Inner gray wire frame
 	trap_R_SetColor( hudTintColor );
-	CG_DrawPic(   x, y, 80, 80, cgs.media.HUDLeftFrame );		// Metal frame
+	CG_DrawPic( x, y, 80, 80, cgs.media.HUDLeftFrame );		// Metal frame
 }
 
 /*
 ================
-DrawHealthArmor
+CG_DrawHealth
 ================
 */
-void DrawHealthArmor(float x, float y)
+void CG_DrawHealth(float x, float y)
 {
 	vec4_t calcColor;
-	float	armorPercent,hold,healthPercent;
+	float	healthPercent, armorPercent;
 	playerState_t	*ps;
-
 	int healthAmt;
-	int armorAmt;
 
 	ps = &cg.snap->ps;
 
 	healthAmt = ps->stats[STAT_HEALTH];
-	armorAmt = ps->stats[STAT_ARMOR];
 
 	if (healthAmt > ps->stats[STAT_MAX_HEALTH])
 	{
 		healthAmt = ps->stats[STAT_MAX_HEALTH];
 	}
 
-	if (armorAmt > 100)
-	{
-		armorAmt = 100;
-	}
-
-	trap_R_SetColor( colorTable[CT_WHITE] );
-	CG_DrawPic(   x, y, 80, 80, cgs.media.HUDLeftFrame );		// Circular black background
-
-	//	Outer Armor circular
-	memcpy(calcColor, colorTable[CT_GREEN], sizeof(vec4_t));
-
-	hold = armorAmt-(ps->stats[STAT_MAX_HEALTH]/2);
-	armorPercent = (float) hold/(ps->stats[STAT_MAX_HEALTH]/2);
-	if (armorPercent <0)
-	{
-		armorPercent = 0;
-	}
-	calcColor[0] *= armorPercent;
-	calcColor[1] *= armorPercent;
-	calcColor[2] *= armorPercent;
-	trap_R_SetColor( calcColor);					
-	CG_DrawPic(   x, y, 80, 80, cgs.media.HUDArmor1 );			
-
-	// Inner Armor circular
-	if (armorPercent>0)
-	{
-		armorPercent = 1;
-	}
-	else
-	{
-		armorPercent = (float) armorAmt/(ps->stats[STAT_MAX_HEALTH]/2);
-	}
-	memcpy(calcColor, colorTable[CT_GREEN], sizeof(vec4_t));
-	calcColor[0] *= armorPercent;
-	calcColor[1] *= armorPercent;
-	calcColor[2] *= armorPercent;
-	trap_R_SetColor( calcColor);					
-	CG_DrawPic(   x, y, 80, 80, cgs.media.HUDArmor2 );			//	Inner Armor circular
-
-	if (ps->stats[STAT_ARMOR])	// Is there armor? Draw the HUD Armor TIC
-	{
-		// Make tic flash if inner armor is at 50% (25% of full armor)
-		if (armorPercent<.5)		// Do whatever the flash timer says
-		{
-			if (cg.HUDTickFlashTime < cg.time)			// Flip at the same time
-			{
-				cg.HUDTickFlashTime = cg.time + 100;
-				if (cg.HUDArmorFlag)
-				{
-					cg.HUDArmorFlag = qfalse;
-				}
-				else
-				{
-					cg.HUDArmorFlag = qtrue;
-				}
-			}
-		}
-		else
-		{
-			cg.HUDArmorFlag=qtrue;
-		}
-	}
-	else						// No armor? Don't show it.
-	{
-		cg.HUDArmorFlag=qfalse;
-	}
-
-	memcpy(calcColor, colorTable[CT_RED], sizeof(vec4_t));
+	memcpy(calcColor, colorTable[CT_HUD_RED], sizeof(vec4_t));
 	healthPercent = (float) healthAmt/ps->stats[STAT_MAX_HEALTH];
 	calcColor[0] *= healthPercent;
 	calcColor[1] *= healthPercent;
 	calcColor[2] *= healthPercent;
 	trap_R_SetColor( calcColor);					
-	CG_DrawPic(   x, y, 80, 80, cgs.media.HUDHealth );
+	CG_DrawPic( x, y, 80, 80, cgs.media.HUDHealth );
+
+	armorPercent = (float)(ps->stats[STAT_ARMOR] - (ps->stats[STAT_MAX_HEALTH] / 2)) / (ps->stats[STAT_MAX_HEALTH] / 2);
 
 	// Make tic flash if health is at 20% of full
 	if (healthPercent>.20)
@@ -636,71 +568,17 @@ void DrawHealthArmor(float x, float y)
 	// Draw the ticks
 	if (cg.HUDHealthFlag)
 	{
-		trap_R_SetColor( colorTable[CT_RED] );					
-		CG_DrawPic(   x, y, 80, 80, cgs.media.HUDHealthTic );
-	}
+		if (ps->stats[STAT_HOLDABLE_ITEMS] & (1 << HI_MEDPAC))
+			trap_R_SetColor(colorTable[CT_BLUE]);
+		else
+			trap_R_SetColor(colorTable[CT_HUD_RED]);
 
-	if (cg.HUDArmorFlag)
-	{
-		trap_R_SetColor( colorTable[CT_GREEN] );					
-		CG_DrawPic(   x, y, 80, 80, cgs.media.HUDArmorTic );		//	
-	}
-
-	trap_R_SetColor(hudTintColor);
-	CG_DrawPic(   x, y, 80, 80, cgs.media.HUDLeftStatic );		//	
-
-	trap_R_SetColor( colorTable[CT_RED] );	
-	CG_DrawNumField (x + 16, y + 40, 3, ps->stats[STAT_HEALTH], 14, 18, 
-		NUM_FONT_SMALL,qfalse);
-
-	trap_R_SetColor( colorTable[CT_GREEN] );	
-	CG_DrawNumField (x + 18 + 14, y + 40 + 14, 3, ps->stats[STAT_ARMOR], 14, 18, 
-		NUM_FONT_SMALL,qfalse);
-
-	trap_R_SetColor(hudTintColor );
-	CG_DrawPic(   x, y, 80, 80, cgs.media.HUDLeft );			// Metal frame
-}
-
-/*
-================
-CG_DrawHealth
-================
-*/
-void CG_DrawHealth(float x, float y)
-{
-	vec4_t calcColor;
-	float	healthPercent;
-	playerState_t	*ps;
-	int healthAmt;
-
-	ps = &cg.snap->ps;
-
-	healthAmt = ps->stats[STAT_HEALTH];
-
-	if (healthAmt > ps->stats[STAT_MAX_HEALTH])
-	{
-		healthAmt = ps->stats[STAT_MAX_HEALTH];
-	}
-
-	memcpy(calcColor, colorTable[CT_HUD_RED], sizeof(vec4_t));
-	healthPercent = (float) healthAmt/ps->stats[STAT_MAX_HEALTH];
-	calcColor[0] *= healthPercent;
-	calcColor[1] *= healthPercent;
-	calcColor[2] *= healthPercent;
-	trap_R_SetColor( calcColor);					
-	CG_DrawPic(   x, y, 80, 80, cgs.media.HUDHealth );
-
-	// Draw the ticks
-	if (cg.HUDHealthFlag)
-	{
-		trap_R_SetColor( colorTable[CT_HUD_RED] );					
-		CG_DrawPic(   x, y, 80, 80, cgs.media.HUDHealthTic );
+		CG_DrawPic( x, y, 80, 80, cgs.media.HUDHealthTic );
 	}
 
 	trap_R_SetColor( colorTable[CT_HUD_RED] );	
-	CG_DrawNumField (x + 16, y + 40, 3, ps->stats[STAT_HEALTH], 6, 12, 
-		NUM_FONT_SMALL,qfalse);
-
+	CG_DrawNumField( x + 16, y + 40, 3, ps->stats[STAT_HEALTH], 6, 12, 
+		NUM_FONT_SMALL, qfalse);
 }
 
 /*
@@ -728,7 +606,7 @@ void CG_DrawArmor(float x, float y)
 	}
 
 	hold = armor-(ps->stats[STAT_MAX_HEALTH]/2);
-	armorPercent = (float) hold/(ps->stats[STAT_MAX_HEALTH]/2);
+	armorPercent = (float)hold/(ps->stats[STAT_MAX_HEALTH]/2);
 	if (armorPercent <0)
 	{
 		armorPercent = 0;
@@ -737,7 +615,7 @@ void CG_DrawArmor(float x, float y)
 	calcColor[1] *= armorPercent;
 	calcColor[2] *= armorPercent;
 	trap_R_SetColor( calcColor);					
-	CG_DrawPic(   x, y, 80, 80, cgs.media.HUDArmor1 );			
+	CG_DrawPic( x, y, 80, 80, cgs.media.HUDArmor1 );			
 
 	// Inner Armor circular
 	if (armorPercent>0)
@@ -753,7 +631,7 @@ void CG_DrawArmor(float x, float y)
 	calcColor[1] *= armorPercent;
 	calcColor[2] *= armorPercent;
 	trap_R_SetColor( calcColor);					
-	CG_DrawPic(   x, y, 80, 80, cgs.media.HUDArmor2 );			//	Inner Armor circular
+	CG_DrawPic( x, y, 80, 80, cgs.media.HUDArmor2 );			//	Inner Armor circular
 
 	if (ps->stats[STAT_ARMOR])	// Is there armor? Draw the HUD Armor TIC
 	{
@@ -790,7 +668,7 @@ void CG_DrawArmor(float x, float y)
 	}
 
 	trap_R_SetColor( colorTable[CT_HUD_GREEN] );	
-	CG_DrawNumField (x + 18 + 14, y + 40 + 14, 3, ps->stats[STAT_ARMOR], 6, 12, 
+	CG_DrawNumField(x + 18 + 14, y + 40 + 14, 3, ps->stats[STAT_ARMOR], 6, 12, 
 		NUM_FONT_SMALL, qfalse);
 
 }
@@ -804,7 +682,7 @@ void CG_DrawHUDRightFrame1(float x, float y)
 {
 	trap_R_SetColor( hudTintColor );
 	// Inner gray wire frame
-	CG_DrawPic(   x, y, 80, 80, cgs.media.HUDInnerRight );		// 
+	CG_DrawPic( x, y, 80, 80, cgs.media.HUDInnerRight );
 }
 
 /*
@@ -815,7 +693,7 @@ CG_DrawHUDRightFrame2
 void CG_DrawHUDRightFrame2(float x, float y)
 {
 	trap_R_SetColor( hudTintColor );
-	CG_DrawPic(   x, y, 80, 80, cgs.media.HUDRightFrame );		// Metal frame
+	CG_DrawPic( x, y, 80, 80, cgs.media.HUDRightFrame );		// Metal frame
 }
 
 /*
