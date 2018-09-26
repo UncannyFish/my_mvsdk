@@ -515,6 +515,7 @@ vmCvar_t	cg_dismember;
 vmCvar_t	cg_widescreen;
 vmCvar_t	cg_fovAspectAdjust;
 
+vmCvar_t	cg_drawInventory;
 vmCvar_t	cg_smallScoreboard;
 vmCvar_t	cg_thirdPerson;
 vmCvar_t	cg_thirdPersonRange;
@@ -677,7 +678,10 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_widescreen, "cg_widescreen", "1", CVAR_ARCHIVE },
 	{ &cg_fovAspectAdjust, "cg_fovAspectAdjust", "0", CVAR_ARCHIVE },
 
+
+	{ &cg_drawInventory, "cg_drawInventory", "1", CVAR_ARCHIVE },
 	{ &cg_smallScoreboard, "cg_smallScoreboard", "0", CVAR_ARCHIVE },
+
 	{ &cg_thirdPerson, "cg_thirdPerson", "0", 0 },
 	{ &cg_thirdPersonRange, "cg_thirdPersonRange", "80", CVAR_CHEAT },
 	{ &cg_thirdPersonAngle, "cg_thirdPersonAngle", "0", CVAR_CHEAT },

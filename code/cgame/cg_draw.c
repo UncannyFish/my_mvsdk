@@ -1918,7 +1918,7 @@ static float CG_DrawTeamOverlay( float y, qboolean right, qboolean upper ) {
 }
 
 
-static void CG_DrawPowerupIcons(int y)
+static int CG_DrawPowerupIcons(int y)
 {
 	int j;
 	int ico_size = 64;
@@ -1928,7 +1928,7 @@ static void CG_DrawPowerupIcons(int y)
 
 	if (!cg.snap)
 	{
-		return;
+		return y;
 	}
 
 	y += 16;
@@ -1973,6 +1973,43 @@ static void CG_DrawPowerupIcons(int y)
 			}
 		}
 	}
+	return y;
+}
+
+static void CG_DrawInventory(int y)
+{
+	int i;
+	int ico_size = 32;
+	float xAlign = cgs.screenWidth - ico_size * 1.1f;
+
+	if (!cg.snap)
+		return;
+
+	if (!cg_drawInventory.integer)
+		return;
+
+	if (cg.snap->ps.stats[STAT_HEALTH] <= 0)
+		return;
+
+	y += 8;
+
+	if (cg.snap->ps.stats[STAT_WEAPONS] & (1 << WP_TRIP_MINE) && cg.snap->ps.ammo[weaponData[WP_TRIP_MINE].ammoIndex] > 0) {
+		CG_DrawPic(xAlign, y, ico_size, ico_size, cgs.media.weaponIcons[WP_TRIP_MINE]);
+		CG_DrawNumField(xAlign, y, 2, cg.snap->ps.ammo[weaponData[WP_TRIP_MINE].ammoIndex], 6, 12, NUM_FONT_SMALL, qfalse);
+		y += ico_size;
+	}
+
+	if (!cg.snap->ps.stats[STAT_HOLDABLE_ITEM] || !cg.snap->ps.stats[STAT_HOLDABLE_ITEMS])
+		return;
+
+	for (i = 0; i < HI_NUM_HOLDABLE; i++)
+	{
+		if (i && cg.snap->ps.stats[STAT_HOLDABLE_ITEMS] & (1 << i))
+		{
+			CG_DrawPic(xAlign, y, ico_size, ico_size, cgs.media.invenIcons[i]);
+			y += ico_size;
+		}
+	}
 }
 
 
@@ -2004,7 +2041,9 @@ static void CG_DrawUpperRight( void ) {
 
 	y = CG_DrawMiniScoreboard ( y );
 
-	CG_DrawPowerupIcons(y);
+	y = CG_DrawPowerupIcons(y);
+
+	CG_DrawInventory(y);
 }
 
 /*
