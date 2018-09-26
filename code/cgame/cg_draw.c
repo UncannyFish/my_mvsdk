@@ -2226,7 +2226,7 @@ static void CG_DrawDisconnect( void ) {
 	}
 
 	x = cgs.screenWidth - 48;
-	y = 480 - 48;
+	y = SCREEN_HEIGHT - 48;
 
 	CG_DrawPic( x, y, 48, 48, trap_R_RegisterShader("gfx/2d/net.tga" ) );
 }
@@ -2241,13 +2241,14 @@ CG_DrawLagometer
 ==============
 */
 static void CG_DrawLagometer( void ) {
-	int		a, x, y, i;
+	int		a, i;
+	float	x, y;
 	float	v;
 	float	ax, ay, aw, ah, mid, range;
 	int		color;
 	float	vscale;
 
-	if ( !cg_lagometer.integer || cgs.localServer ) {
+	if ( !cg_lagometer.integer || cgs.localServer || cg.demoPlayback ) {
 		CG_DrawDisconnect();
 		return;
 	}
@@ -2256,10 +2257,12 @@ static void CG_DrawLagometer( void ) {
 	// draw the graph
 	//
 	x = cgs.screenWidth - 48;
-	y = 480 - 144;
+	y = SCREEN_HEIGHT - 144;
 
 	trap_R_SetColor( NULL );
-	CG_DrawPic( x, y, 48, 48, cgs.media.lagometerShader );
+	if (cg_lagometer.integer < 3)
+		CG_DrawPic( x, y, 48, 48, cgs.media.lagometerShader );
+
 	x -= 1.0f; //lines the actual graph up with the background
 
 	ax = x;
@@ -2337,6 +2340,23 @@ static void CG_DrawLagometer( void ) {
 
 	if ( cg_nopredict.integer || cg_synchronousClients.integer ) {
 		CG_DrawBigString( ax, ay, "snc", 1.0 );
+	}
+
+	//TnG NoVe
+	else if (cg.snap && cg_lagometer.integer == 2 || cg_lagometer.integer == 3)
+	{
+		int total = 0;
+		float avgInterp;
+		int i;
+
+		CG_Text_Paint(ax + 2, ay - 1, 0.5f, colorWhite, va("%i", cg.snap->ping), 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_SMALL);
+
+		for (i = 0; i < LAG_SAMPLES; i++) {
+			total += lagometer.frameSamples[i];
+		}
+		avgInterp = total / (float)LAG_SAMPLES * -1;
+
+		CG_Text_Paint(ax + 16, ay - 1, 0.5f, colorWhite, va("%04.1f", avgInterp), 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_SMALL);
 	}
 
 	CG_DrawDisconnect();
