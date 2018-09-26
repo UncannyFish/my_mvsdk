@@ -1495,6 +1495,7 @@ extern	vmCvar_t		cg_animBlend;
 
 extern	vmCvar_t		cg_dismember;
 
+extern	vmCvar_t		cg_drawTimerMsec;
 extern	vmCvar_t		cg_widescreen;
 extern	vmCvar_t		cg_fovAspectAdjust;
 

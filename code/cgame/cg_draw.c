@@ -1676,10 +1676,10 @@ static float CG_DrawSnapshot( float y ) {
 CG_DrawFPS
 ==================
 */
-#define	FPS_FRAMES	4
+#define	FPS_FRAMES	16
 static float CG_DrawFPS( float y ) {
 	char		*s;
-	int			w;
+	float		w;
 	static int	previousTimes[FPS_FRAMES];
 	static int	index;
 	int		i, total;
@@ -1707,9 +1707,19 @@ static float CG_DrawFPS( float y ) {
 		fps = 1000 * FPS_FRAMES / total;
 
 		s = va( "%ifps", fps );
-		w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
 
+		//JAPRO - Clientside - Add cg_drawfps 2 - Start
+		if (cg_drawFPS.integer == 2)
+		{
+			w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
+			CG_DrawSmallString(cgs.screenWidth - 5 - w, y + 2, s, 1.0f);
+		}
+		else
+		{
+		w = CG_DrawStrlen(s) * BIGCHAR_WIDTH;
 		CG_DrawBigString(cgs.screenWidth - 5 - w, y + 2, s, 1.0f);
+		}
+		//JAPRO - Clientside - Add cg_drawfps 2 - End
 	}
 
 	return y + BIGCHAR_HEIGHT + 4;
@@ -1722,22 +1732,37 @@ CG_DrawTimer
 */
 static float CG_DrawTimer( float y ) {
 	char		*s;
-	int			w;
-	int			mins, seconds, tens;
-	int			msec;
+	float		w;
+	int			msec, secs, mins;
 
-	msec = cg.time - cgs.levelStartTime;
+	if (cg_drawTimer.integer < 0)
+		msec = cg.time;
+	else
+		msec = cg.time - cgs.levelStartTime;
 
-	seconds = msec / 1000;
-	mins = seconds / 60;
-	seconds -= mins * 60;
-	tens = seconds / 10;
-	seconds -= tens * 10;
+	secs = msec / 1000;
+	mins = secs / 60;
 
-	s = va( "%i:%i%i", mins, tens, seconds );
-	w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
+	secs %= 60;
+	msec %= 1000;
 
-	CG_DrawBigString(cgs.screenWidth - 5 - w, y + 2, s, 1.0f);
+	//JAPRO - Clientside - Show MS in map timer. - Start
+	if (cg_drawTimerMsec.integer)
+		s = va("%i:%02i.%03i", mins, secs, msec);
+	else
+		s = va("%i:%02i", mins, secs);
+
+	if (cg_drawTimer.integer == 2)
+	{
+		w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
+		CG_DrawSmallString(cgs.screenWidth - 5 - w, y + 2, s, 1.0f);
+	}
+	else
+	{
+		w = CG_DrawStrlen(s) * BIGCHAR_WIDTH;
+		CG_DrawBigString(cgs.screenWidth - 5 - w, y + 2, s, 1.0f);
+	}
+	//JAPRO - Clientside - Show MS in map timer. - End
 
 	return y + BIGCHAR_HEIGHT + 4;
 }

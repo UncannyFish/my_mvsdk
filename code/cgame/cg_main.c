@@ -512,6 +512,7 @@ vmCvar_t	cg_animBlend;
 
 vmCvar_t	cg_dismember;
 
+vmCvar_t	cg_drawTimerMsec;
 vmCvar_t	cg_widescreen;
 vmCvar_t	cg_fovAspectAdjust;
 
@@ -675,6 +676,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 
 	{ &cg_dismember, "cg_dismember", "0", CVAR_ARCHIVE },
 
+	{ &cg_drawTimerMsec, "cg_drawTimerMsec", "1", CVAR_ARCHIVE },
 	{ &cg_widescreen, "cg_widescreen", "1", CVAR_ARCHIVE },
 	{ &cg_fovAspectAdjust, "cg_fovAspectAdjust", "0", CVAR_ARCHIVE },
 
