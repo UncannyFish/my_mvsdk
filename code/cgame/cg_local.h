@@ -1498,6 +1498,7 @@ extern	vmCvar_t		cg_dismember;
 extern	vmCvar_t		cg_widescreen;
 extern	vmCvar_t		cg_fovAspectAdjust;
 
+extern	vmCvar_t		cg_smallScoreboard;
 extern	vmCvar_t		cg_thirdPerson;
 extern	vmCvar_t		cg_thirdPersonRange;
 extern	vmCvar_t		cg_thirdPersonAngle;
