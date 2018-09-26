@@ -89,21 +89,21 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 			CG_DrawFlagModel( iconx, y - ( 32 - BIGCHAR_HEIGHT ) / 2, 32, 32, TEAM_FREE, qfalse );
 		}
 		else {
-			CG_DrawFlagModel( iconx, y, 16, 16, TEAM_FREE, qfalse );
+			CG_DrawFlagModel( iconx + 32, y, 16, 16, TEAM_FREE, qfalse );
 		}
 	} else if ( ci->powerups & ( 1 << PW_REDFLAG ) ) {
 		if( largeFormat ) {
 			CG_DrawFlagModel( iconx, y, 32, 32, TEAM_RED, qfalse );
 		}
 		else {
-			CG_DrawFlagModel( iconx, y, 32, 32, TEAM_RED, qfalse );
+			CG_DrawFlagModel( iconx + 32, y, 16, 16, TEAM_RED, qfalse );
 		}
 	} else if ( ci->powerups & ( 1 << PW_BLUEFLAG ) ) {
 		if( largeFormat ) {
 			CG_DrawFlagModel( iconx, y, 32, 32, TEAM_BLUE, qfalse );
 		}
 		else {
-			CG_DrawFlagModel( iconx, y, 32, 32, TEAM_BLUE, qfalse );
+			CG_DrawFlagModel( iconx + 32, y, 16, 16, TEAM_BLUE, qfalse );
 		}
 	} else {
 		// draw the wins / losses
