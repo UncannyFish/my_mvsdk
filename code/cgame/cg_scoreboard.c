@@ -248,7 +248,7 @@ qboolean CG_DrawOldScoreboard( void ) {
 	float	fade;
 	float	*fadeColor;
 	char	*s;
-	int maxClients;
+	int maxClients, realMaxClients;
 	int lineHeight;
 	int topBorderSize, bottomBorderSize;
 
@@ -399,6 +399,8 @@ qboolean CG_DrawOldScoreboard( void ) {
 		bottomBorderSize = 8;
 	}
 
+	realMaxClients = maxClients;
+
 	localClient = qfalse;
 
 
@@ -482,6 +484,9 @@ qboolean CG_DrawOldScoreboard( void ) {
 
 			maxClients -= (team1MaxCl+team2MaxCl);
 		}
+
+		maxClients = realMaxClients;
+
 		n1 = CG_TeamScoreboard( y, TEAM_SPECTATOR, fade, maxClients, lineHeight, qfalse );
 		y += (n1 * lineHeight) + BIGCHAR_HEIGHT;
 
