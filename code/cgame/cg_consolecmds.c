@@ -397,6 +397,44 @@ static void CG_Camera_f( void ) {
 }
 */
 
+static void CG_RemapShader_f(void) {
+	char oldShader[MAX_QPATH], newShader[MAX_QPATH];
+
+	if (trap_Argc() != 3) {
+		Com_Printf("Usage: /remapShader <old> <new>\n");
+		return;
+	}
+
+	trap_Argv( 1, oldShader, sizeof( oldShader ) );
+	trap_Argv( 2, newShader, sizeof( newShader ) );
+
+	//validate this ?
+	//how to stop from using trans shaders..?
+
+	trap_R_RemapShader(oldShader, newShader, NULL);	 //what is timeoffset for
+
+}
+
+static void CG_ListRemaps_f(void) {
+	const char	*info;
+	char info2[MAX_CONFIGSTRINGS];
+	info = CG_ConfigString( CS_SHADERSTATE );
+
+	Q_strncpyz( info2, info, sizeof(info2));
+
+	Q_strstrip( info2, ":", "\n" );	
+
+	Com_Printf("Remaps: \n %s \n", info2);
+
+	//Replace : with newline
+	//replace 0.30@ with null?
+	//replace = with " -> "
+
+	//keep track of local remaps somehow
+	//either directly or add remap text to array when added, list here
+
+}
+
 
 typedef struct {
 	char	*cmd;
@@ -452,7 +490,11 @@ static consoleCommand_t	commands[] = {
 	{ "invnext", CG_NextInventory_f },
 	{ "invprev", CG_PrevInventory_f },
 	{ "forcenext", CG_NextForcePower_f },
-	{ "forceprev", CG_PrevForcePower_f }
+	{ "forceprev", CG_PrevForcePower_f },
+
+	//jk2pro stuff
+	{ "remapShader", CG_RemapShader_f },
+	{ "listRemaps", CG_ListRemaps_f }
 };
 
 
