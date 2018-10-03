@@ -200,7 +200,7 @@ static void CG_ShaderStateChanged( const char *o ) {
 				strncpy(timeOffset, t, o-t);
 				timeOffset[o-t] = 0;
 				o++;
-				if (cg_remaps.integer) //JAPRO - Clientside - Allow noremaps
+				if (cg_remaps.integer && Q_stricmpn(originalShader, "console", 7)) //JAPRO - Clientside - Allow noremaps
 					trap_R_RemapShader( originalShader, newShader, timeOffset );
 			}
 		} else {
@@ -1305,7 +1305,7 @@ static void CG_ServerCommand( void ) {
 	}
 
   if ( Q_stricmp (cmd, "remapShader") == 0 ) {
-		if (trap_Argc() == 4 && cg_remaps.integer) { //JAPRO - Clientside - Allow noremaps
+		if (trap_Argc() == 4 && cg_remaps.integer && Q_stricmpn(CG_Argv(1), "console", 7)) { //JAPRO - Clientside - Allow noremaps
 			trap_R_RemapShader(CG_Argv(1), CG_Argv(2), CG_Argv(3));
 		}
 	}
