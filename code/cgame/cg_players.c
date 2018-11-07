@@ -7315,6 +7315,9 @@ stillDoSaber:
 			legs.renderfx |= RF_RGB_TINT;
 		}
 	}
+
+	if (cg.snap->ps.clientNum == cent->currentState.number && cg_playerLOD.integer)
+		legs.renderfx |= RF_NOLOD; //forces high model detail on local player
 	//JAPRO - Clientside - Brightskins - End
 
 	if (cg.snap->ps.duelInProgress /*&& cent->currentState.number != cg.snap->ps.clientNum*/)
