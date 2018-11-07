@@ -4443,6 +4443,13 @@ static void CG_Draw2D( void ) {
 
 		fallTime /= (FALL_FADE_TIME/2);
 
+		if (cg_autoKillWhenFalling.integer && cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR) {
+			if (cg.lastAutoKillTime < (cg.time - 500))
+				trap_SendConsoleCommand("kill\n");
+			trap_SendConsoleCommand("+attack;wait 2;-attack\n");
+			cg.lastAutoKillTime = cg.time;
+		}
+
 		if (fallTime < 0)
 		{
 			fallTime = 0;

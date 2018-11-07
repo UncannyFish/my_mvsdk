@@ -516,6 +516,8 @@ vmCvar_t	cg_dismember;
 vmCvar_t	cg_enhancedFlagStatus;
 vmCvar_t	cg_drawTimerMsec;
 vmCvar_t	cg_remaps;
+vmCvar_t	cg_autoKillWhenFalling;
+
 vmCvar_t	cg_widescreen;
 vmCvar_t	cg_fovAspectAdjust;
 
@@ -690,6 +692,8 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_enhancedFlagStatus, "cg_enhancedFlagStatus", "2", 0 },
 	{ &cg_drawTimerMsec, "cg_drawTimerMsec", "1", CVAR_ARCHIVE },
 	{ &cg_remaps, "cg_remaps", "1",	CVAR_LATCH|CVAR_ARCHIVE },
+	{ &cg_autoKillWhenFalling, "cg_autoKillWhenFalling", "1", CVAR_ARCHIVE },
+
 	{ &cg_widescreen, "cg_widescreen", "1", CVAR_ARCHIVE },
 	{ &cg_fovAspectAdjust, "cg_fovAspectAdjust", "0", CVAR_ARCHIVE },
 

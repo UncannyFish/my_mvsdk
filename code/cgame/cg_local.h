@@ -74,8 +74,8 @@
 
 #define	NUM_CROSSHAIRS		10
 
-#define TEAM_OVERLAY_MAXNAME_WIDTH	12
-#define TEAM_OVERLAY_MAXLOCATION_WIDTH	16
+#define TEAM_OVERLAY_MAXNAME_WIDTH	32
+#define TEAM_OVERLAY_MAXLOCATION_WIDTH	64
 
 #define	DEFAULT_MODEL			"kyle"
 #define	DEFAULT_TEAM_MODEL		"kyle"
@@ -899,6 +899,7 @@ Ghoul2 Insert End
 	char				doVstr[MAX_QPATH];
 	short				numFKFrames;
 	short				numJumps;
+	int					lastAutoKillTime;
 } cg_t;
 
 #define MAX_TICS	14
@@ -1541,6 +1542,8 @@ extern	vmCvar_t		cg_dismember;
 extern	vmCvar_t		cg_enhancedFlagStatus;
 extern	vmCvar_t		cg_drawTimerMsec;
 extern	vmCvar_t		cg_remaps;
+extern	vmCvar_t		cg_autoKillWhenFalling;
+
 extern	vmCvar_t		cg_widescreen;
 extern	vmCvar_t		cg_fovAspectAdjust;
 
