@@ -1386,6 +1386,10 @@ typedef struct {
 	int				redflag, blueflag;		// flag status from configstrings
 	int				flagStatus;
 
+	//new flagstatus stuff
+	clientInfo_t	*redFlagCarrier, *blueFlagCarrier;
+	int				redFlagTime, blueFlagTime;
+
 	qboolean  newHud;
 
 	//
@@ -1533,6 +1537,8 @@ extern	vmCvar_t		cg_animBlend;
 
 extern	vmCvar_t		cg_dismember;
 
+//jk2pro Client Cvars - start
+extern	vmCvar_t		cg_enhancedFlagStatus;
 extern	vmCvar_t		cg_drawTimerMsec;
 extern	vmCvar_t		cg_remaps;
 extern	vmCvar_t		cg_widescreen;
