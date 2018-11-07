@@ -4225,6 +4225,8 @@ void CG_DrawFlagStatus()
 		return;
 	}
 
+	trap_R_SetColor(NULL);
+
 	team = cg.snap->ps.persistant[PERS_TEAM];
 
 	if (cgs.gametype == GT_CTY)
