@@ -86,6 +86,8 @@
 #define DEFAULT_REDTEAM_NAME		"Empire"
 #define DEFAULT_BLUETEAM_NAME		"Rebellion"
 
+#define JK2AWARDS
+
 //[JK2PRO - Clientside - All - Jcinfo bitvalues
 #define JK2PRO_CINFO_HIGHFPSFIX		(1<<0) //unused
 

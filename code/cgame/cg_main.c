@@ -615,8 +615,8 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_ignore, "cg_ignore", "0", 0 },	// used for debugging
 	{ &cg_autoswitch, "cg_autoswitch", "1", CVAR_ARCHIVE },
 	{ &cg_drawGun, "cg_drawGun", "1", CVAR_ARCHIVE },
-	{ &cg_zoomFov, "cg_zoomfov", "40.0", CVAR_ARCHIVE },
-	{ &cg_fov, "cg_fov", "80", CVAR_ARCHIVE },
+	{ &cg_zoomFov, "cg_zoomfov", "30.0", CVAR_ARCHIVE },
+	{ &cg_fov, "cg_fov", "90", CVAR_ARCHIVE },
 	{ &cg_viewsize, "cg_viewsize", "100", CVAR_ARCHIVE },
 	{ &cg_stereoSeparation, "cg_stereoSeparation", "0.4", CVAR_ARCHIVE  },
 	{ &cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE  },
@@ -645,11 +645,11 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_gun_y, "cg_gunY", "0", CVAR_ARCHIVE },
 	{ &cg_gun_z, "cg_gunZ", "0", CVAR_ARCHIVE },
 	{ &cg_centertime, "cg_centertime", "3", CVAR_CHEAT },
-	{ &cg_runpitch, "cg_runpitch", "0.002", CVAR_ARCHIVE},
-	{ &cg_runroll, "cg_runroll", "0.005", CVAR_ARCHIVE },
-	{ &cg_bobup , "cg_bobup", "0.005", CVAR_ARCHIVE },
-	{ &cg_bobpitch, "cg_bobpitch", "0.002", CVAR_ARCHIVE },
-	{ &cg_bobroll, "cg_bobroll", "0.002", CVAR_ARCHIVE },
+	{ &cg_runpitch, "cg_runpitch", "0", CVAR_ARCHIVE},
+	{ &cg_runroll, "cg_runroll", "0", CVAR_ARCHIVE },
+	{ &cg_bobup , "cg_bobup", "0", CVAR_ARCHIVE },
+	{ &cg_bobpitch, "cg_bobpitch", "0", CVAR_ARCHIVE },
+	{ &cg_bobroll, "cg_bobroll", "0", CVAR_ARCHIVE },
 	//{ &cg_swingSpeed, "cg_swingSpeed", "0.3", CVAR_CHEAT },
 	{ &cg_animSpeed, "cg_animspeed", "1", CVAR_CHEAT },
 	{ &cg_debugAnim, "cg_debuganim", "0", CVAR_CHEAT },
@@ -711,7 +711,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_drawInventory, "cg_drawInventory", "1", CVAR_ARCHIVE },
 	{ &cg_smallScoreboard, "cg_smallScoreboard", "0", CVAR_ARCHIVE },
 
-	{ &cg_thirdPerson, "cg_thirdPerson", "0", 0 },
+	{ &cg_thirdPerson, "cg_thirdPerson", "0", CVAR_ARCHIVE },
 	{ &cg_thirdPersonRange, "cg_thirdPersonRange", "80", CVAR_CHEAT },
 	{ &cg_thirdPersonAngle, "cg_thirdPersonAngle", "0", CVAR_CHEAT },
 	{ &cg_thirdPersonPitchOffset, "cg_thirdPersonPitchOffset", "0", CVAR_CHEAT },
@@ -1192,7 +1192,7 @@ static void CG_RegisterSounds( void ) {
 	if ( cgs.gametype >= GT_TEAM || cg_buildScript.integer ) {
 
 #ifdef JK2AWARDS
-		cgs.media.captureAwardSound = trap_S_RegisterSound( "sound/teamplay/flagcapture_yourteam.wav" );
+		cgs.media.captureAwardSound = trap_S_RegisterSound( "sound/chars/mothma/misc/capture.wav" );
 #endif
 		cgs.media.redLeadsSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM046");
 		cgs.media.blueLeadsSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM045");

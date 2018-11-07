@@ -4432,7 +4432,7 @@ static void CG_Draw2D( void ) {
 			}
 
 			//Do we want to use this system again at some point?
-			//CG_DrawReward();
+			CG_DrawReward();
 		}
     
 	}
