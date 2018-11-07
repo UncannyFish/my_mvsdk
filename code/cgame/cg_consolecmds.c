@@ -397,6 +397,171 @@ static void CG_Camera_f( void ) {
 }
 */
 
+
+void CG_Say_f( void ) {
+	char msg[MAX_SAY_TEXT] = {0};
+	char word[MAX_SAY_TEXT] = {0};
+	char numberStr[MAX_SAY_TEXT] = {0};
+	int i, number = 0, numWords = trap_Argc();
+
+	for (i = 1; i < numWords; i++) {
+		trap_Argv( i, word, sizeof(word));
+
+		if (!Q_stricmp(word, "%H%")) {
+			if (pm)
+				number = pm->ps->stats[STAT_HEALTH];
+			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
+			Q_strncpyz( word, numberStr, sizeof(word) );
+		}
+		else if (!Q_stricmp(word, "%S%")) {
+			if (pm)
+				number = pm->ps->stats[STAT_ARMOR];
+			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
+			Q_strncpyz( word, numberStr, sizeof(word) );
+		}
+		else if (!Q_stricmp(word, "%F%")) {
+			if (pm)
+				number = pm->ps->fd.forcePower;
+			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
+			Q_strncpyz( word, numberStr, sizeof(word) );
+		}
+		else if (!Q_stricmp(word, "%W%")) {
+			if (pm)
+				number = pm->ps->weapon;
+			switch (number) {
+				case 1:	Com_sprintf(numberStr, sizeof(numberStr), "Stun baton"); break;
+				case 2: Com_sprintf(numberStr, sizeof(numberStr), "Melee"); break;
+				case 4:	Com_sprintf(numberStr, sizeof(numberStr), "Bryar"); break;
+				case 5:	Com_sprintf(numberStr, sizeof(numberStr), "E11"); break;
+				case 6:	Com_sprintf(numberStr, sizeof(numberStr), "Sniper"); break;
+				case 7:	Com_sprintf(numberStr, sizeof(numberStr), "Bowcaster");	break;
+				case 8:	Com_sprintf(numberStr, sizeof(numberStr), "Repeater"); break;
+				case 9:	Com_sprintf(numberStr, sizeof(numberStr), "Demp2");	break;
+				case 10: Com_sprintf(numberStr, sizeof(numberStr), "Flechette"); break;
+				case 11: Com_sprintf(numberStr, sizeof(numberStr), "Rocket"); break;
+				case 12: Com_sprintf(numberStr, sizeof(numberStr), "Thermal"); break;
+				case 13: Com_sprintf(numberStr, sizeof(numberStr), "Tripmine"); break;
+				case 14: Com_sprintf(numberStr, sizeof(numberStr), "Detpack"); break;
+				default: Com_sprintf(numberStr, sizeof(numberStr), "Saber"); break;
+				}
+			Q_strncpyz( word, numberStr, sizeof(word) );
+		}
+		else if (!Q_stricmp(word, "%A%")) {
+			if (pm)
+				number = pm->ps->ammo[weaponData[pm->ps->weapon].ammoIndex];
+			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
+			Q_strncpyz( word, numberStr, sizeof(word) );
+		}
+
+		Q_strcat(word, MAX_SAY_TEXT, " ");
+		Q_strcat(msg, MAX_SAY_TEXT, word);
+	}
+
+	trap_SendClientCommand(va("say %s", msg));
+}
+
+void CG_TeamSay_f( void ) { 
+	char word[MAX_SAY_TEXT] = {0}, msg[MAX_SAY_TEXT] = {0}, numberStr[MAX_SAY_TEXT] = {0};//eh
+	int i, number = 0, numWords = trap_Argc();
+
+	for (i = 1; i < numWords; i++) {
+		trap_Argv( i, word, sizeof(word));
+
+		if (!Q_stricmp(word, "%H%")) {
+			if (pm)
+				number = pm->ps->stats[STAT_HEALTH];
+			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
+			Q_strncpyz( word, numberStr, sizeof(word) );
+		}
+		else if (!Q_stricmp(word, "%S%")) {
+			if (pm)
+				number = pm->ps->stats[STAT_ARMOR];
+			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
+			Q_strncpyz( word, numberStr, sizeof(word));
+		}
+		else if (!Q_stricmp(word, "%F%")) {
+			if (pm)
+				number = pm->ps->fd.forcePower;
+			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
+			Q_strncpyz( word, numberStr, sizeof(word) );
+		}
+		else if (!Q_stricmp(word, "%W%")) {
+			if (pm)
+				number = pm->ps->weapon;
+			switch (number) {
+				case 1:	Com_sprintf(numberStr, sizeof(numberStr), "Stun baton"); break;
+				case 2: Com_sprintf(numberStr, sizeof(numberStr), "Melee"); break;
+				case 4:	Com_sprintf(numberStr, sizeof(numberStr), "Bryar"); break;
+				case 5:	Com_sprintf(numberStr, sizeof(numberStr), "E11"); break;
+				case 6:	Com_sprintf(numberStr, sizeof(numberStr), "Sniper"); break;
+				case 7:	Com_sprintf(numberStr, sizeof(numberStr), "Bowcaster");	break;
+				case 8:	Com_sprintf(numberStr, sizeof(numberStr), "Repeater"); break;
+				case 9:	Com_sprintf(numberStr, sizeof(numberStr), "Demp2");	break;
+				case 10: Com_sprintf(numberStr, sizeof(numberStr), "Flechette"); break;
+				case 11: Com_sprintf(numberStr, sizeof(numberStr), "Rocket"); break;
+				case 12: Com_sprintf(numberStr, sizeof(numberStr), "Thermal"); break;
+				case 13: Com_sprintf(numberStr, sizeof(numberStr), "Tripmine"); break;
+				case 14: Com_sprintf(numberStr, sizeof(numberStr), "Detpack"); break;
+				default: Com_sprintf(numberStr, sizeof(numberStr), "Saber"); break;
+				}
+			Q_strncpyz( word, numberStr, sizeof(word) );
+		}
+		else if (!Q_stricmp(word, "%A%")) {
+			if (pm)
+				number = pm->ps->ammo[weaponData[pm->ps->weapon].ammoIndex];
+			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
+			Q_strncpyz( word, numberStr, sizeof(word) );
+		}
+
+		Q_strcat(word, MAX_SAY_TEXT, " ");
+		Q_strcat(msg, MAX_SAY_TEXT, word);
+	}
+
+	trap_SendClientCommand(va("say_team %s", msg));
+}
+
+void CG_ClientList_f( void )
+{
+	clientInfo_t *ci;
+	int i;
+	int count = 0;
+
+	for( i = 0; i < MAX_CLIENTS; i++ ) 
+	{
+		ci = &cgs.clientinfo[ i ];
+		if( !ci->infoValid ) 
+			continue;
+
+		switch( ci->team ) 
+		{
+		case TEAM_FREE:
+			Com_Printf( "%2d " S_COLOR_YELLOW "F   " S_COLOR_WHITE "%s" S_COLOR_WHITE "%s\n", i,
+				ci->name, (ci->botSkill != 0) ? " (bot)" : "" );
+ 			break;
+ 
+		case TEAM_RED:
+			Com_Printf( "%2d " S_COLOR_RED "R   " S_COLOR_WHITE "%s" S_COLOR_WHITE "%s\n", i,
+				ci->name, (ci->botSkill != 0) ? " (bot)" : "" );
+			break;
+
+		case TEAM_BLUE:
+			Com_Printf( "%2d " S_COLOR_BLUE "B   " S_COLOR_WHITE "%s" S_COLOR_WHITE "%s\n", i,
+				ci->name, (ci->botSkill != 0) ? " (bot)" : "" );
+			break;
+
+		default:
+		case TEAM_SPECTATOR:
+			Com_Printf( "%2d " S_COLOR_YELLOW "S   " S_COLOR_WHITE "%s" S_COLOR_WHITE "%s\n", i,
+				ci->name, (ci->botSkill != 0) ? " (bot)" : "" );
+			break;
+		}
+
+		count++;
+	}
+
+	Com_Printf( "Listed %2d clients\n", count );
+}
+
 static void CG_RemapShader_f(void) {
 	char oldShader[MAX_QPATH], newShader[MAX_QPATH];
 
@@ -433,6 +598,102 @@ static void CG_ListRemaps_f(void) {
 	//keep track of local remaps somehow
 	//either directly or add remap text to array when added, list here
 
+}
+
+
+void CG_Do_f(void) //loda fixme
+{
+	char vstr[MAX_QPATH], delay[32];
+	int delayMS;
+
+	if (trap_Argc() != 3) {
+		Com_Printf("Usage: /do <vstr> <delay>\n");
+		return;
+	}
+
+	trap_Argv(1, vstr, sizeof(vstr));
+	trap_Argv(2, delay, sizeof(delay));
+
+	delayMS = atoi(delay);
+	if (delayMS < 0)
+		delayMS = 0;
+	else if (delayMS > 1000 * 60 * 60)
+		delayMS = 1000 * 60 * 60;
+
+	Com_sprintf(cg.doVstr, sizeof(cg.doVstr), "vstr %s\n", vstr);
+	cg.doVstrTime = cg.time + delayMS;
+}
+
+static void CG_Flipkick_f(void)
+{
+
+	//Well we always want to do the first kick, unless we are doing some really advanced predictive shit..
+
+	//Ok, we started out flipkick.  Each frame we want to remove/add jump (+moveup and -moveup).
+
+	cg.numFKFrames = 1;
+
+
+	//How to make the perfect KS?
+	//Get frametime or com_maxfps ?
+	//Do however many taps super fast until they are at max jump kick height?
+	//trap_SendConsoleCommand("+moveup;wait 2;-moveup;wait 2;+moveup;wait 2;-moveup;wait 2;+moveup;wait 2;-moveup;wait 2;-moveup;wait 2;+moveup;wait 2;-moveup;wait 2;+moveup;wait 2;-moveup;wait 2;+moveup;wait 2;-moveup;wait 2;+moveup;wait 2;-moveup;wait 2;+moveup;wait 2;-moveup;wait 2;+moveup;wait 2;-moveup;wait 2;+moveup;wait 2;-moveup\n");
+}
+
+static void CG_Lowjump_f(void)
+{
+	trap_SendConsoleCommand("+moveup\n");
+	Q_strncpyz(cg.doVstr, "-moveup\n", sizeof(cg.doVstr));
+	cg.doVstrTime = cg.time;
+}
+
+static void CG_NorollDown_f(void)
+{
+
+	trap_SendConsoleCommand("+speed\n");
+	Q_strncpyz(cg.doVstr, "-moveup;+movedown;-speed\n", sizeof(cg.doVstr));
+	cg.doVstrTime = cg.time;
+}
+
+static void CG_NorollUp_f(void)
+{
+	Q_strncpyz(cg.doVstr, "-movedown;-speed\n", sizeof(cg.doVstr)); //?
+	cg.doVstrTime = cg.time;
+}
+
+qboolean CG_WeaponSelectable(int i);
+void CG_LastWeapon_f(void) //loda fixme. japro
+{
+	if (cg.predictedPlayerState.persistant[PERS_TEAM] == TEAM_SPECTATOR)
+		return;
+	if (cg.predictedPlayerState.pm_flags & PMF_FOLLOW)
+		return;
+
+	if (!cg.lastWeaponSelect[0])
+		cg.lastWeaponSelect[0] = cg.predictedPlayerState.weapon;
+	if (!cg.lastWeaponSelect[1])
+		cg.lastWeaponSelect[1] = cg.predictedPlayerState.weapon;
+
+	if (cg.lastWeaponSelect[1] == cg.lastWeaponSelect[0]) { //if the weapon we spawned with is still equipped
+		int i;
+		for (i = LAST_USEABLE_WEAPON; i > 0; i--) {	//cycle to the next available one
+			if ((i != cg.weaponSelect) && CG_WeaponSelectable(i)) {
+				cg.lastWeaponSelect[1] = i;
+				break;
+			}
+		}
+	}
+
+	if (cg.lastWeaponSelect[0] != cg.weaponSelect) { //Current does not match selected
+		cg.lastWeaponSelect[1] = cg.lastWeaponSelect[0]; //Set last to current
+		cg.lastWeaponSelect[0] = cg.weaponSelect; //Set current to selected
+	}
+
+	cg.weaponSelect = cg.lastWeaponSelect[1]; //Set selected to last
+
+	cg.weaponSelectTime = cg.time;
+	if (cg.weaponSelect != cg.lastWeaponSelect[1])
+		trap_S_MuteSound(cg.predictedPlayerState.clientNum, CHAN_WEAPON);
 }
 
 
@@ -493,8 +754,23 @@ static consoleCommand_t	commands[] = {
 	{ "forceprev", CG_PrevForcePower_f },
 
 	//jk2pro stuff
+	{ "+zoom", CG_ZoomDown_f },
+	{ "-zoom", CG_ZoomUp_f },
+
+	{ "say", CG_Say_f },
+	{ "say_team", CG_TeamSay_f },
+
+	{ "clientlist", CG_ClientList_f },
+
 	{ "remapShader", CG_RemapShader_f },
-	{ "listRemaps", CG_ListRemaps_f }
+	{ "listRemaps", CG_ListRemaps_f },
+
+	{ "do", CG_Do_f },
+	{ "flipkick", CG_Flipkick_f },
+	{ "lowjump", CG_Lowjump_f },
+	{ "+duck", CG_NorollDown_f },
+	{ "-duck", CG_NorollUp_f },
+	{ "weaplast", CG_LastWeapon_f }
 };
 
 
@@ -595,4 +871,83 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand ("stats");
 	trap_AddCommand ("teamtask");
 	trap_AddCommand ("loaddefered");	// spelled wrong, but not changing for demo
+
+	//generic mod server cmds
+	trap_AddCommand("help");
+	trap_AddCommand("aminfo");
+	trap_AddCommand("amempower"); //idk if this is somewhere other than twimod
+	trap_AddCommand("ammerc"); //probably exists somewhere if amempower does
+
+	trap_AddCommand("engage_gunduel"); //?
+	trap_AddCommand("engage_fullforceduel"); //??
+
+	//TwiMod cmds
+	trap_AddCommand("ammodinfo");
+	trap_AddCommand("ammodinfo_twitch");
+	trap_AddCommand("amadmin");
+
+	trap_AddCommand("channel");
+	trap_AddCommand("channellist");
+
+	trap_AddCommand("mute");
+
+	trap_AddCommand("engage_ff"); //oh ok..
+
+	trap_AddCommand("engage_private");
+	trap_AddCommand("invite_private");
+	trap_AddCommand("accept_private");
+	trap_AddCommand("end_private");
+
+	//TwiMod build cmds
+	trap_AddCommand("placemodel");
+	trap_AddCommand("drop");
+	trap_AddCommand("pick");
+	trap_AddCommand("remove");
+
+	//TwiMod emotes
+	trap_AddCommand("ambar");
+	trap_AddCommand("ambeg");
+	trap_AddCommand("amcomeon");
+	trap_AddCommand("amflip");
+	trap_AddCommand("amlaugh");
+	trap_AddCommand("amnod");
+	trap_AddCommand("amshake");
+	trap_AddCommand("amsuper");
+	trap_AddCommand("amsuper2");
+	trap_AddCommand("amspin");
+	trap_AddCommand("amspin2");
+	trap_AddCommand("amspin3");
+	trap_AddCommand("amspinr");
+	trap_AddCommand("amspin2r");
+	trap_AddCommand("amspin3r");
+	trap_AddCommand("amthumbsdown");
+	trap_AddCommand("amthumbsup");
+	trap_AddCommand("amtossover");
+	trap_AddCommand("amtossup");
+	trap_AddCommand("amvictory");
+	trap_AddCommand("amwave2");
+	trap_AddCommand("amdontkillme");
+	trap_AddCommand("amfakedead");
+	trap_AddCommand("amkneel");
+	trap_AddCommand("amsit");
+	trap_AddCommand("amsit2");
+	trap_AddCommand("amsit3");
+	trap_AddCommand("amthreaten");
+	trap_AddCommand("amtype");
+	trap_AddCommand("amtype2");
+	trap_AddCommand("amwrite");
+	trap_AddCommand("amwrite2");
+	trap_AddCommand("amcowboy");
+	trap_AddCommand("amhandhips");
+	trap_AddCommand("amsurrender");
+	trap_AddCommand("amwait");
+
+	trap_AddCommand("amtaunt");
+	trap_AddCommand("amtaunt2");
+	
+	trap_AddCommand("taunt2");
+
+	//these probably exist smehwere..
+	trap_AddCommand("amhug");
+	trap_AddCommand("amkiss");
 }

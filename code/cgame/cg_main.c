@@ -517,6 +517,10 @@ vmCvar_t	cg_remaps;
 vmCvar_t	cg_widescreen;
 vmCvar_t	cg_fovAspectAdjust;
 
+
+vmCvar_t	cg_fkDuration;
+vmCvar_t	cg_fkFirstJumpDuration;
+vmCvar_t	cg_fkSecondJumpDelay;
 vmCvar_t	cg_drawInventory;
 vmCvar_t	cg_smallScoreboard;
 vmCvar_t	cg_thirdPerson;
@@ -682,6 +686,10 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_widescreen, "cg_widescreen", "1", CVAR_ARCHIVE },
 	{ &cg_fovAspectAdjust, "cg_fovAspectAdjust", "0", CVAR_ARCHIVE },
 
+
+	{ &cg_fkDuration, "cg_fkDuration", "50", 0 },
+	{ &cg_fkFirstJumpDuration, "cg_fkFirstJumpDuration", "0", 0 },
+	{ &cg_fkSecondJumpDelay, "cg_fkSecondJumpDelay", "0", 0 },
 
 	{ &cg_drawInventory, "cg_drawInventory", "1", CVAR_ARCHIVE },
 	{ &cg_smallScoreboard, "cg_smallScoreboard", "0", CVAR_ARCHIVE },

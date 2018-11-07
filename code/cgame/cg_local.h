@@ -703,6 +703,8 @@ typedef struct {
 	// input state sent to server
 	int			weaponSelect;
 
+	short		lastWeaponSelect[2];//japro
+
 	int			forceSelect;
 	int			itemSelect;
 
@@ -866,6 +868,10 @@ Ghoul2 Insert End
 */
 
 	char				sharedBuffer[MAX_CG_SHARED_BUFFER_SIZE];
+	int					doVstrTime;
+	char				doVstr[MAX_QPATH];
+	short				numFKFrames;
+	short				numJumps;
 } cg_t;
 
 #define MAX_TICS	14
@@ -1499,6 +1505,10 @@ extern	vmCvar_t		cg_drawTimerMsec;
 extern	vmCvar_t		cg_remaps;
 extern	vmCvar_t		cg_widescreen;
 extern	vmCvar_t		cg_fovAspectAdjust;
+
+extern	vmCvar_t		cg_fkDuration;
+extern	vmCvar_t		cg_fkFirstJumpDuration;
+extern	vmCvar_t		cg_fkSecondJumpDelay;
 
 extern	vmCvar_t		cg_drawInventory;
 extern	vmCvar_t		cg_smallScoreboard;

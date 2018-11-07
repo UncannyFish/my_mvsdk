@@ -5,6 +5,25 @@
 
 #include "cg_local.h"
 
+ID_INLINE void CG_LastWeapon(void) { //Called by CG_SetNextSnap, dunno if need to use snap or can use predicted..
+	if (!cg.snap)
+		return;
+	if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR)
+		return;
+	if (cg.snap->ps.pm_flags & PMF_FOLLOW || cg.snap->ps.pm_type == PM_SPECTATOR)
+		return;
+
+	if (!cg.lastWeaponSelect[0])
+		cg.lastWeaponSelect[0] = cg.predictedPlayerState.weapon;
+	if (!cg.lastWeaponSelect[1])
+		cg.lastWeaponSelect[1] = cg.predictedPlayerState.weapon;
+
+	if (cg.lastWeaponSelect[0] != cg.predictedPlayerState.weapon) { //Current does not match selected
+		cg.lastWeaponSelect[1] = cg.lastWeaponSelect[0]; //Set last to current
+		cg.lastWeaponSelect[0] = cg.predictedPlayerState.weapon; //Set current to selected
+	}
+
+}
 
 
 /*
@@ -243,6 +262,8 @@ static void CG_SetNextSnap( snapshot_t *snap ) {
 
 	// sort out solid entities
 	CG_BuildSolidList();
+
+	CG_LastWeapon();
 }
 
 

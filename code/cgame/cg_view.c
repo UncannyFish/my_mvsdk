@@ -1495,6 +1495,48 @@ Screen Effect stuff ends here
 ================================
 */
 
+ID_INLINE void CG_DoAsync(void) {
+	if (cg.doVstrTime && cg.time > cg.doVstrTime) {
+		trap_SendConsoleCommand(cg.doVstr);
+		cg.doVstrTime = 0;
+	}
+	//if (!(cgs.restricts & RESTRICT_FLIPKICKBIND)) {	//Now flipkick time
+
+	//Need to decouple frames from kick i guess.
+
+	//If we are on kick 1, check to see if our cvar for it is above frames.  If so , kick and increment kickcount.
+
+	//Increment
+	if (cg.numFKFrames > cg_fkDuration.integer) {
+		trap_SendConsoleCommand("-moveup\n");
+		cg.numFKFrames = 0;
+		cg.numJumps = 0;
+	}
+	else if (cg.numFKFrames) {
+		if (cg.numJumps == 1) {
+			if (cg.numFKFrames > cg_fkFirstJumpDuration.integer) {
+				trap_SendConsoleCommand("-moveup\n");
+				cg.numJumps++;
+			}
+		}
+		else if (cg.numJumps == 2) {
+			if (cg.numFKFrames > cg_fkSecondJumpDelay.integer) {
+				trap_SendConsoleCommand("+moveup\n");
+				cg.numJumps++;
+			}
+		}
+		else if (cg.numFKFrames % 2) {//1,3,5
+			trap_SendConsoleCommand("+moveup\n");
+			cg.numJumps++;
+		}
+		else {//2,4,6
+			trap_SendConsoleCommand("-moveup\n");
+			cg.numJumps++;
+		}
+		cg.numFKFrames++;
+	}
+}
+
 /*
 =================
 CG_DrawActiveFrame
@@ -1671,6 +1713,9 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	// actually issue the rendering calls
 	CG_DrawActive( stereoView );
+
+	//jk2pro
+	CG_DoAsync();
 
 	if ( cg_stats.integer ) {
 		CG_Printf( "cg.clientFrame:%i\n", cg.clientFrame );
