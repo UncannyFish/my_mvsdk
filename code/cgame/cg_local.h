@@ -1541,6 +1541,9 @@ extern	vmCvar_t		cg_dismember;
 //jk2pro Client Cvars - start
 extern	vmCvar_t		cg_enhancedFlagStatus;
 extern	vmCvar_t		cg_drawTimerMsec;
+extern	vmCvar_t		cg_jumpSounds;
+extern	vmCvar_t		cg_rollSounds;
+
 extern	vmCvar_t		cg_remaps;
 extern	vmCvar_t		cg_autoKillWhenFalling;
 

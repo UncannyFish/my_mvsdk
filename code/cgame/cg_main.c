@@ -518,6 +518,8 @@ vmCvar_t	cg_drawTimerMsec;
 vmCvar_t	cg_remaps;
 vmCvar_t	cg_autoKillWhenFalling;
 
+vmCvar_t	cg_jumpSounds;
+vmCvar_t	cg_rollSounds;
 vmCvar_t	cg_widescreen;
 vmCvar_t	cg_fovAspectAdjust;
 
@@ -694,6 +696,8 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_remaps, "cg_remaps", "1",	CVAR_LATCH|CVAR_ARCHIVE },
 	{ &cg_autoKillWhenFalling, "cg_autoKillWhenFalling", "1", CVAR_ARCHIVE },
 
+	{ &cg_jumpSounds, "cg_jumpSounds", "1", CVAR_ARCHIVE },
+	{ &cg_rollSounds, "cg_rollSounds", "1", CVAR_ARCHIVE },
 	{ &cg_widescreen, "cg_widescreen", "1", CVAR_ARCHIVE },
 	{ &cg_fovAspectAdjust, "cg_fovAspectAdjust", "0", CVAR_ARCHIVE },
 

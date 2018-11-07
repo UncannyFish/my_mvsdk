@@ -1165,7 +1165,24 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 
 	case EV_JUMP:
 		DEBUGNAME("EV_JUMP");
-		trap_S_StartSound (NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*jump1.wav" ) );
+		if (cg.predictedPlayerState.duelInProgress && (cg.predictedPlayerState.clientNum != es->clientNum && cg.predictedPlayerState.duelIndex != es->clientNum))
+			break;
+
+		if (cg.time - cent->pe.painTime < 500) //don't play jump sound immediately after pain sound?
+			break;
+
+		if (cg_jumpSounds.integer == 1)//JAPRO - Clientside - Add jumpsounds 2 option
+		{
+			trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*jump1.wav" ) );
+		}
+		else if (cg_jumpSounds.integer == 2 && cg.snap->ps.clientNum != es->number)
+		{
+			trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*jump1.wav" ) );
+		}
+		else if (cg_jumpSounds.integer > 2 && cg.snap->ps.clientNum == es->number)
+		{
+			trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*jump1.wav" ) );
+		}
 		break;
 	case EV_ROLL:
 		DEBUGNAME("EV_ROLL");
@@ -1178,7 +1195,22 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 			DoFall(cent, es, clientNum);
 		}
 
-		trap_S_StartSound (NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*jump1.wav" ) );
+		if (cg.predictedPlayerState.duelInProgress && (cg.predictedPlayerState.clientNum != es->clientNum && cg.predictedPlayerState.duelIndex != es->clientNum))
+			break;
+
+		if (cg_rollSounds.integer == 1)//JAPRO - Clientside - Add rollsounds options
+		{
+				trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*jump1.wav" ) );
+		}
+		else if (cg_rollSounds.integer == 2 && cg.snap->ps.clientNum != es->number)
+		{
+			trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*jump1.wav" ) );
+		}
+		else if (cg_rollSounds.integer > 2 && cg.snap->ps.clientNum == es->number)
+		{
+			trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*jump1.wav" ) );
+		}
+
 		trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.rollSound  );
 
 		//FIXME: need some sort of body impact on ground sound and maybe kick up some dust?
