@@ -573,6 +573,8 @@ vmCvar_t	cg_rollSounds;
 vmCvar_t	cg_widescreen;
 vmCvar_t	cg_fovAspectAdjust;
 
+vmCvar_t	cg_fovViewmodel;
+vmCvar_t	cg_fovViewmodelAdjust;
 
 vmCvar_t	cg_fkDuration;
 vmCvar_t	cg_fkFirstJumpDuration;
@@ -806,6 +808,8 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_widescreen, "cg_widescreen", "1", CVAR_ARCHIVE },
 	{ &cg_fovAspectAdjust, "cg_fovAspectAdjust", "0", CVAR_ARCHIVE },
 
+	{ &cg_fovViewmodel, "cg_fovViewmodel", "80", CVAR_ARCHIVE },
+	{ &cg_fovViewmodelAdjust, "cg_fovViewmodelAdjust", "1", CVAR_ARCHIVE },
 
 	{ &cg_fkDuration, "cg_fkDuration", "50", 0 },
 	{ &cg_fkFirstJumpDuration, "cg_fkFirstJumpDuration", "0", 0 },
