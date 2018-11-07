@@ -3276,13 +3276,18 @@ static void CG_PlayerFlag( centity_t *cent, qhandle_t hModel ) {
 	ent.modelScale[2] = 0.5;
 	ScaleModelAxis(&ent);
 
-	/*
-	if (cent->currentState.number == cg.snap->ps.clientNum)
+	
+	if (cent->currentState.number == cg.snap->ps.clientNum && cg_thirdPersonFlagAlpha.integer != 1)
 	{ //If we're the current client (in third person), render the flag on our back transparently
 		ent.renderfx |= RF_FORCE_ENT_ALPHA;
-		ent.shaderRGBA[3] = 100;
+		ent.shaderRGBA[3] = cg_thirdPersonFlagAlpha.value*255;//JAPRO - Clientside - Transparant Flag option
 	}
-	*/
+	else if (cg_thirdPersonFlagAlpha.integer == -1) {
+		ent.renderfx |= RF_NODEPTH;
+		ent.renderfx |= RF_FORCE_ENT_ALPHA;
+		ent.shaderRGBA[3] = 200;//JAPRO - Clientside - Transparant Flag option
+	}
+	
 	//FIXME: Not doing this at the moment because sorting totally messes up
 
 	trap_R_AddRefEntityToScene( &ent );

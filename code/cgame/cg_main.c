@@ -570,6 +570,7 @@ vmCvar_t	cg_autoKillWhenFalling;
 
 vmCvar_t	cg_jumpSounds;
 vmCvar_t	cg_rollSounds;
+vmCvar_t	cg_thirdPersonFlagAlpha;
 vmCvar_t	cg_brightskins;
 vmCvar_t	cg_playerLOD;
 vmCvar_t	cg_privateDuelShell;
@@ -810,6 +811,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 
 	{ &cg_jumpSounds, "cg_jumpSounds", "1", CVAR_ARCHIVE },
 	{ &cg_rollSounds, "cg_rollSounds", "1", CVAR_ARCHIVE },
+	{ &cg_thirdPersonFlagAlpha, "cg_thirdPersonFlagAlpha", "1.0", CVAR_ARCHIVE },
 	{ &cg_brightskins, "cg_brightskins", "0", CVAR_ARCHIVE },
 	{ &cg_playerLOD, "cg_playerLOD", "0", CVAR_ARCHIVE },
 	{ &cg_privateDuelShell,	"cg_privateDuelShell", "1", CVAR_ARCHIVE },
