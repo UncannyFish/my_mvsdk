@@ -103,7 +103,7 @@ void CG_DrawInformation( void ) {
 	const char	*info;
 	const char	*sysInfo;
 	const float	x = 0.5f * cgs.screenWidth;
-	int			y;
+	float		y;
 	int			value, valueNOFP;
 	qhandle_t	levelshot;
 	char		buf[1024];
@@ -113,12 +113,20 @@ void CG_DrawInformation( void ) {
 	sysInfo = CG_ConfigString( CS_SYSTEMINFO );
 
 	s = Info_ValueForKey( info, "mapname" );
-	levelshot = trap_R_RegisterShaderNoMip( va( "levelshots/%s", s ) );
-	if ( !levelshot ) {
-		levelshot = trap_R_RegisterShaderNoMip( "menu/art/unknownmap" );
+
+	levelshot = trap_R_RegisterShaderNoMip(va("levelshots/%s", s));
+	trap_R_SetColor(NULL);
+
+	if (levelshot && cgs.screenXFactor < 1.0)
+		CG_DrawPic(0, 0 - (SCREEN_HEIGHT*cgs.screenXFactorInv - SCREEN_HEIGHT) / 2, cgs.screenWidth, SCREEN_HEIGHT*cgs.screenXFactorInv, levelshot);
+	else {
+		if (!levelshot) {
+			levelshot = trap_R_RegisterShaderNoMip("menu/art/unknownmap_mp");
+			trap_R_SetColor(NULL);
+		}
+
+		CG_DrawPic(0, 0, cgs.screenWidth, SCREEN_HEIGHT, levelshot);
 	}
-	trap_R_SetColor( NULL );
-	CG_DrawPic(0, 0, cgs.screenWidth, SCREEN_HEIGHT, levelshot);
 
 	CG_LoadBar();
 				   
