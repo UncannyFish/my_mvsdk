@@ -741,7 +741,7 @@ void _UI_Refresh( int realtime )
 	
 	// draw cursor
 	UI_SetColor( NULL );
-	if (Menu_Count() > 0) {
+	if (Menu_Count() > 0 && (trap_Key_GetCatcher() & KEYCATCH_UI)) {
 		UI_WideScreenMode(qtrue);
 		UI_DrawHandlePic(uiInfo.uiDC.cursorx * uiInfo.screenXFactorInv, uiInfo.uiDC.cursory, 48, 48, uiInfo.uiDC.Assets.cursor);
 		UI_WideScreenMode(qfalse);
