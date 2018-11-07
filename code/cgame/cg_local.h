@@ -1582,6 +1582,7 @@ extern	vmCvar_t		cg_fkSecondJumpDelay;
 extern	vmCvar_t		cl_commandsize;//Loda - FPS UNLOCK client modcode
 extern	vmCvar_t		cg_drawInventory;
 extern	vmCvar_t		cg_smallScoreboard;
+extern	vmCvar_t		cg_colorScoreboard;
 //jk2 pro stuff end
 
 extern	vmCvar_t		cg_thirdPerson;
