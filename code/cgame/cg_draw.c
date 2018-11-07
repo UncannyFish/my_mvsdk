@@ -3604,6 +3604,7 @@ static void CG_DrawSpectator(void)
 		Com_sprintf(text, sizeof(text), "%i/%i", cgs.clientinfo[cgs.duelist2].score, cgs.fraglimit );
 		CG_Text_Paint( cgs.screenWidth-size+22 - CG_Text_Width( text, 1.0f, 2 ) / 2, SCREEN_HEIGHT-(size*1.5) + 64, 1.0f, colorWhite, text, 0, 0, 0, 2 );
 	}
+	/* //JAPRO - Clientside - Remove Useless spec text
 	else
 	{
 		CG_Text_Paint ( 0.5f * cgs.screenWidth - CG_Text_Width ( s, 1.0f, 3 ) / 2, 420, 1.0f, colorWhite, s, 0, 0, 0, 3 );
@@ -3618,8 +3619,8 @@ static void CG_DrawSpectator(void)
 	{
 		//s = "press ESC and use the JOIN menu to play";
 		s = CG_GetStripEdString("INGAMETEXT", "SPEC_CHOOSEJOIN");
-	}
 		CG_Text_Paint ( 0.5f * cgs.screenWidth - CG_Text_Width ( s, 1.0f, 3 ) / 2, 440, 1.0f, colorWhite, s, 0, 0, 0, 3 );
+	}*/ //JAPRO - Clientside - Remove Useless spec text
 }
 
 /*
@@ -3823,19 +3824,19 @@ static qboolean CG_DrawFollow( void )
 	const char	*s;
 	float		x;
 
-	if ( !(cg.snap->ps.pm_flags & PMF_FOLLOW) ) 
+	if ( !(cg.snap->ps.pm_flags & PMF_FOLLOW) && !(cg.demoPlayback && cg_drawDemoName.integer) )
 	{
 		return qfalse;
 	}
 
-//	s = "following";
-	s = CG_GetStripEdString("INGAMETEXT", "FOLLOWING");
-	x = 0.5f * (cgs.screenWidth - CG_Text_Width(s, 1.0f, FONT_MEDIUM));
-	CG_Text_Paint(x , 60, 1.0f, colorWhite, s, 0, 0, 0, FONT_MEDIUM);
+	//s = "following";
+	//s = CG_GetStripEdString("INGAMETEXT", "FOLLOWING");
+	//x = 0.5f * (cgs.screenWidth - CG_Text_Width(s, 1.0f, FONT_MEDIUM));
+	//CG_Text_Paint(x , 60, 1.0f, colorWhite, s, 0, 0, 0, FONT_MEDIUM);
 
 	s = cgs.clientinfo[ cg.snap->ps.clientNum ].name;
-	x = 0.5f * (cgs.screenWidth - CG_Text_Width(s, 2.0f, FONT_MEDIUM));
-	CG_Text_Paint(x, 80, 2.0f, colorWhite, s, 0, 0, 0, FONT_MEDIUM);
+	x = 4.0f;
+	CG_Text_Paint(x, 27, 0.85f, colorWhite, s, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);//JAPRO - Clientside - Move spectated clients name to top left corner of screen
 
 	return qtrue;
 }

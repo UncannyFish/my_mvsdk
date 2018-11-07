@@ -86,6 +86,7 @@
 #define DEFAULT_REDTEAM_NAME		"Empire"
 #define DEFAULT_BLUETEAM_NAME		"Rebellion"
 
+
 #define JK2AWARDS
 
 //[JK2PRO - Clientside - All - Jcinfo bitvalues
@@ -1659,6 +1660,7 @@ extern	vmCvar_t		cl_commandsize;//Loda - FPS UNLOCK client modcode
 extern	vmCvar_t		cg_drawInventory;
 extern	vmCvar_t		cg_smallScoreboard;
 extern	vmCvar_t		cg_colorScoreboard;
+extern	vmCvar_t		cg_drawDemoName;
 //jk2 pro stuff end
 
 extern	vmCvar_t		cg_thirdPerson;

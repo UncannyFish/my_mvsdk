@@ -584,6 +584,7 @@ vmCvar_t	cl_commandsize;//Loda - FPS UNLOCK client modcode
 vmCvar_t	cg_drawInventory;
 vmCvar_t	cg_smallScoreboard;
 vmCvar_t	cg_colorScoreboard;
+vmCvar_t	cg_drawDemoName;
 //jk2 pro stuff end
 
 vmCvar_t	cg_thirdPerson;
@@ -815,6 +816,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_drawInventory, "cg_drawInventory", "1", CVAR_ARCHIVE },
 	{ &cg_smallScoreboard, "cg_smallScoreboard", "0", CVAR_ARCHIVE },
 	{ &cg_colorScoreboard, "cg_colorScoreboard", "0", CVAR_ARCHIVE },
+	{ &cg_drawDemoName, "cg_drawDemoName", "1", 0 },
 
 	{ &cg_thirdPerson, "cg_thirdPerson", "0", CVAR_ARCHIVE },
 	{ &cg_thirdPersonRange, "cg_thirdPersonRange", "80", CVAR_CHEAT },
