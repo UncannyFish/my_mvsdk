@@ -7059,7 +7059,15 @@ doEssentialTwo:
 
 	if (cent->currentState.eFlags & EF_INVULNERABLE)
 	{
-		CG_DrawPlayerSphere(cent, cent->lerpOrigin, 1.4, cgs.media.invulnerabilityShader );
+		if (cgs.gametype != GT_CTY && cg_teamRespawnShield.integer) {
+			if (cgs.clientinfo[cent->currentState.number].team == TEAM_RED)
+				CG_DrawPlayerSphere(cent, cent->lerpOrigin, 1.4, cgs.media.ysaliredShader);
+			else
+				CG_DrawPlayerSphere(cent, cent->lerpOrigin, 1.4, cgs.media.ysaliblueShader);
+		}
+		else {
+			CG_DrawPlayerSphere(cent, cent->lerpOrigin, 1.4, cgs.media.invulnerabilityShader );
+		}
 	}
 stillDoSaber:
 	if (cent->currentState.weapon == WP_SABER && !cent->currentState.shouldtarget)
