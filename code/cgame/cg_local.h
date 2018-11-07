@@ -909,6 +909,27 @@ Ghoul2 Insert End
 	chatBoxItem_t		chatItems[MAX_CHATBOX_ITEMS];
 	int					chatItemActive;
 
+	//new simple hud stuff
+	int			oldammo;
+	int			oldAmmoTime;
+
+	int			forceHUDTotalFlashTime;
+	int			forceHUDNextFlashTime;
+	qboolean	forceHUDActive;				// Flag to show force hud is off/on
+
+	unsigned int		displacement, displacementSamples; //Speedometer, racetimer stuff
+	float				maxSpeed, currentSpeed, previousSpeed;
+	vec3_t				lastGroundPosition;
+	int					lastGroundTime, lastJumpHeightTime, lastJumpDistanceTime;
+	qboolean			firstTimeInAir, wasOnGround;
+	float				lastZSpeed, lastGroundSpeed, lastJumpHeight, lastJumpDistance, lastYawSpeed;
+	int					lastCheckPointPrintTime;
+	int					timerStartTime;
+	vec4_t				strafeHelperActiveColor;
+	//char				logStrafeTrailFilename[MAX_QPATH];
+	//qboolean			loggingStrafeTrail;
+	//fileHandle_t		strafeTrailFileHandle;
+	//clientCheckpoint_t	clientCheckpoints[MAX_CLIENT_CHECKPOINTS];//japro checkpoint
 	int					doVstrTime;
 	char				doVstr[MAX_QPATH];
 	short				numFKFrames;
@@ -988,6 +1009,21 @@ typedef struct {
 	qhandle_t	teamStatusBar;
 
 	qhandle_t	deferShader;
+
+//JAPRO - Clientside - Movement keys - Start
+	qhandle_t	keyCrouchOffShader;
+	qhandle_t	keyCrouchOnShader;
+	qhandle_t	keyJumpOffShader;
+	qhandle_t	keyJumpOnShader;
+	qhandle_t	keyBackOffShader;
+	qhandle_t	keyBackOnShader;
+	qhandle_t	keyForwardOffShader;
+	qhandle_t	keyForwardOnShader;
+	qhandle_t	keyLeftOffShader;
+	qhandle_t	keyLeftOnShader;
+	qhandle_t	keyRightOffShader;
+	qhandle_t	keyRightOnShader;
+//JAPRO - Clientside - Movement keys - End
 
 	qhandle_t	lightningShader;
 
@@ -1553,8 +1589,41 @@ extern	vmCvar_t		cg_animBlend;
 extern	vmCvar_t		cg_dismember;
 
 //jk2pro Client Cvars - start
+extern	vmCvar_t		cg_raceTimer;
+extern	vmCvar_t		cg_raceTimerSize;
+extern	vmCvar_t		cg_raceTimerX;
+extern	vmCvar_t		cg_raceTimerY;
+extern	vmCvar_t		cg_speedometer;
+extern	vmCvar_t		cg_speedometerX;
+extern	vmCvar_t		cg_speedometerY;
+extern	vmCvar_t		cg_speedometerSize;
+extern	vmCvar_t		cg_showpos;
+
+extern	vmCvar_t		cg_strafeHelperCutoff;
+extern	vmCvar_t		cg_strafeHelper;
+extern	vmCvar_t		cg_strafeHelperPrecision;
+extern	vmCvar_t		cg_strafeHelperLineWidth;
+extern	vmCvar_t		cg_strafeHelperActiveColor;
+extern	vmCvar_t		cg_strafeHelperInactiveAlpha;
+
+extern	vmCvar_t		cg_strafeHelperOffset;
+extern	vmCvar_t		cg_strafeHelperInvertOffset;
+extern	vmCvar_t		cg_strafeHelper_FPS;
+
+extern  vmCvar_t		cg_crosshairRed;
+extern  vmCvar_t		cg_crosshairGreen;
+extern  vmCvar_t		cg_crosshairBlue;
+extern	vmCvar_t		cg_crosshairAlpha;
+
 extern	vmCvar_t		cg_enhancedFlagStatus;
 extern	vmCvar_t		cg_drawTimerMsec;
+extern	vmCvar_t		cg_movementKeys;
+extern	vmCvar_t		cg_movementKeysX;
+extern	vmCvar_t		cg_movementKeysY;
+extern	vmCvar_t		cg_movementKeysSize;
+
+extern	vmCvar_t		cg_hudColors;
+extern	vmCvar_t		cg_drawScore;
 //chatbox
 extern	vmCvar_t		cg_chatBox;
 extern	vmCvar_t		cg_chatBoxFontSize;

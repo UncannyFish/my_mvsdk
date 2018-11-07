@@ -128,6 +128,7 @@ char *HolocronIcons[] = {
 
 int forceModelModificationCount = -1;
 int widescreenModificationCount = -1;
+int strafeHelperActiveColorModificationCount = -1;//japro
 
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum );
 void CG_Shutdown( void );
@@ -513,8 +514,42 @@ vmCvar_t	cg_animBlend;
 vmCvar_t	cg_dismember;
 
 //jk2pro Client Cvars - start
+vmCvar_t	cg_raceTimer;
+vmCvar_t	cg_raceTimerSize;
+vmCvar_t	cg_raceTimerX;
+vmCvar_t	cg_raceTimerY;
+vmCvar_t	cg_speedometer;
+vmCvar_t	cg_speedometerX;
+vmCvar_t	cg_speedometerY;
+vmCvar_t	cg_speedometerSize;
+vmCvar_t	cg_showpos;
+
+vmCvar_t	cg_strafeHelperCutoff;
+vmCvar_t	cg_strafeHelper;
+vmCvar_t	cg_strafeHelperPrecision;
+vmCvar_t	cg_strafeHelperLineWidth;
+vmCvar_t	cg_strafeHelperActiveColor;
+vmCvar_t	cg_strafeHelperInactiveAlpha;
+
+vmCvar_t	cg_strafeHelperOffset;
+vmCvar_t	cg_strafeHelperInvertOffset;
+vmCvar_t	cg_strafeHelper_FPS;
+
+
+vmCvar_t	cg_crosshairRed;
+vmCvar_t	cg_crosshairGreen;
+vmCvar_t	cg_crosshairBlue;
+vmCvar_t	cg_crosshairAlpha;
+
 vmCvar_t	cg_enhancedFlagStatus;
 vmCvar_t	cg_drawTimerMsec;
+vmCvar_t	cg_movementKeys;
+vmCvar_t	cg_movementKeysX;
+vmCvar_t	cg_movementKeysY;
+vmCvar_t	cg_movementKeysSize;
+
+vmCvar_t	cg_hudColors;
+vmCvar_t	cg_drawScore;
 //chatbox
 vmCvar_t	cg_chatBox;
 vmCvar_t	cg_chatBoxFontSize;
@@ -706,10 +741,43 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_dismember, "cg_dismember", "0", CVAR_ARCHIVE },
 
 	//jk2pro Client Cvars start
+	{ &cg_raceTimer, "cg_raceTimer", "3", 0 },
+	{ &cg_raceTimerSize, "cg_raceTimerSize", "0.75", 0 },
+	{ &cg_raceTimerX, "cg_raceTimerX", "5", 0 },
+	{ &cg_raceTimerY, "cg_raceTimerY", "280", 0 },
+	{ &cg_speedometer, "cg_speedometer", "0", CVAR_ARCHIVE },
+	{ &cg_speedometerX, "cg_speedometerX", "98", CVAR_ARCHIVE },
+	{ &cg_speedometerY, "cg_speedometerY", "460", CVAR_ARCHIVE },
+	{ &cg_speedometerSize, "cg_speedometerSize", "0.75", CVAR_ARCHIVE },
+	{ &cg_showpos, "cg_showpos", "0", 0 },
+
+
+	{ &cg_strafeHelperCutoff, "cg_strafeHelperCutoff", "0", 0 },
+	{ &cg_strafeHelper, "cg_strafeHelper", "992", CVAR_ARCHIVE },
+	{ &cg_strafeHelperPrecision, "cg_strafeHelperPrecision", "256", 0 },
+	{ &cg_strafeHelperLineWidth, "cg_strafeHelperLineWidth", "1", 0 },
+	{ &cg_strafeHelperActiveColor, "cg_strafeHelperActiveColor", "0 255 0 200", 0 },
+	{ &cg_strafeHelperInactiveAlpha, "cg_strafeHelperInactiveAlpha", "200", 0 },
+
+	{ &cg_strafeHelperOffset, "cg_strafeHelperOffset", "75", CVAR_ARCHIVE },
+	{ &cg_strafeHelperInvertOffset, "cg_strafeHelperInvertOffset", "75", CVAR_ARCHIVE },
+	{ &cg_strafeHelper_FPS, "cg_strafeHelper_FPS", "0", 0 },
+
+
+	{ &cg_crosshairRed, "cg_crosshairRed", "0", 0 },
+	{ &cg_crosshairGreen, "cg_crosshairGreen", "0", 0 },
+	{ &cg_crosshairBlue, "cg_crosshairBlue", "0", 0 },
+	{ &cg_crosshairAlpha, "cg_crosshairAlpha", "255", 0 },
+
 	{ &cg_enhancedFlagStatus, "cg_enhancedFlagStatus", "2", 0 },
 	{ &cg_drawTimerMsec, "cg_drawTimerMsec", "1", CVAR_ARCHIVE },
-	{ &cg_remaps, "cg_remaps", "1",	CVAR_LATCH|CVAR_ARCHIVE },
+	{ &cg_movementKeys, "cg_movementKeys", "1", CVAR_ARCHIVE }, //"0"
+	{ &cg_movementKeysX, "cg_movementKeysX", "148", CVAR_ARCHIVE },
+	{ &cg_movementKeysY, "cg_movementKeysY", "428", CVAR_ARCHIVE },
+	{ &cg_movementKeysSize, "cg_movementKeysSize", "1.0", CVAR_ARCHIVE },
 
+	{ &cg_hudColors, "cg_hudColors", "1", CVAR_ARCHIVE },
+	{ &cg_drawScore, "cg_drawScore", "2", CVAR_ARCHIVE },
 	//chatbox
 	{ &cg_chatBox, "cg_chatBox", "10000", CVAR_ARCHIVE },
 	{ &cg_chatBoxFontSize, "cg_chatBoxFontSize", "1.0", CVAR_ARCHIVE },
@@ -721,6 +789,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_cleanChatbox, "cg_cleanChatbox", "0", 0 },
 	{ &cg_newFont, "cg_newFont", "0", CVAR_ARCHIVE },
 
+	{ &cg_remaps, "cg_remaps", "1",	CVAR_LATCH|CVAR_TEMP },
 	{ &cg_autoKillWhenFalling, "cg_autoKillWhenFalling", "1", CVAR_ARCHIVE },
 
 	{ &cg_jumpSounds, "cg_jumpSounds", "1", CVAR_ARCHIVE },
@@ -910,6 +979,48 @@ static void CG_UpdateWidescreen(void) {
 		trap_MVAPI_SetVirtualScreen(cgs.screenWidth, (float)SCREEN_HEIGHT);
 }
 
+//Strafehelper colors
+static void CG_StrafeHelperActiveColorChange(void) {
+	if (sscanf(cg_strafeHelperActiveColor.string, "%f %f %f %f", &cg.strafeHelperActiveColor[0], &cg.strafeHelperActiveColor[1], &cg.strafeHelperActiveColor[2], &cg.strafeHelperActiveColor[3]) != 4) {
+		cg.strafeHelperActiveColor[0] = 0;
+		cg.strafeHelperActiveColor[1] = 255;
+		cg.strafeHelperActiveColor[2] = 0;
+		cg.strafeHelperActiveColor[3] = 200;
+	}
+
+	if (cg.strafeHelperActiveColor[0] < 0)
+		cg.strafeHelperActiveColor[0] = 0;
+	else if (cg.strafeHelperActiveColor[0] > 255)
+		cg.strafeHelperActiveColor[0] = 255;
+
+	if (cg.strafeHelperActiveColor[1] < 0)
+		cg.strafeHelperActiveColor[1] = 0;
+	else if (cg.strafeHelperActiveColor[1] > 255)
+		cg.strafeHelperActiveColor[1] = 255;
+
+	if (cg.strafeHelperActiveColor[2] < 0)
+		cg.strafeHelperActiveColor[2] = 0;
+	else if (cg.strafeHelperActiveColor[2] > 255)
+		cg.strafeHelperActiveColor[2] = 255;
+
+	if (cg.strafeHelperActiveColor[3] < 25)
+		cg.strafeHelperActiveColor[3] = 25;
+	else if (cg.strafeHelperActiveColor[3] > 255)
+		cg.strafeHelperActiveColor[3] = 255;
+
+	trap_Cvar_Set("ui_sha_r", va("%f", cg.strafeHelperActiveColor[0]));
+	trap_Cvar_Set("ui_sha_g", va("%f", cg.strafeHelperActiveColor[1]));
+	trap_Cvar_Set("ui_sha_b", va("%f", cg.strafeHelperActiveColor[2]));
+	trap_Cvar_Set("ui_sha_a", va("%f", cg.strafeHelperActiveColor[3]));
+
+	cg.strafeHelperActiveColor[0] /= 255.0f;
+	cg.strafeHelperActiveColor[1] /= 255.0f;
+	cg.strafeHelperActiveColor[2] /= 255.0f;
+	cg.strafeHelperActiveColor[3] /= 255.0f;
+
+	//Com_Printf("New color is %f, %f, %f, %f\n", cg.strafeHelperActiveColor[0], cg.strafeHelperActiveColor[1], cg.strafeHelperActiveColor[2], cg.strafeHelperActiveColor[3]);
+}
+
 /*
 =================
 CG_UpdateCvars
@@ -948,6 +1059,11 @@ void CG_UpdateCvars( void ) {
 	if (widescreenModificationCount != cg_widescreen.modificationCount) {
 		widescreenModificationCount = cg_widescreen.modificationCount;
 		CG_UpdateWidescreen();
+	}
+
+	if (strafeHelperActiveColorModificationCount != cg_strafeHelperActiveColor.modificationCount) {
+		strafeHelperActiveColorModificationCount = cg_strafeHelperActiveColor.modificationCount;
+		CG_StrafeHelperActiveColorChange();
 	}
 }
 
@@ -1603,6 +1719,21 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.endarkenmentShader	= trap_R_RegisterShader( "powerups/endarkenmentshell");
 	cgs.media.enlightenmentShader	= trap_R_RegisterShader( "powerups/enlightenmentshell");
 	cgs.media.invulnerabilityShader = trap_R_RegisterShader( "powerups/invulnerabilityshell");
+
+//JAPRO - Clientside - Movement Keys - Start
+	cgs.media.keyCrouchOffShader = trap_R_RegisterShaderNoMip("gfx/hud/keys/crouch_off");
+	cgs.media.keyCrouchOnShader = trap_R_RegisterShaderNoMip("gfx/hud/keys/crouch_on");
+	cgs.media.keyJumpOffShader = trap_R_RegisterShaderNoMip("gfx/hud/keys/jump_off");
+	cgs.media.keyJumpOnShader = trap_R_RegisterShaderNoMip("gfx/hud/keys/jump_on");
+	cgs.media.keyBackOffShader = trap_R_RegisterShaderNoMip("gfx/hud/keys/back_off");
+	cgs.media.keyBackOnShader = trap_R_RegisterShaderNoMip("gfx/hud/keys/back_on");
+	cgs.media.keyForwardOffShader = trap_R_RegisterShaderNoMip("gfx/hud/keys/forward_off");
+	cgs.media.keyForwardOnShader = trap_R_RegisterShaderNoMip("gfx/hud/keys/forward_on");
+	cgs.media.keyLeftOffShader = trap_R_RegisterShaderNoMip("gfx/hud/keys/left_off");
+	cgs.media.keyLeftOnShader = trap_R_RegisterShaderNoMip("gfx/hud/keys/left_on");
+	cgs.media.keyRightOffShader = trap_R_RegisterShaderNoMip("gfx/hud/keys/right_off");
+	cgs.media.keyRightOnShader = trap_R_RegisterShaderNoMip("gfx/hud/keys/right_on");
+//JAPRO - Clientside - Movement Keys - End
 
 #ifdef JK2AWARDS
 	cgs.media.medalImpressive		= trap_R_RegisterShaderNoMip( "medal_impressive" );
