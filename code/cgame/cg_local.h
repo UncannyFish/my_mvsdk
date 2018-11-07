@@ -1510,6 +1510,7 @@ extern	vmCvar_t		cg_fkDuration;
 extern	vmCvar_t		cg_fkFirstJumpDuration;
 extern	vmCvar_t		cg_fkSecondJumpDelay;
 
+extern	vmCvar_t		cl_commandsize;//Loda - FPS UNLOCK client modcode
 extern	vmCvar_t		cg_drawInventory;
 extern	vmCvar_t		cg_smallScoreboard;
 extern	vmCvar_t		cg_thirdPerson;

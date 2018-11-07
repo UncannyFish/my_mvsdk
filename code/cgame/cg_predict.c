@@ -623,6 +623,7 @@ void CG_PredictPlayerState( void ) {
 	qboolean	moved;
 	usercmd_t	oldestCmd;
 	usercmd_t	latestCmd;
+	const int REAL_CMD_BACKUP = (cl_commandsize.integer >= 4 && cl_commandsize.integer <= 512) ? (cl_commandsize.integer) : (CMD_BACKUP); //Loda - FPS UNLOCK client modcode
 
 	cg.hyperspace = qfalse;	// will be set if touching a trigger_teleport
 
@@ -669,7 +670,7 @@ void CG_PredictPlayerState( void ) {
 	// if we don't have the commands right after the snapshot, we
 	// can't accurately predict a current position, so just freeze at
 	// the last good position we had
-	cmdNum = current - CMD_BACKUP + 1;
+	cmdNum = current - REAL_CMD_BACKUP + 1;
 	trap_GetUserCmd( cmdNum, &oldestCmd );
 	if ( oldestCmd.serverTime > cg.snap->ps.commandTime 
 		&& oldestCmd.serverTime < cg.time ) {	// special check for map_restart
@@ -706,7 +707,7 @@ void CG_PredictPlayerState( void ) {
 
 	// run cmds
 	moved = qfalse;
-	for ( cmdNum = current - CMD_BACKUP + 1 ; cmdNum <= current ; cmdNum++ ) {
+	for ( cmdNum = current - REAL_CMD_BACKUP + 1 ; cmdNum <= current ; cmdNum++ ) {
 		// get the command
 		trap_GetUserCmd( cmdNum, &cg_pmove.cmd );
 
