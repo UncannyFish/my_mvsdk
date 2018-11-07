@@ -938,6 +938,10 @@ void	Q_strcat( char *dest, int size, const char *src );
 int Q_PrintStrlen( const char *string, qboolean use102color );
 // removes color sequences from string
 char *Q_CleanStr( char *string, qboolean use102color );
+char *Q_CleanAsciiStr( char *string );
+
+const char *Q_strchrs( const char *string, const char *search );
+void Q_strstrip( char *string, const char *strip, const char *repl );
 
 const char *Q_strchrs( const char *string, const char *search );
 void Q_strstrip( char *string, const char *strip, const char *repl );

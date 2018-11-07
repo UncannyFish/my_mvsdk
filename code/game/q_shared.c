@@ -992,6 +992,24 @@ char *Q_CleanStr( char *string, qboolean use102color ) {
 }
 
 #if defined(_MSC_VER) && _MSC_VER < 1900
+char *Q_CleanAsciiStr( char *string ) {
+	char*	d;
+	char*	s;
+	int		c;
+
+	s = string;
+	d = string;
+	while ((c = *s) != 0 ) {
+		if ( c >= 0x20 && c <= 0x7E ) {
+			*d++ = c;
+		}
+		s++;
+	}
+	*d = '\0';
+
+	return string;
+}
+
 /*
 =============
 Q_vsnprintf
