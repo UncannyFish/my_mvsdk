@@ -273,7 +273,8 @@ static void CG_CalcIdealThirdPersonViewTarget(void)
 	}
 
 	// Add in the new viewheight
-	if ( cg.snap ) cameraFocusLoc[2] += cg.snap->ps.viewheight;
+	//if ( cg.snap ) cameraFocusLoc[2] += cg.snap->ps.viewheight; //36 = standing, 12 = crouching. 
+	if (cg.snap) cameraFocusLoc[2] += cg.predictedPlayerState.viewheight; //Proper prediction
 
 	// Add in a vertical offset from the viewpoint, which puts the actual target above the head, regardless of angle.
 //	VectorMA(cameraFocusLoc, thirdPersonVertOffset, cameraup, cameraIdealTarget);
