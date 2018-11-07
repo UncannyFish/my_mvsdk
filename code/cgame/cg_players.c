@@ -495,7 +495,8 @@ retryModel:
 				}
 
 				//rww - Set the animation again because it just got reset due to the model change
-				trap_G2API_SetBoneAnim(ci->ghoul2Model, 0, (ci->jk2gameplay == VERSION_1_02 ? "upper_lumbar" : "lower_lumbar"), anim->firstFrame + anim->numFrames-1, anim->firstFrame + anim->numFrames, flags, 1.0f, cg.time, -1, 150);
+				//trap_G2API_SetBoneAnim(ci->ghoul2Model, 0, (ci->jk2gameplay == VERSION_1_02 ? "upper_lumbar" : "lower_lumbar"), anim->firstFrame + anim->numFrames-1, anim->firstFrame + anim->numFrames, flags, 1.0f, cg.time, -1, 150);
+				trap_G2API_SetBoneAnim(ci->ghoul2Model, 0, ((ci->jk2gameplay == VERSION_1_02 && cg_fixlean.integer != 2) ? "upper_lumbar" : "lower_lumbar"), anim->firstFrame + anim->numFrames - 1, anim->firstFrame + anim->numFrames, flags, 1.0f, cg.time, -1, 150);
 
 				cg_entities[clientNum].currentState.torsoAnim = 0;
 			}
@@ -1304,7 +1305,8 @@ void CG_NewClientInfo( int clientNum, qboolean entitiesInitialized ) {
 			}
 
 			//rww - Set the animation again because it just got reset due to the model change
-			trap_G2API_SetBoneAnim(ci->ghoul2Model, 0, (ci->jk2gameplay == VERSION_1_02 ? "upper_lumbar" : "lower_lumbar"), firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed, cg.time, setFrame, 150);
+			//trap_G2API_SetBoneAnim(ci->ghoul2Model, 0, (ci->jk2gameplay == VERSION_1_02 ? "upper_lumbar" : "lower_lumbar"), firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed, cg.time, setFrame, 150);
+			trap_G2API_SetBoneAnim(ci->ghoul2Model, 0, ((ci->jk2gameplay == VERSION_1_02 && cg_fixlean.integer != 2) ? "upper_lumbar" : "lower_lumbar"), firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed, cg.time, setFrame, 150);
 
 			cg_entities[clientNum].currentState.torsoAnim = 0;
 		}
@@ -1626,7 +1628,8 @@ static void CG_SetLerpFrameAnimation( centity_t *cent, clientInfo_t *ci, lerpFra
 
 		animSpeed *= animSpeedMult;
 
-		if ( ci->jk2gameplay != VERSION_1_02 ) BG_SaberStartTransAnim(cent->currentState.fireflag, newAnimation, &animSpeed);
+		//if ( ci->jk2gameplay != VERSION_1_02 ) BG_SaberStartTransAnim(cent->currentState.fireflag, newAnimation, &animSpeed);
+		if ( ci->jk2gameplay != VERSION_1_02 || cg_fixlean.integer ) BG_SaberStartTransAnim(cent->currentState.fireflag, newAnimation, &animSpeed);
 
 		if (torsoOnly)
 		{
@@ -1656,25 +1659,29 @@ static void CG_SetLerpFrameAnimation( centity_t *cent, clientInfo_t *ci, lerpFra
 
 			if (torsoOnly)
 			{
-				if ( ci->jk2gameplay != VERSION_1_02 && (cent->currentState.torsoAnim&~ANIM_TOGGLEBIT) == (cent->currentState.legsAnim&~ANIM_TOGGLEBIT) && cent->pe.legs.frame >= anim->firstFrame && cent->pe.legs.frame <= (anim->firstFrame + anim->numFrames))
+				//if ( ci->jk2gameplay != VERSION_1_02 && (cent->currentState.torsoAnim&~ANIM_TOGGLEBIT) == (cent->currentState.legsAnim&~ANIM_TOGGLEBIT) && cent->pe.legs.frame >= anim->firstFrame && cent->pe.legs.frame <= (anim->firstFrame + anim->numFrames))
+				if ( (ci->jk2gameplay != VERSION_1_02 || cg_fixlean.integer == 2) && (cent->currentState.torsoAnim&~ANIM_TOGGLEBIT) == (cent->currentState.legsAnim&~ANIM_TOGGLEBIT) && cent->pe.legs.frame >= anim->firstFrame && cent->pe.legs.frame <= (anim->firstFrame + anim->numFrames))
 				{
 					trap_G2API_SetBoneAnim(cent->ghoul2, 0, "lower_lumbar", anim->firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed,cg.time, cent->pe.legs.frame, blendTime);
 					beginFrame = cent->pe.legs.frame;
 				}
 				else
 				{
-					trap_G2API_SetBoneAnim(cent->ghoul2, 0, (ci->jk2gameplay == VERSION_1_02 ? "upper_lumbar" : "lower_lumbar"), anim->firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed,cg.time, -1, blendTime);
+					//trap_G2API_SetBoneAnim(cent->ghoul2, 0, (ci->jk2gameplay == VERSION_1_02 ? "upper_lumbar" : "lower_lumbar"), anim->firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed,cg.time, -1, blendTime);
+					trap_G2API_SetBoneAnim(cent->ghoul2, 0, ((ci->jk2gameplay == VERSION_1_02 && cg_fixlean.integer != 2) ? "upper_lumbar" : "lower_lumbar"), anim->firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed,cg.time, -1, blendTime);
 				}
 				cgs.clientinfo[cent->currentState.number].torsoAnim = newAnimation;
 			}
 			else
 			{
 				trap_G2API_SetBoneAnim(cent->ghoul2, 0, "model_root", anim->firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed, cg.time, -1, blendTime);
-				if ( ci->jk2gameplay == VERSION_1_02 ) cgs.clientinfo[cent->currentState.number].torsoAnim = newAnimation;
+				//if ( ci->jk2gameplay == VERSION_1_02 ) cgs.clientinfo[cent->currentState.number].torsoAnim = newAnimation;
+				if ( ci->jk2gameplay == VERSION_1_02 && cg_fixlean.integer != 2 ) cgs.clientinfo[cent->currentState.number].torsoAnim = newAnimation;
 				cgs.clientinfo[cent->currentState.number].legsAnim = newAnimation;
 			}
 
-			if ( jk2gameplay == VERSION_1_02 )
+			//if ( jk2gameplay == VERSION_1_02 )
+			if ( jk2gameplay == VERSION_1_02 && cg_fixlean.integer != 2 )
 			{ // 1.02
 				if (cg.snap && cg.snap->ps.clientNum == cent->currentState.number)
 				{ //go ahead and use the predicted state if you can.
@@ -1930,7 +1937,8 @@ static void CG_RunLerpFrame( centity_t *cent, clientInfo_t *ci, lerpFrame_t *lf,
 	{
 		int flags = BONE_ANIM_OVERRIDE_FREEZE; //|BONE_ANIM_BLEND;
 		float animSpeed = 1.0f;
-		trap_G2API_SetBoneAnim(cent->ghoul2, 0, (ci->jk2gameplay == VERSION_1_02 ? "upper_lumbar" : "lower_lumbar"), cent->currentState.forceFrame, cent->currentState.forceFrame+1, flags, animSpeed, cg.time, -1, 150);
+		//trap_G2API_SetBoneAnim(cent->ghoul2, 0, (ci->jk2gameplay == VERSION_1_02 ? "upper_lumbar" : "lower_lumbar"), cent->currentState.forceFrame, cent->currentState.forceFrame+1, flags, animSpeed, cg.time, -1, 150);
+		trap_G2API_SetBoneAnim(cent->ghoul2, 0, ((ci->jk2gameplay == VERSION_1_02 && cg_fixlean.integer != 2) ? "upper_lumbar" : "lower_lumbar"), cent->currentState.forceFrame, cent->currentState.forceFrame+1, flags, animSpeed, cg.time, -1, 150);
 		trap_G2API_SetBoneAnim(cent->ghoul2, 0, "model_root", cent->currentState.forceFrame, cent->currentState.forceFrame+1, flags, animSpeed, cg.time, -1, 150);
 		trap_G2API_SetBoneAnim(cent->ghoul2, 0, "Motion", cent->currentState.forceFrame, cent->currentState.forceFrame+1, flags, animSpeed, cg.time, -1, 150);
 
@@ -2863,7 +2871,7 @@ static void CG_G2PlayerAngles( centity_t *cent, vec3_t legs[3], vec3_t legsAngle
 	AnglesSubtract( headAngles, torsoAngles, headAngles );
 	AnglesSubtract( torsoAngles, legsAngles, torsoAngles );
 
-	if ( jk2startversion != VERSION_1_02 ) legsAngles[PITCH] = 0;
+	if ( jk2startversion != VERSION_1_02 || cg_fixlean.integer ) legsAngles[PITCH] = 0;
 
 	AnglesToAxis( legsAngles, legs );
 	// we assume that model 0 is the player model.
@@ -2888,7 +2896,7 @@ static void CG_G2PlayerAngles( centity_t *cent, vec3_t legs[3], vec3_t legsAngle
 	viewAngles[YAW] = viewAngles[ROLL] = 0;
 	viewAngles[PITCH] *= 0.5;
 
-	if ( jk2startversion == VERSION_1_02 )
+	if ( jk2startversion == VERSION_1_02 && !cg_fixlean.integer )
 	{
 		VectorCopy( cent->lerpAngles, angles );
 		angles[PITCH] = 0;
@@ -6688,7 +6696,7 @@ doEssentialTwo:
 				efOrg[1] -= boltDir[1]*4;
 				efOrg[2] -= boltDir[2]*4;
 
-				if ( jk2startversion == VERSION_1_02 )
+				if ( jk2startversion == VERSION_1_02 && !cg_fixlean.integer )
 				{
 					efOrg[2] += 8;
 				}
@@ -6700,7 +6708,7 @@ doEssentialTwo:
 				VectorCopy(efOrg, cent->grip_arm.origin);
 				VectorCopy(cent->grip_arm.origin, cent->grip_arm.lightingOrigin);
 
-				if ( jk2startversion == VERSION_1_02 )
+				if ( jk2startversion == VERSION_1_02 && !cg_fixlean.integer )
 				{
 					VectorCopy(cent->lerpAngles, armAng);
 					armAng[ROLL] = -90;
@@ -7432,7 +7440,8 @@ doEssentialThree:
 		}
 
 		trap_G2API_SetBoneAnim(legs.ghoul2, 0, "model_root", cent->miscTime, cent->miscTime, BONE_ANIM_OVERRIDE_FREEZE, 1.0f, cg.time, cent->miscTime, -1);
-		trap_G2API_SetBoneAnim(legs.ghoul2, 0, (ci->jk2gameplay == VERSION_1_02 ? "upper_lumbar" : "lower_lumbar"), cent->miscTime, cent->miscTime, BONE_ANIM_OVERRIDE_FREEZE, 1.0f, cg.time, cent->miscTime, -1);
+		//trap_G2API_SetBoneAnim(legs.ghoul2, 0, (ci->jk2gameplay == VERSION_1_02 ? "upper_lumbar" : "lower_lumbar"), cent->miscTime, cent->miscTime, BONE_ANIM_OVERRIDE_FREEZE, 1.0f, cg.time, cent->miscTime, -1);
+		trap_G2API_SetBoneAnim(legs.ghoul2, 0, ((ci->jk2gameplay == VERSION_1_02 && cg_fixlean.integer != 2) ? "upper_lumbar" : "lower_lumbar"), cent->miscTime, cent->miscTime, BONE_ANIM_OVERRIDE_FREEZE, 1.0f, cg.time, cent->miscTime, -1);
 		trap_G2API_SetBoneAnim(legs.ghoul2, 0, "Motion", cent->miscTime, cent->miscTime, BONE_ANIM_OVERRIDE_FREEZE, 1.0f, cg.time, cent->miscTime, -1);
 
 		VectorCopy(cent->currentState.origin2, hitLoc);

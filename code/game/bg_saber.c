@@ -1940,13 +1940,22 @@ weapChecks:
 	pm->ps->weaponTime = addTime;
 }
 
+#ifdef JK2_CGAME
+#include "../cgame/cg_local.h" //ahahahahhahahaha@$!$!
+#endif
+
 void PM_SetSaberMove(short newMove)
 {
 	unsigned int setflags = saberMoveData[newMove].animSetFlags;
 	int	anim = saberMoveData[newMove].animToUse;
 	int parts = SETANIM_TORSO;
 	
-	if ( newMove == LS_READY || ((newMove == LS_A_FLIP_STAB || newMove == LS_A_FLIP_SLASH) && jk2gameplay != VERSION_1_02) )
+	if ( newMove == LS_READY || ((newMove == LS_A_FLIP_STAB || newMove == LS_A_FLIP_SLASH) &&
+#ifdef JK2_CGAME
+		(jk2gameplay != VERSION_1_02 || cg_fixlean.integer)))
+#else
+		jk2gameplay != VERSION_1_02) )
+#endif
 	{//finished with a kata (or in a special move) reset attack counter
 		pm->ps->saberAttackChainCount = 0;
 	}
@@ -2054,7 +2063,11 @@ void PM_SetSaberMove(short newMove)
 		}
 	}
 
+#ifdef JK2_CGAME
+	PM_SetAnim(parts, anim, ((jk2gameplay == VERSION_1_02 && !cg_fixlean.integer) ? (setflags | SETANIM_FLAG_HOLD) : setflags), saberMoveData[newMove].blendTime);
+#else
 	PM_SetAnim(parts, anim, (jk2gameplay == VERSION_1_02 ? (setflags|SETANIM_FLAG_HOLD) : setflags), saberMoveData[newMove].blendTime);
+#endif
 
 	if ( (pm->ps->torsoAnim&~ANIM_TOGGLEBIT) == anim )
 	{//successfully changed anims

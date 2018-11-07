@@ -588,6 +588,7 @@ vmCvar_t	cg_fkSecondJumpDelay;
 
 vmCvar_t	cl_commandsize;//Loda - FPS UNLOCK client modcode
 
+vmCvar_t	cg_fixlean; //idk man
 
 vmCvar_t	cg_drawInventory;
 vmCvar_t	cg_smallScoreboard;
@@ -828,6 +829,8 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_fkSecondJumpDelay, "cg_fkSecondJumpDelay", "0", 0 },
 
 	{ &cl_commandsize, "cl_commandsize", "64", CVAR_ARCHIVE },//Loda - FPS UNLOCK client modcode
+
+	{ &cg_fixlean, "cg_fixlean", "0", CVAR_LATCH }, //idk man
 
 	{ &cg_drawInventory, "cg_drawInventory", "1", CVAR_ARCHIVE },
 	{ &cg_smallScoreboard, "cg_smallScoreboard", "0", CVAR_ARCHIVE },
