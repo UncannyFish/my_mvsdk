@@ -2333,6 +2333,9 @@ static void CG_DrawInventory(int y)
 	if (!cg_drawInventory.integer)
 		return;
 
+	if (cg.snap->ps.pm_type == PM_SPECTATOR)
+		return;
+
 	if (cg.snap->ps.stats[STAT_HEALTH] <= 0)
 		return;
 
