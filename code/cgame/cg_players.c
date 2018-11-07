@@ -567,6 +567,8 @@ void CG_LoadClientInfo( clientInfo_t *ci ) {
 	int			fLen = 0;
 	char		soundpath[MAX_QPATH];
 	char		soundName[1024];
+	const char	*defaultModel;
+	qboolean	isDefaultModel = qfalse;
 	qboolean	isFemale = qfalse;
 	fileHandle_t f;
 
@@ -618,6 +620,16 @@ void CG_LoadClientInfo( clientInfo_t *ci ) {
 		//rww - DO NOT error out here! Someone could just type in a nonsense model name and crash everyone's client.
 		//Give it a chance to load default model for this client instead.
 
+		isDefaultModel = qtrue;
+		if (ci->gender != GENDER_FEMALE) {
+			defaultModel = DEFAULT_MODEL;
+			isFemale = qfalse;
+		}
+		else {
+			defaultModel = "jan";
+			isFemale = qtrue;
+		}
+
 		// fall back to default team name
 		if( cgs.gametype >= GT_TEAM) {
 			// keep skin name
@@ -626,12 +638,12 @@ void CG_LoadClientInfo( clientInfo_t *ci ) {
 			} else {
 				Q_strncpyz(teamname, DEFAULT_REDTEAM_NAME, sizeof(teamname) );
 			}
-			if ( !CG_RegisterClientModelname( ci, DEFAULT_TEAM_MODEL, ci->skinName, teamname, -1 ) ) {
-				CG_Error( "DEFAULT_TEAM_MODEL / skin (%s/%s) failed to register", DEFAULT_TEAM_MODEL, ci->skinName );
+			if ( !CG_RegisterClientModelname( ci, defaultModel, ci->skinName, teamname, -1 ) ) {
+				CG_Error( "DEFAULT_TEAM_MODEL / skin (%s/%s) failed to register", defaultModel, ci->skinName );
 			}
 		} else {
-			if ( !CG_RegisterClientModelname( ci, DEFAULT_MODEL, "default", teamname, -1 ) ) {
-				CG_Error( "DEFAULT_MODEL (%s) failed to register", DEFAULT_MODEL );
+			if ( !CG_RegisterClientModelname( ci, defaultModel, "default", teamname, -1 ) ) {
+				CG_Error( "DEFAULT_MODEL (%s) failed to register", defaultModel );
 			}
 		}
 		modelloaded = qfalse;
@@ -656,8 +668,13 @@ void CG_LoadClientInfo( clientInfo_t *ci ) {
 	}
 
 	// sounds
-	dir = ci->modelName;
-	fallback = DEFAULT_MALE_SOUNDPATH; //(cgs.gametype >= GT_TEAM) ? DEFAULT_TEAM_MODEL : DEFAULT_MODEL;
+	if (!isDefaultModel)
+		dir = ci->modelName;
+	else
+		dir = isFemale ? DEFAULT_FEMALE_SOUNDPATH : DEFAULT_MALE_SOUNDPATH;
+
+	fallback = isFemale ? DEFAULT_FEMALE_SOUNDPATH : DEFAULT_MALE_SOUNDPATH;
+	
 
 	if ( ci->skinName[0] == '\0' || !Q_stricmp( "default", ci->skinName ) )
 	{//try default sounds.cfg first
