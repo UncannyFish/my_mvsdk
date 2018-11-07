@@ -2840,6 +2840,29 @@ void CG_Shutdown( void )
 	// like closing files or archiving session data
 }
 
+//do we have any force powers that we would normally need to cycle to?
+qboolean CG_NoUseableForce(void)
+{
+	int i = FP_HEAL;
+	while (i < NUM_FORCE_POWERS)
+	{ 
+		if (i != FP_SABERTHROW &&
+			i != FP_SABERATTACK &&
+			i != FP_SABERDEFEND &&
+			i != FP_LEVITATION)
+		{ //valid selectable power
+			if (cg.predictedPlayerState.fd.forcePowersKnown & (1 << i))
+			{ //we have it
+				return qfalse;
+			}
+		}
+		i++;
+	}
+
+	//no useable force powers, I guess.
+	return qtrue;
+}
+
 
 /*
 ===============
@@ -2848,13 +2871,22 @@ CG_NextForcePower_f
 */
 void CG_NextForcePower_f( void ) 
 {
+	usercmd_t cmd;
+
 	if ( !cg.snap )
 	{
 		return;
 	}
 
-	if (cg.snap->ps.pm_flags & PMF_FOLLOW)
+	if (cg.snap->ps.pm_type == PM_SPECTATOR || (cg.snap->ps.pm_flags & PMF_FOLLOW))
 	{
+		return;
+	}
+
+	trap_GetUserCmd(trap_GetCurrentCmdNumber(), &cmd);
+	if ((cmd.buttons & BUTTON_USE) || CG_NoUseableForce())
+	{
+		CG_NextInventory_f();
 		return;
 	}
 
@@ -2880,13 +2912,22 @@ CG_PrevForcePower_f
 */
 void CG_PrevForcePower_f( void ) 
 {
+	usercmd_t cmd;
+
 	if ( !cg.snap )
 	{
 		return;
 	}
 
-	if (cg.snap->ps.pm_flags & PMF_FOLLOW)
+	if (cg.predictedPlayerState.pm_type == PM_SPECTATOR || cg.snap->ps.pm_flags & PMF_FOLLOW)
 	{
+		return;
+	}
+
+	trap_GetUserCmd(trap_GetCurrentCmdNumber(), &cmd);
+	if ((cmd.buttons & BUTTON_USE) || CG_NoUseableForce())
+	{
+		CG_PrevInventory_f();
 		return;
 	}
 
