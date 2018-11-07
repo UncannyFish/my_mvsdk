@@ -1648,6 +1648,9 @@ extern	vmCvar_t		cg_autoKillWhenFalling;
 extern	vmCvar_t		cg_widescreen;
 extern	vmCvar_t		cg_fovAspectAdjust;
 
+extern	vmCvar_t		cg_fovViewmodel;
+extern	vmCvar_t		cg_fovViewmodelAdjust;
+
 extern	vmCvar_t		cg_fkDuration;
 extern	vmCvar_t		cg_fkFirstJumpDuration;
 extern	vmCvar_t		cg_fkSecondJumpDelay;

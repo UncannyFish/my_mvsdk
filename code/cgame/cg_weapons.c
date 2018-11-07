@@ -742,7 +742,7 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 	float		fovOffset;
 	vec3_t		angles;
 	weaponInfo_t	*weapon;
-	float	cgFov = cg_fov.value;
+	float cgFov = cg_fovViewmodel.integer ? cg_fovViewmodel.value : cg_fov.value;
 
 	if (cgFov < 1)
 	{
@@ -786,8 +786,8 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 	}
 
 	// drop gun lower at higher fov
-	if ( cgFov > 90 ) {
-		fovOffset = -0.2 * ( cgFov - 90 );
+	if ( cg_fovViewmodelAdjust.integer && cgFov > 90 ) {
+		fovOffset = -0.2f * ( cgFov - 90 );
 	} else {
 		fovOffset = 0;
 	}
@@ -806,6 +806,13 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 	VectorMA( hand.origin, (cg_gun_z.value+fovOffset), cg.refdef.viewaxis[2], hand.origin );
 
 	AnglesToAxis( angles, hand.axis );
+
+	if (cg_fovViewmodel.integer)
+	{
+		float fracDistFOV = tan(cg.refdef.fov_x * (M_PI / 180) * 0.5f);
+		float fracWeapFOV = (1.0f / fracDistFOV) * tan(cgFov * (M_PI / 180) * 0.5f);
+		VectorScale(hand.axis[0], fracWeapFOV, hand.axis[0]);
+	}
 
 	// map torso animations to weapon animations
 	if ( cg_gun_frame.integer ) {
@@ -854,7 +861,7 @@ WEAPON SELECTION
 
 void CG_DrawIconBackground(void)
 {
-	int				height,xAdd,x2,y2,t;
+	float			height,xAdd,x2,y2,t;
 	float			prongLeftX, prongRightX;
 	float			prongWidth;
 	float			inTime = cg.invenSelectTime+WEAPON_SELECT_TIME;
@@ -916,9 +923,9 @@ void CG_DrawIconBackground(void)
 				cg.iconHUDPercent=0;
 			}
 
-			xAdd = (int) 8*cg.iconHUDPercent;
+			xAdd = 8*cg.iconHUDPercent;
 
-			height = (int) (60.0f*cg.iconHUDPercent);
+			height = (60.0f*cg.iconHUDPercent);
 			CG_DrawPic( x2+60, y2+30, prongWidth, -height, drawType);	// Top half
 			CG_DrawPic( x2+60, y2+30-2, prongWidth, height, drawType);	// Bottom half
 
@@ -957,7 +964,7 @@ void CG_DrawIconBackground(void)
 	}
 
 	trap_R_SetColor( colorTable[CT_WHITE] );					
-	height = (int) (60.0f*cg.iconHUDPercent);
+	height = 60.0f*cg.iconHUDPercent;
 	CG_DrawPic( x2+60, y2+30, prongWidth, -height, drawType);	// Top half
 	CG_DrawPic( x2+60, y2+30-2, prongWidth, height, drawType);	// Bottom half
 
@@ -980,7 +987,7 @@ void CG_DrawIconBackground(void)
 */
 	// Side Prongs
 	trap_R_SetColor( colorTable[CT_WHITE]);					
-	xAdd = (int) 8*cg.iconHUDPercent;
+	xAdd = 8*cg.iconHUDPercent;
 	CG_DrawPic( prongLeftX+xAdd, y2-10, 40, 80, background);
 	CG_DrawPic( prongRightX-xAdd, y2-10, -40, 80, background);
 
@@ -1381,6 +1388,7 @@ void CG_Weapon_f( void ) {
 
 	if (num == 1 && cg.snap->ps.weapon == WP_SABER)
 	{
+		cg.weaponSelectTime = cg.time;
 		if (cg.snap->ps.weaponTime < 1)
 		{
 			//trap_SendClientCommand("sv_saberswitch");
