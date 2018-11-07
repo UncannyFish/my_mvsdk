@@ -238,6 +238,26 @@ float forceJumpStrength[NUM_FORCE_POWER_LEVELS] =
 	840
 };
 
+int PM_GetMovePhysics(void)
+{
+#ifndef CGAME
+/*	if (pm->ps->stats[STAT_RACEMODE])
+		return (pm->ps->stats[STAT_MOVEMENTSTYLE]);
+	else if (g_movementStyle.integer >= 0 && g_movementStyle.integer <= 6)
+		return (g_movementStyle.integer);
+	else if (g_movementStyle.integer < 0)
+		return 0;
+	else if (g_movementStyle.integer > 8)
+		return 8;*/
+	return 1;
+#else
+	/*if (!cgs.isJK2Pro)
+		return 1;
+	return pm->ps->stats[STAT_MOVEMENTSTYLE];*/
+	return 1;
+#endif
+}
+
 int PM_GetSaberStance(void)
 {
 	if ( pm->ps->dualBlade )

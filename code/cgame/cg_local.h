@@ -86,6 +86,31 @@
 #define DEFAULT_REDTEAM_NAME		"Empire"
 #define DEFAULT_BLUETEAM_NAME		"Rebellion"
 
+//[JK2PRO - Clientside - All - Jcinfo bitvalues
+#define JK2PRO_CINFO_HIGHFPSFIX		(1<<0) //unused
+
+extern int dueltypes[MAX_CLIENTS];//jk2PRO - Clientside - Fullforce Duels
+
+typedef enum //movementstyle enum
+{
+	MV_SIEGE,
+	MV_JKA,
+	MV_QW,
+	MV_CPM,
+	MV_Q3,
+	MV_PJK,
+	MV_WSW,
+	MV_RJQ3,
+	MV_RJCPM,
+	MV_SWOOP,
+	MV_JETPACK,
+	MV_SPEED,
+	MV_SP,
+	MV_SLICK,
+	MV_BOTCPM,
+	MV_NUMSTYLES
+} movementStyle_e;
+
 typedef enum {
 	FOOTSTEP_NORMAL,
 	FOOTSTEP_METAL,
@@ -868,6 +893,8 @@ Ghoul2 Insert End
 */
 
 	char				sharedBuffer[MAX_CG_SHARED_BUFFER_SIZE];
+
+	//jk2pro/eternaljk2mv stuff
 	int					doVstrTime;
 	char				doVstr[MAX_QPATH];
 	short				numFKFrames;
@@ -1412,6 +1439,11 @@ Ghoul2 Insert End
 	cgEffects_t		effects;
 
 	int				mvsdk_svFlags;
+
+	//jk2pro
+	int				jcinfo;
+	qboolean		isJK2Pro;
+
 
 } cgs_t;
 
