@@ -3459,6 +3459,11 @@ static void CG_ScanForCrosshairEntity( void ) {
 //		return;
 //	}
 
+	//Raz: Put this back in so fading works again
+	if ( cg_drawCrosshairNames.integer > 1 && trace.entityNum >= MAX_CLIENTS ) {
+		return;
+	}
+
 	// if the player is in fog, don't show it
 	content = trap_CM_PointContents( trace.endpos, 0 );
 	if ( content & CONTENTS_FOG ) {
@@ -3487,6 +3492,7 @@ static void CG_DrawCrosshairNames( void ) {
 	vec4_t		tcolor;
 	char		*name;
 	int			baseColor;
+	qboolean	blackColor;
 
 	if ( !cg_drawCrosshair.integer ) {
 		return;
@@ -3508,13 +3514,13 @@ static void CG_DrawCrosshairNames( void ) {
 	// draw the name of the player being looked at
 	color = CG_FadeColor( cg.crosshairClientTime, 1000 );
 	if ( !color ) {
-		trap_R_SetColor( NULL );
+		trap_R_SetColor( colorTable[CT_WHITE] );
 		return;
 	}
 
 	name = cgs.clientinfo[ cg.crosshairClientNum ].name;
 
-	if (cgs.gametype >= GT_TEAM)
+	/*if (cgs.gametype >= GT_TEAM)
 	{
 		if (cgs.clientinfo[cg.crosshairClientNum].team == TEAM_RED)
 		{
@@ -3535,33 +3541,49 @@ static void CG_DrawCrosshairNames( void ) {
 		{
 			baseColor = CT_RED;
 		}
-		*/
+		
 	}
 	else
-	{
-		//baseColor = CT_WHITE;
-		baseColor = CT_RED; //just make it red in nonteam modes since everyone is hostile and crosshair will be red on them too
-	}
+	{*/
+		blackColor = qfalse;
+		//baseColor = CT_RED; //just make it red in nonteam modes since everyone is hostile and crosshair will be red on them too
+	//}
 
 	if (cg.snap->ps.duelInProgress)
 	{
 		if (cg.crosshairClientNum != cg.snap->ps.duelIndex)
 		{ //grey out crosshair for everyone but your foe if you're in a duel
-			baseColor = CT_BLACK;
+			blackColor = qtrue;
 		}
 	}
 	else if (cg_entities[cg.crosshairClientNum].currentState.bolt1)
 	{ //this fellow is in a duel. We just checked if we were in a duel above, so
 	  //this means we aren't and he is. Which of course means our crosshair greys out over him.
-		baseColor = CT_BLACK;
+		blackColor = qtrue;
 	}
 
-	tcolor[0] = colorTable[baseColor][0];
-	tcolor[1] = colorTable[baseColor][1];
-	tcolor[2] = colorTable[baseColor][2];
-	tcolor[3] = color[3]*0.5f;
+	if (!blackColor) {
+		baseColor = CT_WHITE;
+		tcolor[0] = colorTable[baseColor][0];
+		tcolor[1] = colorTable[baseColor][1];
+		tcolor[2] = colorTable[baseColor][2];
+		tcolor[3] = colorTable[baseColor][3]; //color[3]*0.8f;
 
-	UI_DrawProportionalString(0.5f * cgs.screenWidth, 170, name, UI_CENTER, tcolor);
+		//JAPRO - Clientside - Colored crosshair names - Start
+		UI_DrawProportionalString(0.5f * cgs.screenWidth, 170, name, UI_CENTER | UI_DROPSHADOW, tcolor);
+		//JAPRO - Clientside - Colored crosshair names - End
+	}
+	else {
+		baseColor = CT_BLACK;
+		tcolor[0] = colorTable[baseColor][0];
+		tcolor[1] = colorTable[baseColor][1];
+		tcolor[2] = colorTable[baseColor][2];
+		tcolor[3] = color[3]*0.8f;
+
+		//JAPRO - Clientside - Colored crosshair names - Start
+		UI_DrawProportionalString(0.5f * cgs.screenWidth, 170, name, UI_CENTER, tcolor);
+		//JAPRO - Clientside - Colored crosshair names - End
+	}
 
 	trap_R_SetColor( NULL );
 }
