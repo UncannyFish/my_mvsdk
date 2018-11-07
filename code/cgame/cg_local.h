@@ -664,6 +664,14 @@ typedef struct {
 // all cg.stepTime, cg.duckTime, cg.landTime, etc are set to cg.time when the action
 // occurs, and they will have visible effects for #define STEP_TIME or whatever msec after
 
+#define	MAX_CHATBOX_ITEMS		5
+typedef struct chatBoxItem_s
+{
+	char	string[MAX_SAY_TEXT];
+	int		time;
+	int		lines;
+} chatBoxItem_t;
+
 #define MAX_PREDICTED_EVENTS	16
  
 typedef struct {
@@ -897,6 +905,10 @@ Ghoul2 Insert End
 	char				sharedBuffer[MAX_CG_SHARED_BUFFER_SIZE];
 
 	//jk2pro/eternaljk2mv stuff
+	//chatbox
+	chatBoxItem_t		chatItems[MAX_CHATBOX_ITEMS];
+	int					chatItemActive;
+
 	int					doVstrTime;
 	char				doVstr[MAX_QPATH];
 	short				numFKFrames;
@@ -1543,6 +1555,17 @@ extern	vmCvar_t		cg_dismember;
 //jk2pro Client Cvars - start
 extern	vmCvar_t		cg_enhancedFlagStatus;
 extern	vmCvar_t		cg_drawTimerMsec;
+//chatbox
+extern	vmCvar_t		cg_chatBox;
+extern	vmCvar_t		cg_chatBoxFontSize;
+extern	vmCvar_t		cg_chatBoxHeight;
+//japro chatbox stuff
+extern	vmCvar_t		cg_chatBoxX;
+extern	vmCvar_t		cg_chatBoxCutOffLength;
+extern	vmCvar_t		cg_chatSounds;
+extern	vmCvar_t		cg_cleanChatbox;
+extern	vmCvar_t		cg_newFont;
+
 extern	vmCvar_t		cg_jumpSounds;
 extern	vmCvar_t		cg_rollSounds;
 
@@ -1559,6 +1582,8 @@ extern	vmCvar_t		cg_fkSecondJumpDelay;
 extern	vmCvar_t		cl_commandsize;//Loda - FPS UNLOCK client modcode
 extern	vmCvar_t		cg_drawInventory;
 extern	vmCvar_t		cg_smallScoreboard;
+//jk2 pro stuff end
+
 extern	vmCvar_t		cg_thirdPerson;
 extern	vmCvar_t		cg_thirdPersonRange;
 extern	vmCvar_t		cg_thirdPersonAngle;

@@ -515,6 +515,17 @@ vmCvar_t	cg_dismember;
 //jk2pro Client Cvars - start
 vmCvar_t	cg_enhancedFlagStatus;
 vmCvar_t	cg_drawTimerMsec;
+//chatbox
+vmCvar_t	cg_chatBox;
+vmCvar_t	cg_chatBoxFontSize;
+vmCvar_t	cg_chatBoxHeight;
+//japro chatbox stuff
+vmCvar_t	cg_chatBoxX;
+vmCvar_t	cg_chatBoxCutOffLength;
+vmCvar_t	cg_chatSounds;
+vmCvar_t	cg_cleanChatbox;
+vmCvar_t	cg_newFont;
+
 vmCvar_t	cg_remaps;
 vmCvar_t	cg_autoKillWhenFalling;
 
@@ -694,6 +705,18 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_enhancedFlagStatus, "cg_enhancedFlagStatus", "2", 0 },
 	{ &cg_drawTimerMsec, "cg_drawTimerMsec", "1", CVAR_ARCHIVE },
 	{ &cg_remaps, "cg_remaps", "1",	CVAR_LATCH|CVAR_ARCHIVE },
+
+	//chatbox
+	{ &cg_chatBox, "cg_chatBox", "10000", CVAR_ARCHIVE },
+	{ &cg_chatBoxFontSize, "cg_chatBoxFontSize", "1.0", CVAR_ARCHIVE },
+	{ &cg_chatBoxHeight, "cg_chatBoxHeight", "360", CVAR_ARCHIVE },
+	//japro chatbox stuff
+	{ &cg_chatBoxX, "cg_chatBoxX", "16", CVAR_ARCHIVE },
+	{ &cg_chatBoxCutOffLength, "cg_chatBoxCutOffLength", "375", CVAR_ARCHIVE },
+	{ &cg_chatSounds, "cg_chatSounds", "1", CVAR_ARCHIVE },
+	{ &cg_cleanChatbox, "cg_cleanChatbox", "0", 0 },
+	{ &cg_newFont, "cg_newFont", "0", CVAR_ARCHIVE },
+
 	{ &cg_autoKillWhenFalling, "cg_autoKillWhenFalling", "1", CVAR_ARCHIVE },
 
 	{ &cg_jumpSounds, "cg_jumpSounds", "1", CVAR_ARCHIVE },

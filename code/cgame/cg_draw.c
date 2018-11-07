@@ -3905,6 +3905,305 @@ vec3_t gCGFallVector;
 CG_Draw2D
 =================
 */
+/*====================================
+chatbox functionality -rww
+====================================*/
+#define	CHATBOX_CUTOFF_LEN	(cg_chatBoxCutOffLength.integer)
+#define	CHATBOX_FONT_HEIGHT	20
+
+//utility func, insert a string into a string at the specified
+//place (assuming this will not overflow the buffer)
+void CG_ChatBox_StrInsert(char *buffer, int place, char *str)
+{
+	int insLen = strlen(str);
+	int i = strlen(buffer);
+	int k = 0;
+
+	buffer[i+insLen+1] = 0; //terminate the string at its new length
+	while (i >= place)
+	{
+		buffer[i+insLen] = buffer[i];
+		i--;
+	}
+
+	i++;
+	while (k < insLen)
+	{
+		buffer[i] = str[k];
+		i++;
+		k++;
+	}
+}
+
+char *Q_RemoveLeadingColorCode( char *string ) {
+	char*	i;
+
+	i = string;
+	if (i[0] == '^') {
+		if (i[1] == '0' || i[1] == '1' || i[1] == '3' || i[1] == '4' || i[1] == '5' || i[1] == '6' || i[1] == '7' || i[1] == '8' || i[1] == '9') {
+			i[1] = '2';
+		}
+	}
+	return string;
+}
+
+qboolean Q_HasLeadingColorCode(char *msg) {
+	if (msg[0] == '^') {
+#if 0
+		if (msg[1] == '1' || msg[1] == '2' || msg[1] == '3' || msg[1] == '4' || msg[1] == '5' || msg[1] == '6' || msg[1] == '7' || msg[1] == '8' || msg[1] == '9' || msg[1] == '0') {
+#else
+		if (msg[1] >= '0' && msg[1] <= '9') {
+#endif
+			return qtrue;
+		}
+	}
+	return qfalse;
+}
+
+char *Q_strtokm(char *str, const char *delim)
+{
+    static char *tok;
+    static char *next;
+    char *m;
+
+    if (delim == NULL) return NULL;
+
+    tok = (str) ? str : next;
+    if (tok == NULL) return NULL;
+
+    m = strstr(tok, delim);
+
+    if (m) {
+        next = m + strlen(delim);
+        *m = '\0';
+    } else {
+        next = NULL;
+    }
+
+    return tok;
+}
+
+//add chatbox string
+void CG_ChatBox_AddString(char *chatStr)
+{
+	chatBoxItem_t *chat = &cg.chatItems[cg.chatItemActive];
+	float chatLen;
+	char *token;
+	char *search = "^7: ^2";
+	char name[MAX_NETNAME + MAX_SAY_TEXT + 64], msg[MAX_SAY_TEXT + 64];
+	qboolean regular = qfalse, teamchat = qfalse, personal = qfalse;
+
+	if (cg_chatBox.integer<=0)
+	{ //don't bother then.
+		return;
+	}
+
+	memset(chat, 0, sizeof(chatBoxItem_t));
+
+	if (strlen(chatStr) > sizeof(chat->string))
+	{ //too long, terminate at proper len.
+		chatStr[sizeof(chat->string)-1] = 0;
+	}
+
+	//so this is how im handling dropshadows on 1.02 i guess
+	if (strstr(chatStr, "^7: ^2")) {
+		regular = qtrue;
+		search = "^7: ^2";
+	}
+
+	if (strstr(chatStr, "^7): ^5")) {
+		teamchat = qtrue;
+		search = "^7): ^5";
+	}
+
+	if (strstr(chatStr, "^7]: ^6")) {
+		personal = qtrue;
+		search = "^7]: ^6";
+	}
+
+	if (regular || teamchat || personal) {
+		token = Q_strtokm(chatStr, search);
+		if (token) {
+			Q_strncpyz(name, token, sizeof(name));
+		}
+
+		token = Q_strtokm(NULL, search);
+		if (token)
+			Q_strncpyz(msg, token, sizeof(msg));
+
+		if (cg_cleanChatbox.integer == 1) {
+			Q_CleanStr(msg, (qboolean)(jk2startversion == VERSION_1_02));
+		}
+		else if (cg_cleanChatbox.integer > 1) {
+			Q_RemoveLeadingColorCode(msg);
+		}
+
+		//basically checking for colored binds and things like that
+		if (regular) {
+			if (!Q_HasLeadingColorCode(msg))
+				Q_strcat(name, sizeof(name), "^7: ^0^0^2");
+			else
+				Q_strcat(name, sizeof(name), "^7: ^0^0");
+		}
+		else if (teamchat) {
+			if (!Q_HasLeadingColorCode(msg))
+				Q_strcat(name, sizeof(name), "^7): ^0^0^5");
+			else
+				Q_strcat(name, sizeof(name), "^7): ^0^0"); 
+		}
+		else if (personal) {
+			if (!Q_HasLeadingColorCode(msg))
+				Q_strcat(name, sizeof(name), "^7]: ^0^0^6");
+			else
+				Q_strcat(name, sizeof(name), "^7]: ^0^0"); 
+		}
+
+		Q_strcat(name, sizeof(name), msg);
+
+		strcpy(chatStr, name);
+
+	}
+
+	strcpy(chat->string, chatStr);
+	chat->time = cg.time + cg_chatBox.integer;
+
+	chat->lines = 1;
+
+	chatLen = CG_Text_Width(chat->string, 1.0f, FONT_SMALL);//loda
+	if (chatLen > CHATBOX_CUTOFF_LEN)
+	{ //we have to break it into segments...
+        int i = 0;
+		int lastLinePt = 0;
+		char s[2];
+
+		chatLen = 0;
+		while (chat->string[i])
+		{
+			s[0] = chat->string[i];
+			s[1] = 0;
+			chatLen += CG_Text_Width(s, 0.65f, FONT_SMALL);//loda
+
+			if (chatLen >= CHATBOX_CUTOFF_LEN)
+			{
+				int j = i;
+				while (j > 0 && j > lastLinePt)
+				{
+					if (chat->string[j] == ' ')
+					{
+						break;
+					}
+					j--;
+				}
+				if (chat->string[j] == ' ')
+				{
+					i = j;
+				}
+
+                chat->lines++;
+				CG_ChatBox_StrInsert(chat->string, i, "\n");
+				i++;
+				chatLen = 0;
+				lastLinePt = i+1;
+			}
+			i++;
+		}
+	}
+
+	cg.chatItemActive++;
+	if (cg.chatItemActive >= MAX_CHATBOX_ITEMS)
+	{
+		cg.chatItemActive = 0;
+	}
+}
+
+//insert item into array (rearranging the array if necessary)
+void CG_ChatBox_ArrayInsert(chatBoxItem_t **array, int insPoint, int maxNum, chatBoxItem_t *item)
+{
+    if (array[insPoint])
+	{ //recursively call, to move everything up to the top
+		if (insPoint+1 >= maxNum)
+		{
+			CG_Error("CG_ChatBox_ArrayInsert: Exceeded array size");
+		}
+		CG_ChatBox_ArrayInsert(array, insPoint+1, maxNum, array[insPoint]);
+	}
+
+	//now that we have moved anything that would be in this slot up, insert what we want into the slot
+	array[insPoint] = item;
+}
+
+//go through all the chat strings and draw them if they are not yet expired
+//static QINLINE void CG_ChatBox_DrawStrings(void)
+ID_INLINE void CG_ChatBox_DrawStrings(void) //o, ID_INLINE is static Q_INLINE
+{
+	chatBoxItem_t *drawThese[MAX_CHATBOX_ITEMS];
+	int numToDraw = 0;
+	int linesToDraw = 0;
+	int i = 0;
+	float x = cg_chatBoxX.integer;
+	//float y = cg.scoreBoardShowing ? 475 : cg_chatBoxHeight.integer;
+	float y = cg_chatBoxHeight.integer;
+	float fontScale = 0.65 * cg_chatBoxFontSize.value;//JAPRO - Clientside - Chatbox Font Size Scaler
+
+	//y = cg_chatBoxHeight.integer;
+
+	if (cg.scoreBoardShowing)
+		y = 475;
+	else if (cg_chatBoxHeight.integer >= 360 && cg_enhancedFlagStatus.integer && (cgs.gametype == GT_CTF || cgs.gametype == GT_CTY))
+		y -= 35;
+
+	if (!cg_chatBox.integer)
+	{
+		return;
+	}
+
+	memset(drawThese, 0, sizeof(drawThese));
+
+	while (i < MAX_CHATBOX_ITEMS)
+	{
+		if (cg.chatItems[i].time >= cg.time)
+		{
+			int check = numToDraw;
+			int insertionPoint = numToDraw;
+
+			while (check >= 0)
+			{
+				if (drawThese[check] &&
+					cg.chatItems[i].time < drawThese[check]->time)
+				{ //insert here
+					insertionPoint = check;
+				}
+				check--;
+			}
+			CG_ChatBox_ArrayInsert(drawThese, insertionPoint, MAX_CHATBOX_ITEMS, &cg.chatItems[i]);
+			numToDraw++;
+			linesToDraw += cg.chatItems[i].lines;
+		}
+		i++;
+	}
+
+	if (!numToDraw)
+	{ //nothing, then, just get out of here now.
+		return;
+	}
+
+	//move initial point up so we draw bottom-up (visually)
+	y -= (CHATBOX_FONT_HEIGHT*fontScale)*linesToDraw;
+
+	//we have the items we want to draw, just quickly loop through them now
+	i = 0;
+	while (i < numToDraw)
+	{
+		if (!cg_newFont.integer)
+			CG_Text_Paint(x, y, fontScale, colorWhite, drawThese[i]->string, 0, 0, ITEM_TEXTSTYLE_OUTLINED, FONT_SMALL);
+		else
+			CG_Text_Paint(x, y, fontScale, colorWhite, drawThese[i]->string, 0, 0, ITEM_TEXTSTYLE_OUTLINED, FONT_MEDIUM);
+
+		y += ((CHATBOX_FONT_HEIGHT*fontScale)*drawThese[i]->lines);
+		i++;
+	}
+}
+
 static void CG_Draw2D( void ) {
 	float			inTime = cg.invenSelectTime+WEAPON_SELECT_TIME;
 	float			wpTime = cg.weaponSelectTime+WEAPON_SELECT_TIME;
@@ -3950,6 +4249,7 @@ static void CG_Draw2D( void ) {
 
 	if ( cg.snap->ps.pm_type == PM_INTERMISSION ) {
 		CG_DrawIntermission();
+		CG_ChatBox_DrawStrings();
 		return;
 	}
 
@@ -4499,6 +4799,9 @@ static void CG_Draw2D( void ) {
 	if ( !cg.scoreBoardShowing) {
 		CG_DrawCenterString();
 	}
+
+	// always draw chat
+	CG_ChatBox_DrawStrings();
 }
 
 
