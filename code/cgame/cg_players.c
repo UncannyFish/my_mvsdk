@@ -7302,6 +7302,21 @@ stillDoSaber:
 		legs.renderfx |= RF_MINLIGHT;
 	}
 
+//JAPRO - Clientside - Brightskins - Start
+	if (cg_brightskins.integer)
+	{
+		if (mvapi >= 3) {
+			legs.renderfx |= RF_FULLBRIGHT; //while custom RGBA colors in JKA were the reason for this originally, it looks really nice with overbrightbits in JK2
+		}
+		else {
+			legs.shaderRGBA[0] = 255;
+			legs.shaderRGBA[1] = 255;
+			legs.shaderRGBA[2] = 255;
+			legs.renderfx |= RF_RGB_TINT;
+		}
+	}
+	//JAPRO - Clientside - Brightskins - End
+
 	if (cg.snap->ps.duelInProgress /*&& cent->currentState.number != cg.snap->ps.clientNum*/)
 	{ //I guess go ahead and glow your own client too in a duel
 		if (cent->currentState.number != cg.snap->ps.duelIndex &&
@@ -7365,7 +7380,10 @@ stillDoSaber:
 
 				if (subLen <= 1024)
 				{
-					legs.renderfx |= RF_RGB_TINT;
+					if (mvapi >= 3)
+						legs.renderfx |= RF_FULLBRIGHT;
+					else
+						legs.renderfx |= RF_RGB_TINT;
 				}
 			}
 		}

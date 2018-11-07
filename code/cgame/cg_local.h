@@ -1642,6 +1642,7 @@ extern	vmCvar_t		cg_newFont;
 
 extern	vmCvar_t		cg_jumpSounds;
 extern	vmCvar_t		cg_rollSounds;
+extern	vmCvar_t		cg_brightskins;
 
 extern	vmCvar_t		cg_remaps;
 extern	vmCvar_t		cg_autoKillWhenFalling;
