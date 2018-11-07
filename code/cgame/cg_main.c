@@ -548,8 +548,12 @@ vmCvar_t	cg_movementKeysX;
 vmCvar_t	cg_movementKeysY;
 vmCvar_t	cg_movementKeysSize;
 
+//only for you, arto
 vmCvar_t	cg_hudColors;
 vmCvar_t	cg_drawScore;
+vmCvar_t	cg_centerHeight;
+vmCvar_t	cg_centerSize;
+
 //chatbox
 vmCvar_t	cg_chatBox;
 vmCvar_t	cg_chatBoxFontSize;
@@ -776,8 +780,12 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_movementKeysY, "cg_movementKeysY", "428", CVAR_ARCHIVE },
 	{ &cg_movementKeysSize, "cg_movementKeysSize", "1.0", CVAR_ARCHIVE },
 
+	//only for you, arto
 	{ &cg_hudColors, "cg_hudColors", "1", CVAR_ARCHIVE },
 	{ &cg_drawScore, "cg_drawScore", "2", CVAR_ARCHIVE },
+	{ &cg_centerHeight, "cg_centerHeight", "0", CVAR_ARCHIVE },
+	{ &cg_centerSize, "cg_centerSize", "1.0", CVAR_ARCHIVE },
+
 	//chatbox
 	{ &cg_chatBox, "cg_chatBox", "10000", CVAR_ARCHIVE },
 	{ &cg_chatBoxFontSize, "cg_chatBoxFontSize", "1.0", CVAR_ARCHIVE },

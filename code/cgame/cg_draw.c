@@ -2732,6 +2732,13 @@ void CG_CenterPrint( const char *str, int y, int charWidth ) {
 
 	Q_strncpyz( cg.centerPrint, str, sizeof(cg.centerPrint) );
 
+	if (cg_centerHeight.value)
+		y = cg_centerHeight.value;
+	if (y < 0)
+		y = 0;
+	if (y > SCREEN_HEIGHT)
+		y = SCREEN_HEIGHT;
+
 	cg.centerPrintTime = cg.time;
 	cg.centerPrintY = y;
 	cg.centerPrintCharWidth = charWidth;
@@ -2746,6 +2753,52 @@ void CG_CenterPrint( const char *str, int y, int charWidth ) {
 	}
 }
 
+//From SMod/Newmod
+void CG_CenterPrintMultiKill(const char *str, int y, int charWidth) {
+	char    *s;
+	int        i = 0;
+
+	if (cg.lastKillTime + (cg_centertime.integer * 1000) > cg.time) //always stack over the last kill msg?
+	{
+		//we killed someone recently; append a line break and the new kill message
+		Com_sprintf(cg.centerPrint, sizeof(cg.centerPrint), "%s\n%s", cg.centerPrint, str);
+	}
+	else
+	{
+		//normal behavior
+		Q_strncpyz(cg.centerPrint, str, sizeof(cg.centerPrint));
+	}
+
+	if (cg_centerHeight.value)
+		y = cg_centerHeight.value;
+	if (y < 0)
+		y = 0;
+	if (y > SCREEN_HEIGHT)
+		y = SCREEN_HEIGHT;
+
+	cg.centerPrintTime = cg.time;
+	cg.centerPrintY = y;
+	cg.centerPrintCharWidth = charWidth;
+
+	// count the number of lines for centering
+	cg.centerPrintLines = 1;
+	s = cg.centerPrint;
+	while (*s)
+	{
+		i++;
+		if (i >= 50)
+		{//maxed out a line of text, this will make the line spill over onto another line.
+			i = 0;
+			cg.centerPrintLines++;
+		}
+		else if (*s == '\n')
+			cg.centerPrintLines++;
+		s++;
+	}
+
+	cg.lastKillTime = cg.time;
+}
+
 
 /*
 ===================
@@ -2754,11 +2807,10 @@ CG_DrawCenterString
 */
 static void CG_DrawCenterString( void ) {
 	char	*start;
-	int		l;
-	int		y, w, h;
-	float	x;
+	int		l;	
+	float	x, y, w, h;
 	float	*color;
-	const float scale = 1.0; //0.5
+	const float scale = cg_centerSize.value; //0.5
 
 	if ( !cg.centerPrintTime ) {
 		return;
