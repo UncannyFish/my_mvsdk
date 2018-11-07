@@ -1551,9 +1551,13 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	cg.time = serverTime;
 	cg.demoPlayback = demoPlayback;
 
-	if (cg.snap && cg_ui_myteam.integer != cg.snap->ps.persistant[PERS_TEAM])
-	{
-		trap_Cvar_Set ( "ui_myteam", va("%i", cg.snap->ps.persistant[PERS_TEAM]) );
+	if (cg.snap && cg_ui_myteam.integer != cg.snap->ps.persistant[PERS_TEAM]) {
+		if (!(cg.snap->ps.pm_flags & PMF_FOLLOW || cg.snap->ps.pm_type == PM_SPECTATOR))
+			trap_Cvar_Set( "ui_myteam", va("%i", cg.snap->ps.persistant[PERS_TEAM]) );
+		else if (cg_ui_myteam.integer != 3)
+			trap_Cvar_Set("ui_myteam", "3");
+
+		trap_Cvar_Update(&cg_ui_myteam);
 	}
 
 	// update cvars
