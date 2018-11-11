@@ -1615,6 +1615,7 @@ extern  vmCvar_t		cg_crosshairRed;
 extern  vmCvar_t		cg_crosshairGreen;
 extern  vmCvar_t		cg_crosshairBlue;
 extern	vmCvar_t		cg_crosshairAlpha;
+extern	vmCvar_t		cg_crosshairSizeScale;
 
 extern	vmCvar_t		cg_enhancedFlagStatus;
 extern	vmCvar_t		cg_drawTimerMsec;

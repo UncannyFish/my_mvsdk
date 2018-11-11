@@ -2992,7 +2992,14 @@ static void CG_DrawCrosshair( vec3_t worldPoint, int chEntValid ) {
 		}
 	}
 
-	w = h = cg_crosshairSize.value;
+	//JAPRO - Clientside - Option to disable crosshair scaling.
+	if (!cg_crosshairSizeScale.integer || cg_drawCrosshair.integer == 10) {
+		w = (float)(cg_crosshairSize.value / (cgs.glconfig.vidWidth * (1.0 / SCREEN_WIDTH)));
+		h = (float)(cg_crosshairSize.value / (cgs.glconfig.vidHeight * (1.0 / SCREEN_HEIGHT)));
+	}
+	else {
+		w = h = cg_crosshairSize.value;
+	}
 
 	// pulse the size of the crosshair when picking up items
 	f = cg.time - cg.itemPickupBlendTime;

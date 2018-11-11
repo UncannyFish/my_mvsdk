@@ -535,11 +535,11 @@ vmCvar_t	cg_strafeHelperOffset;
 vmCvar_t	cg_strafeHelperInvertOffset;
 vmCvar_t	cg_strafeHelper_FPS;
 
-
 vmCvar_t	cg_crosshairRed;
 vmCvar_t	cg_crosshairGreen;
 vmCvar_t	cg_crosshairBlue;
 vmCvar_t	cg_crosshairAlpha;
+vmCvar_t	cg_crosshairSizeScale;
 
 vmCvar_t	cg_enhancedFlagStatus;
 vmCvar_t	cg_drawTimerMsec;
@@ -778,11 +778,11 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_strafeHelperInvertOffset, "cg_strafeHelperInvertOffset", "75", CVAR_ARCHIVE },
 	{ &cg_strafeHelper_FPS, "cg_strafeHelper_FPS", "0", 0 },
 
-
 	{ &cg_crosshairRed, "cg_crosshairRed", "0", 0 },
 	{ &cg_crosshairGreen, "cg_crosshairGreen", "0", 0 },
 	{ &cg_crosshairBlue, "cg_crosshairBlue", "0", 0 },
 	{ &cg_crosshairAlpha, "cg_crosshairAlpha", "255", 0 },
+	{ &cg_crosshairSizeScale, "cg_crosshairSizeScale", "1", 0 },
 
 	{ &cg_enhancedFlagStatus, "cg_enhancedFlagStatus", "2", 0 },
 	{ &cg_drawTimerMsec, "cg_drawTimerMsec", "1", CVAR_ARCHIVE },
