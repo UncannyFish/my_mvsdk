@@ -1188,6 +1188,7 @@ typedef struct {
 	sfxHandle_t deniedSound;
 	sfxHandle_t humiliationSound;
 	sfxHandle_t defendSound;
+	sfxHandle_t	assistSound;
 #endif
 
 	sfxHandle_t takenLeadSound;

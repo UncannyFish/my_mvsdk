@@ -107,7 +107,7 @@ void CG_DamageFeedback( int yawByte, int pitchByte, int damage ) {
 	if (kick > 10)
 		kick = 10;
 
-	if (cg_lowhpsound.integer && (health + cg.snap->ps.stats[STAT_ARMOR] - damage) <= cg_lowhpsound.integer)
+	if (cg_lowhpsound.integer && (health + cg.predictedPlayerState.stats[STAT_ARMOR] - damage) <= cg_lowhpsound.integer)
 		trap_S_StartLocalSound(trap_S_RegisterSound("sound/common/warning.wav"), CHAN_LOCAL);
 
 	// if yaw and pitch are both 255, make the damage always centered (falling, etc)
@@ -384,8 +384,8 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops ) {
 		//Com_Printf("defend\n");
 	}
 	if (ps->persistant[PERS_ASSIST_COUNT] != ops->persistant[PERS_ASSIST_COUNT]) {
-		//pushReward(cgs.media.assistSound, cgs.media.medalAssist, ps->persistant[PERS_ASSIST_COUNT]);
-		//reward = qtrue;
+		pushReward(cgs.media.assistSound, cgs.media.medalAssist, ps->persistant[PERS_ASSIST_COUNT]);
+		reward = qtrue;
 		//Com_Printf("assist\n");
 	}
 	// if any of the player event bits changed

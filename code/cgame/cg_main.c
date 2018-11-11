@@ -1422,6 +1422,7 @@ static void CG_RegisterSounds( void ) {
 	cgs.media.deniedSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM017" );
 	cgs.media.humiliationSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM019" );
 	cgs.media.defendSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM024" );
+	cgs.media.assistSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM026" );
 #endif
 
 	cgs.media.takenLeadSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM051");
