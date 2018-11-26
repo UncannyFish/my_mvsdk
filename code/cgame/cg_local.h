@@ -1609,7 +1609,6 @@ extern	vmCvar_t		cg_strafeHelperActiveColor;
 extern	vmCvar_t		cg_strafeHelperInactiveAlpha;
 
 extern	vmCvar_t		cg_strafeHelperOffset;
-extern	vmCvar_t		cg_strafeHelperInvertOffset;
 extern	vmCvar_t		cg_strafeHelper_FPS;
 
 extern  vmCvar_t		cg_crosshairRed;

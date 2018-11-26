@@ -532,7 +532,6 @@ vmCvar_t	cg_strafeHelperActiveColor;
 vmCvar_t	cg_strafeHelperInactiveAlpha;
 
 vmCvar_t	cg_strafeHelperOffset;
-vmCvar_t	cg_strafeHelperInvertOffset;
 vmCvar_t	cg_strafeHelper_FPS;
 
 vmCvar_t	cg_crosshairRed;
@@ -775,7 +774,6 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_strafeHelperInactiveAlpha, "cg_strafeHelperInactiveAlpha", "200", 0 },
 
 	{ &cg_strafeHelperOffset, "cg_strafeHelperOffset", "75", CVAR_ARCHIVE },
-	{ &cg_strafeHelperInvertOffset, "cg_strafeHelperInvertOffset", "75", CVAR_ARCHIVE },
 	{ &cg_strafeHelper_FPS, "cg_strafeHelper_FPS", "0", 0 },
 
 	{ &cg_crosshairRed, "cg_crosshairRed", "0", 0 },

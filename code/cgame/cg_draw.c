@@ -5505,21 +5505,19 @@ static void CG_Speedometer(void)
 
 	speedometerXPos += 52;
 
-	if (cg_speedometer.integer & SPEEDOMETER_GROUNDSPEED)
-	{
+	if (cg_speedometer.integer & SPEEDOMETER_GROUNDSPEED) {
 		char speedStr4[32] = { 0 };
 		vec4_t colorGroundSpeed = { 1, 1, 1, 1 };
 
-		if (PM_GroundDistance2() < 1) {//pm->ps->groundEntityNum != ENTITYNUM_NONE
-									   //if (pm->ps->groundEntityNum == ENTITYNUM_WORLD) {
-			cg.lastGroundTime = cg.time;
+		if (cg.predictedPlayerState.groundEntityNum != ENTITYNUM_NONE || cg.predictedPlayerState.velocity[2] < 0) { //On ground or Moving down
 			cg.firstTimeInAir = qfalse;
-			cg.lastGroundSpeed = 0;
 		}
-		else if (!cg.firstTimeInAir) {
+		else if (!cg.firstTimeInAir) { //Moving up for first time
 			cg.firstTimeInAir = qtrue;
 			cg.lastGroundSpeed = currentSpeed;
+			cg.lastGroundTime = cg.time;
 		}
+
 		if (cg.lastGroundSpeed > 250) {
 			colorGroundSpeed[1] = 1 / ((cg.lastGroundSpeed / 250)*(cg.lastGroundSpeed / 250));
 			colorGroundSpeed[2] = 1 / ((cg.lastGroundSpeed / 250)*(cg.lastGroundSpeed / 250));
@@ -5657,14 +5655,11 @@ static void CG_JumpHeight(centity_t *cent)
 	const vec_t* const velocity = (cent->currentState.clientNum == cg.clientNum ? cg.predictedPlayerState.velocity : cent->currentState.pos.trDelta);
 	char jumpHeightStr[32] = { 0 };
 
-	if (!pm || !pm->ps)//idk
+	if (cg.predictedPlayerState.fd.forceJumpZStart == -65536) //Coming back from a tele or w/e
 		return;
 
-	if (pm->ps->fd.forceJumpZStart == -65536) //Coming back from a tele or w/e
-		return;
-
-	if (pm->ps->fd.forceJumpZStart && (cg.lastZSpeed > 0) && (velocity[2] <= 0)) {//If we were going up, and we are now going down, print our height.
-		cg.lastJumpHeight = pm->ps->origin[2] - pm->ps->fd.forceJumpZStart;
+	if (cg.predictedPlayerState.fd.forceJumpZStart && (cg.lastZSpeed > 0) && (velocity[2] <= 0)) {//If we were going up, and we are now going down, print our height.
+		cg.lastJumpHeight = cg.predictedPlayerState.origin[2] - cg.predictedPlayerState.fd.forceJumpZStart;
 		cg.lastJumpHeightTime = cg.time;
 	}
 
@@ -6053,7 +6048,7 @@ static void CG_StrafeHelper(centity_t *cent)
 	}
 	else if (moveStyle == MV_SP) {
 		/*
-		if ((DotProduct(pm->ps->velocity, wishdir)) < 0.0f)
+		if ((DotProduct(cg.predictedPlayerState.velocity, wishdir)) < 0.0f)
 		{//Encourage deceleration away from the current velocity
 		wishspeed *= 1.35f;//pm_airDecelRate - adjust basespeed
 		}
@@ -6094,14 +6089,14 @@ static void CG_StrafeHelper(centity_t *cent)
 	//}
 	//if (moveStyle == MV_JKA || moveStyle == MV_Q3 || moveStyle == MV_RJQ3 || moveStyle == MV_JETPACK || moveStyle == MV_SPEED || moveStyle == MV_SP || (moveStyle == MV_SLICK && onGround)) { //JKA, Q3, RJQ3, Jetpack? have A/D
 		if (cg_strafeHelper.integer & SHELPER_A)
-			DrawStrafeLine(velocityAngle, -(45.0f - (optimalDeltaAngle + (cg_strafeHelperInvertOffset.value * 0.01f))), (qboolean)(cmd.forwardmove == 0 && cmd.rightmove < 0), 2); //A
+			DrawStrafeLine(velocityAngle, -(45.0f - (optimalDeltaAngle + (cg_strafeHelperOffset.value * 0.01f))), (qboolean)(cmd.forwardmove == 0 && cmd.rightmove < 0), 2); //A
 		if (cg_strafeHelper.integer & SHELPER_D)
-			DrawStrafeLine(velocityAngle, (45.0f - (optimalDeltaAngle + (cg_strafeHelperInvertOffset.value * 0.01f))), (qboolean)(cmd.forwardmove == 0 && cmd.rightmove > 0), 6); //D
+			DrawStrafeLine(velocityAngle, (45.0f - (optimalDeltaAngle + (cg_strafeHelperOffset.value * 0.01f))), (qboolean)(cmd.forwardmove == 0 && cmd.rightmove > 0), 6); //D
 
 																																												  //A/D backwards strafe?
 		if (cg_strafeHelper.integer & SHELPER_REAR) {
-			DrawStrafeLine(velocityAngle, (225.0f - (optimalDeltaAngle + (cg_strafeHelperInvertOffset.value * 0.01f))), (qboolean)(cmd.forwardmove == 0 && cmd.rightmove < 0), 9); //A
-			DrawStrafeLine(velocityAngle, (135.0f + (optimalDeltaAngle + (cg_strafeHelperInvertOffset.value * 0.01f))), (qboolean)(cmd.forwardmove == 0 && cmd.rightmove > 0), 10); //D
+			DrawStrafeLine(velocityAngle, (225.0f - (optimalDeltaAngle + (cg_strafeHelperOffset.value * 0.01f))), (qboolean)(cmd.forwardmove == 0 && cmd.rightmove < 0), 9); //A
+			DrawStrafeLine(velocityAngle, (135.0f + (optimalDeltaAngle + (cg_strafeHelperOffset.value * 0.01f))), (qboolean)(cmd.forwardmove == 0 && cmd.rightmove > 0), 10); //D
 		}
 	//}
 	//if (moveStyle == MV_JKA || moveStyle == MV_Q3 || moveStyle == MV_RJQ3 || moveStyle == MV_SWOOP || moveStyle == MV_JETPACK || moveStyle == MV_SPEED || moveStyle == MV_SP) {
