@@ -1305,6 +1305,9 @@ typedef struct {
 	sfxHandle_t	zoomEnd;
 	sfxHandle_t	disruptorZoomLoop;
 
+	//jk2pro
+	sfxHandle_t	lowHPSound;
+
 } cgMedia_t;
 
 

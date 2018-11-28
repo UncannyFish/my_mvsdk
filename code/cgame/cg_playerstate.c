@@ -108,7 +108,7 @@ void CG_DamageFeedback( int yawByte, int pitchByte, int damage ) {
 		kick = 10;
 
 	if (cg_lowhpsound.integer && (health + cg.predictedPlayerState.stats[STAT_ARMOR] - damage) <= cg_lowhpsound.integer)
-		trap_S_StartLocalSound(trap_S_RegisterSound("sound/common/warning.wav"), CHAN_LOCAL);
+		trap_S_StartLocalSound(cgs.media.lowHPSound, CHAN_LOCAL);
 
 	// if yaw and pitch are both 255, make the damage always centered (falling, etc)
 	if ( yawByte == 255 && pitchByte == 255 ) {

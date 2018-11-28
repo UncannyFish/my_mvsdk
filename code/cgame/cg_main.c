@@ -1491,6 +1491,9 @@ static void CG_RegisterSounds( void ) {
 	
 	cgs.media.winnerSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM006" );
 	cgs.media.loserSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM010" );
+
+	//jk2pro
+	cgs.media.lowHPSound = trap_S_RegisterSound("sound/common/warning.wav");
 }
 
 
