@@ -172,6 +172,10 @@ void MVAPI_AfterInit(void)
 		MV_SetGamePlay( jk2startversion );
 	}
 
+	if (mvapi >= 1) { //to show jk2mv menu settings
+		trap_Cvar_Set("ui_menulevel", "1");
+	}
+
 	// Call _UI_Init now, because we delayed it earilier
 	_UI_Init( Init_inGameLoad );
 }
@@ -4464,7 +4468,7 @@ you to discard your changes if you did something you didnt want
 void UI_UpdateVideoSetup ( void )
 {
 	trap_Cvar_Set ( "r_mode", UI_Cvar_VariableString ( "ui_r_mode" ) );
-	trap_Cvar_Set ( "r_aspectratio", UI_Cvar_VariableString("ui_r_aspectratio"));
+	if (mvapi >= 1) trap_Cvar_Set ( "r_aspectratio", UI_Cvar_VariableString ( "ui_r_aspectratio" ) );
 	trap_Cvar_Set ( "r_fullscreen", UI_Cvar_VariableString ( "ui_r_fullscreen" ) );
 	trap_Cvar_Set ( "r_colorbits", UI_Cvar_VariableString ( "ui_r_colorbits" ) );
 	trap_Cvar_Set ( "r_lodbias", UI_Cvar_VariableString ( "ui_r_lodbias" ) );
@@ -4473,7 +4477,7 @@ void UI_UpdateVideoSetup ( void )
 	trap_Cvar_Set ( "r_texturemode", UI_Cvar_VariableString ( "ui_r_texturemode" ) );
 	trap_Cvar_Set ( "r_detailtextures", UI_Cvar_VariableString ( "ui_r_detailtextures" ) );
 	trap_Cvar_Set ( "r_ext_compress_textures", UI_Cvar_VariableString ( "ui_r_ext_compress_textures" ) );
-	trap_Cvar_Set ( "r_ext_multisample", UI_Cvar_VariableString ( "ui_r_ext_multisample" ) );
+	if (mvapi >= 1) trap_Cvar_Set ( "r_ext_multisample", UI_Cvar_VariableString ( "ui_r_ext_multisample" ) );
 	trap_Cvar_Set ( "r_depthbits", UI_Cvar_VariableString ( "ui_r_depthbits" ) );
 	trap_Cvar_Set ( "r_subdivisions", UI_Cvar_VariableString ( "ui_r_subdivisions" ) );
 	trap_Cvar_Set ( "r_fastSky", UI_Cvar_VariableString ( "ui_r_fastSky" ) );
@@ -4507,7 +4511,7 @@ void UI_GetVideoSetup ( void )
 	trap_Cvar_Register ( NULL, "ui_r_texturemode",			"0", CVAR_ROM|CVAR_INTERNAL );
 	trap_Cvar_Register ( NULL, "ui_r_detailtextures",		"0", CVAR_ROM|CVAR_INTERNAL );
 	trap_Cvar_Register ( NULL, "ui_r_ext_compress_textures","0", CVAR_ROM|CVAR_INTERNAL );
-	trap_Cvar_Register ( NULL, "ui_r_ext_multisample",		"0", CVAR_ROM|CVAR_INTERNAL );
+	if (mvapi >= 1) trap_Cvar_Register ( NULL, "ui_r_ext_multisample",		"0", CVAR_ROM|CVAR_INTERNAL );
 	trap_Cvar_Register ( NULL, "ui_r_depthbits",			"0", CVAR_ROM|CVAR_INTERNAL );
 	trap_Cvar_Register ( NULL, "ui_r_subdivisions",			"0", CVAR_ROM|CVAR_INTERNAL );
 	trap_Cvar_Register ( NULL, "ui_r_fastSky",				"0", CVAR_ROM|CVAR_INTERNAL );
@@ -4526,7 +4530,7 @@ void UI_GetVideoSetup ( void )
 	trap_Cvar_Set ( "ui_r_texturemode", UI_Cvar_VariableString ( "r_texturemode" ) );
 	trap_Cvar_Set ( "ui_r_detailtextures", UI_Cvar_VariableString ( "r_detailtextures" ) );
 	trap_Cvar_Set ( "ui_r_ext_compress_textures", UI_Cvar_VariableString ( "r_ext_compress_textures" ) );
-	trap_Cvar_Set ( "ui_r_ext_multisample", UI_Cvar_VariableString ( "r_ext_multisample" ) );
+	if (mvapi >= 1) trap_Cvar_Set ( "ui_r_ext_multisample", UI_Cvar_VariableString ( "r_ext_multisample" ) );
 	trap_Cvar_Set ( "ui_r_depthbits", UI_Cvar_VariableString ( "r_depthbits" ) );
 	trap_Cvar_Set ( "ui_r_subdivisions", UI_Cvar_VariableString ( "r_subdivisions" ) );
 	trap_Cvar_Set ( "ui_r_fastSky", UI_Cvar_VariableString ( "r_fastSky" ) );
@@ -4535,9 +4539,11 @@ void UI_GetVideoSetup ( void )
 	trap_Cvar_Set ( "ui_cg_shadows", UI_Cvar_VariableString ( "cg_shadows" ) );
 	trap_Cvar_Set ( "ui_r_modified", "0" );
 
-	// screen resolutions
-	trap_Cvar_Register(NULL, "ui_r_aspectratio", "0", CVAR_ROM | CVAR_INTERNAL);
-	trap_Cvar_Set("ui_r_aspectratio", UI_Cvar_VariableString("r_aspectratio"));
+	if (mvapi >= 1)
+	{ // screen resolutions
+		trap_Cvar_Register(NULL, "ui_r_aspectratio", "0", CVAR_ROM | CVAR_INTERNAL);
+		trap_Cvar_Set("ui_r_aspectratio", UI_Cvar_VariableString("r_aspectratio"));
+	}
 }
 
 static void UI_RunMenuScript(const char **args)
