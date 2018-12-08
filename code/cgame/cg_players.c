@@ -7326,7 +7326,7 @@ stillDoSaber:
 //JAPRO - Clientside - Brightskins - Start
 	if (cg_brightskins.integer)
 	{
-		if (mvapi >= 4) {
+		if (mvapi >= 3) {
 			legs.renderfx |= RF_FULLBRIGHT; //while custom RGBA colors in JKA were the reason for this originally, it looks really nice with overbrightbits in JK2
 		}
 		else {
@@ -7338,7 +7338,7 @@ stillDoSaber:
 	}
 	//JAPRO - Clientside - Brightskins - End
 
-	if (mvapi >= 4 && !cg_playerLOD.integer && cg.snap->ps.clientNum == cent->currentState.number)
+	if (mvapi >= 3 && !cg_playerLOD.integer && cg.snap->ps.clientNum == cent->currentState.number)
 		legs.renderfx |= RF_NOLOD; //JAPRO - Clientside - Force high detail on local player
 
 
