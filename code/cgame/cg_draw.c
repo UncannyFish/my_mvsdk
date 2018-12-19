@@ -5818,7 +5818,7 @@ void Dzikie_CG_DrawSpeed(int moveDir) {
 		return; //No cg.snap causes this to return.
 	}
 
-	midx = SCREEN_WIDTH / 2;
+	midx = cgs.screenWidth / 2;
 	midy = SCREEN_HEIGHT / 2;
 	VectorCopy(cg.predictedPlayerState.velocity, velocity_copy);
 	velocity_copy[2] = 0;
