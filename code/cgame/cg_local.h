@@ -668,7 +668,7 @@ typedef struct {
 #define	MAX_CHATBOX_ITEMS		5
 typedef struct chatBoxItem_s
 {
-	char	string[MAX_SAY_TEXT];
+	char	string[MAX_NETNAME+MAX_SAY_TEXT];
 	int		time;
 	int		lines;
 } chatBoxItem_t;

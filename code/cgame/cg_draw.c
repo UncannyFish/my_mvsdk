@@ -4306,7 +4306,6 @@ CG_Draw2D
 /*====================================
 chatbox functionality -rww
 ====================================*/
-#define	CHATBOX_CUTOFF_LEN	(cg_chatBoxCutOffLength.integer)
 #define	CHATBOX_FONT_HEIGHT	20
 
 //utility func, insert a string into a string at the specified
@@ -4468,7 +4467,7 @@ void CG_ChatBox_AddString(char *chatStr)
 	chat->lines = 1;
 
 	chatLen = CG_Text_Width(chat->string, 1.0f, FONT_SMALL);//loda
-	if (chatLen > CHATBOX_CUTOFF_LEN)
+	if (chatLen > cg_chatBoxCutOffLength.value)
 	{ //we have to break it into segments...
         int i = 0;
 		int lastLinePt = 0;
@@ -4477,11 +4476,16 @@ void CG_ChatBox_AddString(char *chatStr)
 		chatLen = 0;
 		while (chat->string[i])
 		{
+			const char *checkColor = (const char *)(chat->string + i);
+			if (Q_IsColorString(checkColor)) {
+				i += 2;
+				continue; // duo: fix for messages with lots of colors being broken up too early
+			}
 			s[0] = chat->string[i];
 			s[1] = 0;
 			chatLen += CG_Text_Width(s, 0.65f, FONT_SMALL);//loda
 
-			if (chatLen >= CHATBOX_CUTOFF_LEN)
+			if (chatLen >= cg_chatBoxCutOffLength.value)
 			{
 				int j = i;
 				while (j > 0 && j > lastLinePt)
