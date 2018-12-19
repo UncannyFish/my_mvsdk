@@ -3125,8 +3125,7 @@ void CG_SaberClashFlare( void )
 		trap_R_SetColor( color );
 
 		CG_DrawPic( x - ( v * 300 ), y - ( v * 300 ),
-			v * 600, v * 600,
-			trap_R_RegisterShader( "gfx/effects/saberFlare" ));
+			v * 600, v * 600, cgs.media.saberClashFlare );
 	}
 }
 

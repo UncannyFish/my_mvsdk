@@ -1046,6 +1046,8 @@ typedef struct {
 
 	qhandle_t	rivetMarkShader;
 
+	qhandle_t	saberClashFlare;
+
 	qhandle_t	teamRedShader;
 	qhandle_t	teamBlueShader;
 
@@ -1270,14 +1272,14 @@ typedef struct {
 	qhandle_t rageRecShader;
 
 	//other HUD parts
-	qhandle_t HUDLeftFrame;
-	qhandle_t HUDArmor1;
-	qhandle_t HUDArmor2;
-	qhandle_t HUDHealth;
-	qhandle_t HUDHealthTic;
-	qhandle_t HUDArmorTic;
-	qhandle_t HUDLeftStatic;
-	qhandle_t HUDLeft;
+	qhandle_t	HUDLeftFrame;
+	qhandle_t	HUDArmor1;
+	qhandle_t	HUDArmor2;
+	qhandle_t	HUDHealth;
+	qhandle_t	HUDHealthTic;
+	qhandle_t	HUDArmorTic;
+	qhandle_t	HUDLeftStatic;
+	qhandle_t	HUDLeft;
 
 	qhandle_t	HUDSaberStyle1;
 	qhandle_t	HUDSaberStyle2;
@@ -1503,7 +1505,6 @@ Ghoul2 Insert End
 	//jk2pro
 	int				jcinfo;
 	qboolean		isJK2Pro;
-
 
 } cgs_t;
 

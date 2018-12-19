@@ -1268,7 +1268,7 @@ static void CG_RegisterSounds( void ) {
 
 	cgs.media.rivetMarkShader			= trap_R_RegisterShader( "gfx/damage/rivetmark" );
 
-	trap_R_RegisterShader( "gfx/effects/saberFlare" );
+	cgs.media.saberClashFlare			= trap_R_RegisterShader( "gfx/effects/saberFlare" );
 
 	trap_R_RegisterShader( "powerups/ysalimarishell" );
 	trap_R_RegisterShader("gfx/effects/saberDamageGlow" );
