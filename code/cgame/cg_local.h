@@ -1652,6 +1652,7 @@ extern	vmCvar_t		cg_brightskins;
 extern	vmCvar_t		cg_playerLOD;
 extern	vmCvar_t		cg_privateDuelShell;
 extern	vmCvar_t		cg_teamRespawnShield;
+extern	vmCvar_t		cg_saberTeamColors;
 
 extern	vmCvar_t		cg_remaps;
 extern	vmCvar_t		cg_autoKillWhenFalling;

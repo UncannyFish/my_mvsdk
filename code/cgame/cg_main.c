@@ -574,6 +574,7 @@ vmCvar_t	cg_brightskins;
 vmCvar_t	cg_playerLOD;
 vmCvar_t	cg_privateDuelShell;
 vmCvar_t	cg_teamRespawnShield;
+vmCvar_t	cg_saberTeamColors;
 
 vmCvar_t	cg_widescreen;
 vmCvar_t	cg_fovAspectAdjust;
@@ -816,6 +817,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_playerLOD, "cg_playerLOD", "0", CVAR_ARCHIVE },
 	{ &cg_privateDuelShell,	"cg_privateDuelShell", "1", CVAR_ARCHIVE },
 	{ &cg_teamRespawnShield, "cg_teamRespawnShield", "1", CVAR_ARCHIVE },
+	{ &cg_saberTeamColors, "cg_saberTeamColors", "1", 0 },
 
 	{ &cg_widescreen, "cg_widescreen", "1", CVAR_ARCHIVE },
 	{ &cg_fovAspectAdjust, "cg_fovAspectAdjust", "0", CVAR_ARCHIVE },

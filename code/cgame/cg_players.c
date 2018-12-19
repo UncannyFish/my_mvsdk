@@ -4420,11 +4420,13 @@ Ghoul2 Insert Start
 
 	if (cgs.gametype >= GT_TEAM && !cgs.jediVmerc )
 	{
-		if (cgs.clientinfo[cent->currentState.number].team == TEAM_RED)
+		if (cgs.clientinfo[cent->currentState.number].team == TEAM_RED &&
+			(cg_saberTeamColors.integer || scolor == SABER_BLUE))
 		{
 			scolor = SABER_RED;
 		}
-		else if (cgs.clientinfo[cent->currentState.number].team == TEAM_BLUE)
+		else if (cgs.clientinfo[cent->currentState.number].team == TEAM_BLUE &&
+			(cg_saberTeamColors.integer || scolor == SABER_RED))
 		{
 			scolor = SABER_BLUE;
 		}
