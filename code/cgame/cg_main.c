@@ -128,6 +128,7 @@ char *HolocronIcons[] = {
 
 int forceModelModificationCount = -1;
 int widescreenModificationCount = -1;
+int crosshairColorModificationCount = -1;//japro
 int strafeHelperActiveColorModificationCount = -1;//japro
 
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum );
@@ -534,11 +535,10 @@ vmCvar_t	cg_strafeHelperInactiveAlpha;
 vmCvar_t	cg_strafeHelperOffset;
 vmCvar_t	cg_strafeHelper_FPS;
 
-vmCvar_t	cg_crosshairRed;
-vmCvar_t	cg_crosshairGreen;
-vmCvar_t	cg_crosshairBlue;
-vmCvar_t	cg_crosshairAlpha;
 vmCvar_t	cg_crosshairSizeScale;
+vmCvar_t	cg_crosshairSaberStyleColor;
+vmCvar_t	cg_crosshairColor;
+vmCvar_t	cg_crosshairIdentifyTarget;
 
 vmCvar_t	cg_enhancedFlagStatus;
 vmCvar_t	cg_drawTimerMsec;
@@ -777,11 +777,10 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_strafeHelperOffset, "cg_strafeHelperOffset", "75", CVAR_ARCHIVE },
 	{ &cg_strafeHelper_FPS, "cg_strafeHelper_FPS", "0", 0 },
 
-	{ &cg_crosshairRed, "cg_crosshairRed", "0", 0 },
-	{ &cg_crosshairGreen, "cg_crosshairGreen", "0", 0 },
-	{ &cg_crosshairBlue, "cg_crosshairBlue", "0", 0 },
-	{ &cg_crosshairAlpha, "cg_crosshairAlpha", "255", 0 },
-	{ &cg_crosshairSizeScale, "cg_crosshairSizeScale", "1", 0 },
+	{ &cg_crosshairSizeScale, "cg_crosshairSizeScale", "1", CVAR_ARCHIVE },
+	{ &cg_crosshairSaberStyleColor, "cg_crosshairSaberStyleColor", "0", CVAR_ARCHIVE },
+	{ &cg_crosshairColor, "cg_crosshairColor", "0 0 0 255", CVAR_ARCHIVE },
+	{ &cg_crosshairIdentifyTarget, "cg_crosshairIdentifyTarget", "1", CVAR_ARCHIVE },
 
 	{ &cg_enhancedFlagStatus, "cg_enhancedFlagStatus", "2", 0 },
 	{ &cg_drawTimerMsec, "cg_drawTimerMsec", "1", CVAR_ARCHIVE },
@@ -1011,8 +1010,37 @@ static void CG_UpdateWidescreen(void) {
 		trap_MVAPI_SetVirtualScreen(cgs.screenWidth, (float)SCREEN_HEIGHT);
 }
 
-//Strafehelper colors
+/*
+===================
+CG_CrosshairColorChange
+===================
+*/
+static void CG_CrosshairColorChange(void) {
+	int i;
+	sscanf(cg_crosshairColor.string, "%f %f %f %f", &cg.crosshairColor[0], &cg.crosshairColor[1], &cg.crosshairColor[2], &cg.crosshairColor[3]);
+
+	for (i = 0; i < 4; i++) {
+		if (cg.crosshairColor[i] < 1)
+			cg.crosshairColor[i] = 0;
+		else if (cg.crosshairColor[i] > 255)
+			cg.crosshairColor[i] = 255;
+	}
+
+	cg.crosshairColor[0] /= 255.0f;
+	cg.crosshairColor[1] /= 255.0f;
+	cg.crosshairColor[2] /= 255.0f;
+	cg.crosshairColor[3] /= 255.0f;
+
+	//Com_Printf("New color is %f, %f, %f, %f\n", cg.crosshairColor[0], cg.crosshairColor[1], cg.crosshairColor[2], cg.crosshairColor[3]);
+}
+
+/*
+===================
+CG_StrafeHelperActiveColorChange
+===================
+*/
 static void CG_StrafeHelperActiveColorChange(void) {
+	int i;
 	if (sscanf(cg_strafeHelperActiveColor.string, "%f %f %f %f", &cg.strafeHelperActiveColor[0], &cg.strafeHelperActiveColor[1], &cg.strafeHelperActiveColor[2], &cg.strafeHelperActiveColor[3]) != 4) {
 		cg.strafeHelperActiveColor[0] = 0;
 		cg.strafeHelperActiveColor[1] = 255;
@@ -1020,25 +1048,12 @@ static void CG_StrafeHelperActiveColorChange(void) {
 		cg.strafeHelperActiveColor[3] = 200;
 	}
 
-	if (cg.strafeHelperActiveColor[0] < 0)
-		cg.strafeHelperActiveColor[0] = 0;
-	else if (cg.strafeHelperActiveColor[0] > 255)
-		cg.strafeHelperActiveColor[0] = 255;
-
-	if (cg.strafeHelperActiveColor[1] < 0)
-		cg.strafeHelperActiveColor[1] = 0;
-	else if (cg.strafeHelperActiveColor[1] > 255)
-		cg.strafeHelperActiveColor[1] = 255;
-
-	if (cg.strafeHelperActiveColor[2] < 0)
-		cg.strafeHelperActiveColor[2] = 0;
-	else if (cg.strafeHelperActiveColor[2] > 255)
-		cg.strafeHelperActiveColor[2] = 255;
-
-	if (cg.strafeHelperActiveColor[3] < 25)
-		cg.strafeHelperActiveColor[3] = 25;
-	else if (cg.strafeHelperActiveColor[3] > 255)
-		cg.strafeHelperActiveColor[3] = 255;
+	for (i = 0; i < 4; i++) {
+		if (cg.strafeHelperActiveColor[i] < 0)
+			cg.strafeHelperActiveColor[i] = 0;
+		else if (cg.strafeHelperActiveColor[i] > 255)
+			cg.strafeHelperActiveColor[i] = 255;
+	}
 
 	trap_Cvar_Set("ui_sha_r", va("%f", cg.strafeHelperActiveColor[0]));
 	trap_Cvar_Set("ui_sha_g", va("%f", cg.strafeHelperActiveColor[1]));
@@ -1091,6 +1106,11 @@ void CG_UpdateCvars( void ) {
 	if (widescreenModificationCount != cg_widescreen.modificationCount) {
 		widescreenModificationCount = cg_widescreen.modificationCount;
 		CG_UpdateWidescreen();
+	}
+
+	if (crosshairColorModificationCount != cg_crosshairColor.modificationCount) {
+		crosshairColorModificationCount = cg_crosshairColor.modificationCount;
+		CG_CrosshairColorChange();
 	}
 
 	if (strafeHelperActiveColorModificationCount != cg_strafeHelperActiveColor.modificationCount) {

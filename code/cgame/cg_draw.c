@@ -1136,10 +1136,19 @@ void CG_DrawHUD(centity_t	*cent)
 	if (cg_strafeHelper.integer & SHELPER_CROSSHAIR) {
 		vec3_t		hcolor;
 		float		lineWidth;
-		hcolor[0] = cg_crosshairRed.value / 255.0f;
-		hcolor[1] = cg_crosshairGreen.value / 255.0f;
-		hcolor[2] = cg_crosshairBlue.value / 255.0f;
-		hcolor[3] = cg_crosshairAlpha.value / 255.0f;//alpha? pff
+
+		if (!cg.crosshairColor[0] && !cg.crosshairColor[1] && !cg.crosshairColor[2]) { //default to white
+			hcolor[0] = 1.0f;
+			hcolor[1] = 1.0f;
+			hcolor[2] = 1.0f;
+			hcolor[3] = 1.0f;
+		}
+		else {
+			hcolor[0] = cg.crosshairColor[0];
+			hcolor[1] = cg.crosshairColor[1];
+			hcolor[2] = cg.crosshairColor[2];
+			hcolor[3] = cg.crosshairColor[3];
+		}
 
 		lineWidth = cg_strafeHelperLineWidth.value;
 		if (lineWidth < 0.25f)
@@ -2276,6 +2285,10 @@ static int CG_DrawPowerupIcons(int y)
 		return y;
 	}
 
+	if (cg.snap->ps.pm_type == PM_SPECTATOR) {
+		return y;
+	}
+
 	y += 16;
 
 	for (j = 0; j < PW_NUM_POWERUPS; j++)
@@ -2764,7 +2777,7 @@ void CG_CenterPrintMultiKill(const char *str, int y, int charWidth) {
 	char    *s;
 	int        i = 0;
 
-	if (cg.lastKillTime + (cg_centertime.integer * 1000) > cg.time) //always stack over the last kill msg?
+	if (cg.lastKillTime + (cg_centertime.integer * 1000) > cg.time)
 	{
 		//we killed someone recently; append a line break and the new kill message
 		Com_sprintf(cg.centerPrint, sizeof(cg.centerPrint), "%s\n%s", cg.centerPrint, str);
@@ -2881,8 +2894,14 @@ CG_DrawCrosshair
 static void CG_DrawCrosshair( vec3_t worldPoint, int chEntValid ) {
 	float		w, h;
 	qhandle_t	hShader;
+	vec4_t		hcolor;
 	float		f;
 	float		x, y;
+
+	if (cg_strafeHelper.integer & SHELPER_CROSSHAIR)
+	{
+		return;
+	}
 
 	if ( !cg_drawCrosshair.integer ) 
 	{
@@ -2906,10 +2925,45 @@ static void CG_DrawCrosshair( vec3_t worldPoint, int chEntValid ) {
 		CG_ColorForHealth( hcolor );
 		trap_R_SetColor( hcolor );
 	}
+	else if (cg_crosshairSaberStyleColor.integer && cg.predictedPlayerState.weapon == WP_SABER) {
+		switch (cg.predictedPlayerState.fd.saberDrawAnimLevel)
+		{
+			case 1://blue
+				hcolor[0] = 0.0f;
+				hcolor[1] = 0.0f;
+				hcolor[2] = 1.0f;
+				break;
+			case 2://yellow
+				hcolor[0] = 1.0f;
+				hcolor[1] = 1.0f;
+				hcolor[2] = 0.0f;
+				break;
+			case 3://red
+				hcolor[0] = 1.0f;
+				hcolor[1] = 0.0f;
+				hcolor[2] = 0.0f;
+				break;
+			default:
+				hcolor[0] = 1.0f;
+				hcolor[1] = 1.0f;
+				hcolor[2] = 1.0f;
+		}
+		hcolor[3] = cg.crosshairColor[3];
+
+		trap_R_SetColor(hcolor);
+	}
+	else if ((cg.crosshairColor[0] || cg.crosshairColor[1] || cg.crosshairColor[2]) && !cg_crosshairIdentifyTarget.integer)
+	{
+		hcolor[0] = cg.crosshairColor[0];
+		hcolor[1] = cg.crosshairColor[1];
+		hcolor[2] = cg.crosshairColor[2];
+		hcolor[3] = cg.crosshairColor[3];
+		trap_R_SetColor(hcolor);
+	}
 	else
 	{
 		//set color based on what kind of ent is under crosshair
-		if ( cg.crosshairClientNum >= ENTITYNUM_WORLD )
+		if ( cg.crosshairClientNum >= ENTITYNUM_WORLD || !cg_crosshairIdentifyTarget.integer )
 		{
 			trap_R_SetColor( NULL );
 		}

@@ -927,6 +927,7 @@ Ghoul2 Insert End
 	int					lastCheckPointPrintTime;
 	int					timerStartTime;
 	vec4_t				strafeHelperActiveColor;
+	vec4_t				crosshairColor;
 	//char				logStrafeTrailFilename[MAX_QPATH];
 	//qboolean			loggingStrafeTrail;
 	//fileHandle_t		strafeTrailFileHandle;
@@ -1615,11 +1616,10 @@ extern	vmCvar_t		cg_strafeHelperInactiveAlpha;
 extern	vmCvar_t		cg_strafeHelperOffset;
 extern	vmCvar_t		cg_strafeHelper_FPS;
 
-extern  vmCvar_t		cg_crosshairRed;
-extern  vmCvar_t		cg_crosshairGreen;
-extern  vmCvar_t		cg_crosshairBlue;
-extern	vmCvar_t		cg_crosshairAlpha;
 extern	vmCvar_t		cg_crosshairSizeScale;
+extern	vmCvar_t		cg_crosshairSaberStyleColor;
+extern	vmCvar_t		cg_crosshairColor;
+extern	vmCvar_t		cg_crosshairIdentifyTarget;
 
 extern	vmCvar_t		cg_enhancedFlagStatus;
 extern	vmCvar_t		cg_drawTimerMsec;
