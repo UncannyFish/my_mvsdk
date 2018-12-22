@@ -819,7 +819,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_saberTeamColors, "cg_saberTeamColors", "1", 0 },
 
 	{ &cg_widescreen, "cg_widescreen", "1", CVAR_ARCHIVE },
-	{ &cg_fovAspectAdjust, "cg_fovAspectAdjust", "0", CVAR_ARCHIVE },
+	{ &cg_fovAspectAdjust, "cg_fovAspectAdjust", "1", CVAR_ARCHIVE },
 
 	{ &cg_fovViewmodel, "cg_fovViewmodel", "80", CVAR_ARCHIVE },
 	{ &cg_fovViewmodelAdjust, "cg_fovViewmodelAdjust", "1", CVAR_ARCHIVE },
@@ -1005,6 +1005,8 @@ static void CG_UpdateWidescreen(void) {
 	} else {
 		cgs.screenWidth = (float)SCREEN_WIDTH;
 	}
+	cgs.screenXFactor = (float)SCREEN_WIDTH / cgs.screenWidth;
+	cgs.screenXFactorInv = cgs.screenWidth / (float)SCREEN_WIDTH;
 	
 	if (mvapi >= 3 && cg_widescreen.integer != 2)
 		trap_MVAPI_SetVirtualScreen(cgs.screenWidth, (float)SCREEN_HEIGHT);
