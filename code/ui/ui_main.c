@@ -7788,6 +7788,7 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 	char			info[MAX_INFO_VALUE];
 	char text[256];
 	float centerPoint, yStart, scale;
+	const float xOffset = 0.5f * (uiInfo.screenWidth - SCREEN_WIDTH);
 
 	char sStripEdTemp[256];
 
@@ -7795,7 +7796,18 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 
 
 	if ( !overlay && menu ) {
-		Menu_Paint(menu, qtrue);
+		if (menu->items[0]) {
+			UI_WideScreenMode(qtrue);
+			menu->items[0]->window.rect.x = xOffset;
+			Menu_Paint(menu, qtrue);
+			UI_FillRect(0, 0, xOffset, SCREEN_HEIGHT, colorBlack);
+			UI_FillRect(xOffset + SCREEN_WIDTH, 0, xOffset, SCREEN_HEIGHT, colorBlack);
+			UI_WideScreenMode(qfalse);
+		}
+		else {
+			Menu_Paint(menu, qtrue);
+
+		}
 	}
 
 	if (!overlay) {
