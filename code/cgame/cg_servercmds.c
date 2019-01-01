@@ -1149,6 +1149,8 @@ extern void CG_ChatBox_AddString(char *chatStr);
 static void CG_ServerCommand( void ) {
 	const char	*cmd;
 	char		text[MAX_SAY_TEXT];
+	char tempChatStr[MAX_SAY_TEXT] = { 0 };
+	char *r = text, *w = tempChatStr;
 
 	cmd = CG_Argv(0);
 
@@ -1270,6 +1272,26 @@ static void CG_ServerCommand( void ) {
 			trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
 			Q_strncpyz( text, CG_Argv(1), MAX_SAY_TEXT );
 			CG_RemoveChatEscapeChar( text );
+
+			// replace "*/." with real percent symbol, and replace two single quotes with double quote
+			// NOTE: this creates real percent symbols in the string, be careful using va(), etc below here!
+			while (*r) {
+				if (*r == '*' && *(r + 1) == '/' && *(r + 2) == '.') {
+					*w = '%';
+					r += 3;
+				}
+				else if (*r == '\'' && *(r + 1) == '\'') {
+					*w = '"';
+					r += 2;
+				}
+				else {
+					*w = *r;
+					r++;
+				}
+				w++;
+			}
+			Q_strncpyz(text, tempChatStr, sizeof(text));
+
 			if (cg_chatBox.integer) {
 				CG_ChatBox_AddString(text);
 				CG_Printf("[skipnotify]%s\n", text);
@@ -1285,6 +1307,26 @@ static void CG_ServerCommand( void ) {
 		trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
 		Q_strncpyz( text, CG_Argv(1), MAX_SAY_TEXT );
 		CG_RemoveChatEscapeChar( text );
+
+		// replace "*/." with real percent symbol, and replace two single quotes with double quote
+		// NOTE: this creates real percent symbols in the string, be careful using va(), etc below here!
+		while (*r) {
+			if (*r == '*' && *(r + 1) == '/' && *(r + 2) == '.') {
+				*w = '%';
+				r += 3;
+			}
+			else if (*r == '\'' && *(r + 1) == '\'') {
+				*w = '"';
+				r += 2;
+			}
+			else {
+				*w = *r;
+				r++;
+			}
+			w++;
+		}
+		Q_strncpyz(text, tempChatStr, sizeof(text));
+
 		CG_AddToTeamChat( text );
 		if (cg_chatBox.integer) {
 			CG_ChatBox_AddString(text);
