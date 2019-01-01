@@ -1199,17 +1199,11 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 			break;
 
 		if (cg_rollSounds.integer == 1)//JAPRO - Clientside - Add rollsounds options
-		{
-				trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*jump1.wav" ) );
-		}
+				trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*roll1.wav" ) );
 		else if (cg_rollSounds.integer == 2 && cg.snap->ps.clientNum != es->number)
-		{
-			trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*jump1.wav" ) );
-		}
+			trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*roll1.wav" ) );
 		else if (cg_rollSounds.integer > 2 && cg.snap->ps.clientNum == es->number)
-		{
-			trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*jump1.wav" ) );
-		}
+			trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*roll1.wav" ) );
 
 		trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.rollSound  );
 

@@ -21,7 +21,8 @@ char	*cg_customSoundNames[MAX_CUSTOM_SOUNDS] = {
 	"*choke3.wav",
 	"*gasp.wav",
 	"*land1.wav",
-	"*taunt.wav"
+	"*taunt.wav",
+	"*roll1.wav"
 };
 
 
@@ -774,6 +775,9 @@ void CG_LoadClientInfo( clientInfo_t *ci ) {
 				ci->sounds[i] = trap_S_RegisterSound( va("sound/%s/%s", fallback, soundName) );
 			}
 		}
+
+		if (!ci->sounds[i] && i == 15) //"*roll1"
+			ci->sounds[i] = ci->sounds[3]; //fallback to jumpsound if model doesn't have a custom roll sound
 	}
 
 	ci->deferred = qfalse;
