@@ -4130,8 +4130,8 @@ void CG_DrawEnhancedFlagStatus(void)
 	int team = 0;
 	char myFlagStatus[256];
 	char myFlagStatusHP[16];
-	const char *theirFlagStatus;
-	const char *myFlagTimer, *theirFlagTimer;
+	const char *theirFlagStatus = NULL;
+	const char *myFlagTimer = NULL, *theirFlagTimer = NULL;
 	char redFlagTimeStr[8], blueFlagTimeStr[8];
 	int secs, mins;
 	vec4_t hcolor;
@@ -4175,9 +4175,6 @@ void CG_DrawEnhancedFlagStatus(void)
 
 		Com_sprintf(blueFlagTimeStr, sizeof(blueFlagTimeStr), "%i:%02i", mins, secs);
 	}
-
-	myFlagTimer = "";
-	theirFlagStatus = "";
 
 	hcolor[0] = hcolor[1] = hcolor[2] = hcolor[3] = 1.0;
 
@@ -4244,7 +4241,7 @@ void CG_DrawEnhancedFlagStatus(void)
 	{
 		CG_DrawPic(2, startDrawPos, ico_size, ico_size, theirFlagShader);
 
-		if (cg_enhancedFlagStatus.integer > 1 && strlen(myFlagTimer))
+		if (cg_enhancedFlagStatus.integer > 1 && myFlagTimer != NULL)
 			CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, myFlagTimer, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 
 		if (strlen(myFlagStatus)) {
@@ -4261,10 +4258,10 @@ void CG_DrawEnhancedFlagStatus(void)
 	{
 		CG_DrawPic(2, startDrawPos, ico_size, ico_size, myFlagTakenShader);
 
-		if (cg_enhancedFlagStatus.integer > 1 && strlen(theirFlagTimer))
+		if (cg_enhancedFlagStatus.integer > 1 && theirFlagTimer != NULL)
 			CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, theirFlagTimer, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 
-		if (strlen(theirFlagStatus))
+		if (theirFlagStatus != NULL)
 			CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, theirFlagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 
 		trap_R_SetColor(NULL);
@@ -5747,7 +5744,7 @@ static void CG_JumpDistance(void)
 			vec3_t distance;
 
 			VectorSubtract(cg.predictedPlayerState.origin, cg.lastGroundPosition, distance);
-			cg.lastJumpDistance = (float)sqrt(distance[0] * distance[0] + distance[1] * distance[1]); //sqrtf(distance[0] * distance[0] + distance[1] * distance[1]); // is this right?
+			cg.lastJumpDistance = (float)sqrt(distance[0] * distance[0] + distance[1] * distance[1]); // is this right?
 			cg.lastJumpDistanceTime = cg.time;
 		}
 
