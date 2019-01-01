@@ -270,7 +270,7 @@ static void CG_DrawZoomMask( void )
 	}
 	else if ( cg.predictedPlayerState.zoomMode)
 	{
-		float xOffset = 0.5f * (cgs.screenWidth - 640);
+		float xOffset = 0.5f * (cgs.screenWidth - SCREEN_WIDTH);
 
 		// disruptor zoom mode
 		level = (float)(50.0f - zoomFov) / 50.0f;//(float)(80.0f - zoomFov) / 80.0f;
@@ -289,11 +289,11 @@ static void CG_DrawZoomMask( void )
 		level *= 103.0f;
 
 		// Draw target mask
-		CG_FillRect(0, 0, xOffset, 480, colorTable[CT_BLACK]);
-		CG_FillRect(xOffset + 640, 0, xOffset, 480, colorTable[CT_BLACK]);
+		CG_FillRect(0, 0, xOffset, SCREEN_HEIGHT, colorTable[CT_BLACK]);
+		CG_FillRect(xOffset + SCREEN_WIDTH, 0, xOffset, SCREEN_HEIGHT, colorTable[CT_BLACK]);
 
 		trap_R_SetColor( colorTable[CT_WHITE] );
-		CG_DrawPic(xOffset, 0, 640, 480, cgs.media.disruptorMask);
+		CG_DrawPic(xOffset, 0, SCREEN_WIDTH, SCREEN_HEIGHT, cgs.media.disruptorMask);
 
 		// apparently 99.0f is the full zoom level
 		if ( level >= 99 )
@@ -2714,14 +2714,18 @@ static void CG_DrawLagometer( void ) {
 		float avgInterp;
 		int i;
 
-		CG_Text_Paint(ax + 2, ay - 1, 0.5f, colorWhite, va("%i", cg.snap->ping), 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_SMALL);
+		CG_Text_Paint(ax + 2, ay - 1, 0.5f, colorWhite, va("%i", cg.snap->ping), 0, 0, ITEM_ALIGN_LEFT|ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_SMALL);
 
 		for (i = 0; i < LAG_SAMPLES; i++) {
 			total += lagometer.frameSamples[i];
 		}
 		avgInterp = total / (float)LAG_SAMPLES * -1;
 
-		CG_Text_Paint(ax + 16, ay - 1, 0.5f, colorWhite, va("%04.1f", avgInterp), 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_SMALL);
+#ifndef Q3_VM
+		CG_Text_Paint(ax + 26, ay - 1, 0.5f, colorWhite, va("%04.1f", avgInterp), 0, 0, ITEM_ALIGN_RIGHT|ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_SMALL);
+#else
+		CG_Text_Paint(ax + 16, ay - 1, 0.5f, colorWhite, va("%04.1f", avgInterp), 0, 0, ITEM_ALIGN_RIGHT|ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_SMALL);
+#endif
 	}
 
 	CG_DrawDisconnect();
