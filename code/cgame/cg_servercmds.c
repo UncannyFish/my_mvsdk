@@ -1293,8 +1293,8 @@ static void CG_ServerCommand( void ) {
 			Q_strncpyz(text, tempChatStr, sizeof(text));
 
 			if (cg_chatBox.integer) {
+				CG_Printf("[skipnotify]%s\n", text); 
 				CG_ChatBox_AddString(text);
-				CG_Printf("[skipnotify]%s\n", text);
 			}
 			else {
 				CG_Printf( "%s\n", text );
@@ -1329,8 +1329,8 @@ static void CG_ServerCommand( void ) {
 
 		CG_AddToTeamChat( text );
 		if (cg_chatBox.integer) {
-			CG_ChatBox_AddString(text);
 			CG_Printf("[skipnotify]%s\n", text);
+			CG_ChatBox_AddString(text);
 		}
 		else {
 			CG_Printf( "%s\n", text );
