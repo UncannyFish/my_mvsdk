@@ -3052,7 +3052,7 @@ static void CG_DrawCrosshair( vec3_t worldPoint, int chEntValid ) {
 
 	//JAPRO - Clientside - Option to disable crosshair scaling.
 	if (!cg_crosshairSizeScale.integer || cg_drawCrosshair.integer == 10) {
-		w = (float)(cg_crosshairSize.value / (cgs.glconfig.vidWidth * (1.0 / SCREEN_WIDTH)));
+		w = (float)(cg_crosshairSize.value / (cgs.glconfig.vidWidth * (1.0 / SCREEN_WIDTH))*cgs.screenXFactorInv);
 		h = (float)(cg_crosshairSize.value / (cgs.glconfig.vidHeight * (1.0 / SCREEN_HEIGHT)));
 	}
 	else {
