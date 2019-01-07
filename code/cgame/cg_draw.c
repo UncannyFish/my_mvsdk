@@ -5608,8 +5608,8 @@ static void CG_DrawShowPos(void)
 
 static void CG_StrafeHelperSound(float difference) {
 	//Com_Printf("Difference: %f\n", difference);
-//	if (difference > -40.0f && difference < 10.0f) //Under aiming by a bit, but still good?
-//		trap_S_StartLocalSound(cgs.media.hitSound4, CHAN_LOCAL_SOUND);
+	if (difference > -40.0f && difference < 10.0f) //Under aiming by a bit, but still good?
+		trap_S_StartLocalSound(cgs.media.hitSound4, CHAN_LOCAL_SOUND);
 }
 
 void Dzikie_CG_DrawLine(float x1, float y1, float x2, float y2, float size, vec4_t color, float alpha, float ycutoff)

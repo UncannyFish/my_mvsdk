@@ -1313,6 +1313,11 @@ typedef struct {
 
 	//jk2pro
 	sfxHandle_t	lowHPSound;
+	sfxHandle_t hitSound;
+	sfxHandle_t hitSound2;
+	sfxHandle_t hitSound3;
+	sfxHandle_t hitSound4;
+	sfxHandle_t hitTeamSound;
 
 } cgMedia_t;
 
@@ -1652,6 +1657,7 @@ extern	vmCvar_t		cg_newFont;
 
 extern	vmCvar_t		cg_jumpSounds;
 extern	vmCvar_t		cg_rollSounds;
+extern	vmCvar_t		cg_hitSounds;
 extern	vmCvar_t		cg_thirdPersonFlagAlpha;
 extern	vmCvar_t		cg_brightskins;
 extern	vmCvar_t		cg_playerLOD;

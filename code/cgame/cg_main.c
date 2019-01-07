@@ -569,6 +569,7 @@ vmCvar_t	cg_autoKillWhenFalling;
 
 vmCvar_t	cg_jumpSounds;
 vmCvar_t	cg_rollSounds;
+vmCvar_t	cg_hitSounds;
 vmCvar_t	cg_thirdPersonFlagAlpha;
 vmCvar_t	cg_brightskins;
 vmCvar_t	cg_playerLOD;
@@ -813,6 +814,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 
 	{ &cg_jumpSounds, "cg_jumpSounds", "1", CVAR_ARCHIVE },
 	{ &cg_rollSounds, "cg_rollSounds", "1", CVAR_ARCHIVE },
+	{ &cg_hitSounds, "cg_hitSounds", "0", CVAR_ARCHIVE },
 	{ &cg_thirdPersonFlagAlpha, "cg_thirdPersonFlagAlpha", "1.0", CVAR_ARCHIVE },
 	{ &cg_brightskins, "cg_brightskins", "0", CVAR_ARCHIVE },
 	{ &cg_playerLOD, "cg_playerLOD", "0", CVAR_ARCHIVE },
@@ -1521,7 +1523,13 @@ static void CG_RegisterSounds( void ) {
 	cgs.media.loserSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM010" );
 
 	//jk2pro
-	cgs.media.lowHPSound = trap_S_RegisterSound("sound/common/warning.wav");
+	cgs.media.lowHPSound	= trap_S_RegisterSound("sound/common/warning.wav");
+	cgs.media.hitSound		= trap_S_RegisterSound("sound/effects/hitsound.wav"); 
+	cgs.media.hitSound2		= trap_S_RegisterSound("sound/effects/hitsound2.wav");
+	cgs.media.hitSound3		= trap_S_RegisterSound("sound/effects/hitsound3.wav");
+	cgs.media.hitSound4		= trap_S_RegisterSound("sound/effects/hitsound4.wav");
+	cgs.media.hitTeamSound	= trap_S_RegisterSound("sound/effects/hitsoundteam.wav");
+
 }
 
 
