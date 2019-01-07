@@ -88,6 +88,7 @@
 
 
 #define JK2AWARDS
+#define CAMERA_MIN_FPS 15
 
 //[JK2PRO - Clientside - All - Jcinfo bitvalues
 #define JK2PRO_CINFO_HIGHFPSFIX		(1<<0) //unused
@@ -937,6 +938,8 @@ Ghoul2 Insert End
 	short				numFKFrames;
 	short				numJumps;
 	int					lastAutoKillTime;
+	float				predictedTimeFrac;	// frameInterpolation * (next->commandTime - prev->commandTime)
+
 } cg_t;
 
 #define MAX_TICS	14
@@ -1661,6 +1664,7 @@ extern	vmCvar_t		cg_autoKillWhenFalling;
 
 extern	vmCvar_t		cg_widescreen;
 extern	vmCvar_t		cg_fovAspectAdjust;
+extern	vmCvar_t		cg_cameraFPS;
 
 extern	vmCvar_t		cg_fovViewmodel;
 extern	vmCvar_t		cg_fovViewmodelAdjust;

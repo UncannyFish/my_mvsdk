@@ -658,6 +658,7 @@ signed char ClampChar( int i );
 signed short ClampShort( int i );
 
 float JK2_powf ( float x, int y );
+float Q_pown(float x, int n);
 
 // this isn't a real cheap function to call!
 int DirToByte( vec3_t dir );
