@@ -1014,12 +1014,34 @@ void CG_InitConsoleCommands( void ) {
 
 	//generic mod server cmds
 	trap_AddCommand("help");
+	trap_AddCommand("ignore");
 	trap_AddCommand("aminfo");
 	trap_AddCommand("amempower"); //idk if this is somewhere other than twimod
 	trap_AddCommand("ammerc"); //probably exists somewhere if amempower does
 
 	trap_AddCommand("engage_gunduel"); //?
 	trap_AddCommand("engage_fullforceduel"); //??
+
+	//ctfmod server cmds
+	trap_AddCommand("afk");
+	trap_AddCommand("altf");
+	trap_AddCommand("ignoreclear");
+	trap_AddCommand("ignorelist");
+	trap_AddCommand("specs");
+
+	//ctfmod rcon cmds for autocomplete
+	trap_AddCommand("amkick");
+	trap_AddCommand("amstatus");
+	trap_AddCommand("cp");
+	trap_AddCommand("cvars");
+	trap_AddCommand("forceteam");
+	trap_AddCommand("lockname");
+	trap_AddCommand("lockteam");
+	trap_AddCommand("mute");
+	trap_AddCommand("pause");
+	trap_AddCommand("poll");
+	trap_AddCommand("swapteams");
+	trap_AddCommand("unpause");
 
 	//TwiMod cmds
 	trap_AddCommand("ammodinfo");
