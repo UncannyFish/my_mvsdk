@@ -6211,6 +6211,16 @@ void CG_Player( centity_t *cent ) {
 		cent->ghoul2weapon = NULL; //be sure to update after respawning/getting limb regrown
 	}
 
+	// option to use a different run animation with active saber (like SP and JKA)
+	if (cg_SPRunAnim.integer && (jk2gameplay != VERSION_1_02 || cg_fixlean.integer) && cent->currentState.weapon == WP_SABER && !cent->currentState.saberInFlight && cent->saberLength > 0) {
+		if (cent->currentState.torsoAnim == BOTH_RUN1) {
+			cent->currentState.torsoAnim = BOTH_RUN2;
+		}
+
+		if (cent->currentState.legsAnim == BOTH_RUN1) {
+			cent->currentState.legsAnim = BOTH_RUN2;
+		}
+	}
 	
 	memset (&legs, 0, sizeof(legs));
 
