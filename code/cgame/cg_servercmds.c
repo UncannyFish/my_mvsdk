@@ -147,10 +147,14 @@ static void CG_ParseServerinfo( const char *info ) {
 	cgs.maxclients = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
 
 	cgs.isJK2Pro = qfalse;
+	cgs.isCaMod = qfalse;
 	cgs.jcinfo = 0;
 	if (!Q_stricmpn(Info_ValueForKey(info, "gamename"), "jk2pro", 5)) {
 		cgs.isJK2Pro = qtrue;
 		cgs.jcinfo = atoi(Info_ValueForKey(info, "jcinfo"));//[JAPRO - Clientside - All - Add gamename variable to get jcinfo from japro servers]
+	}
+	else if (!Q_stricmpn(Info_ValueForKey(info, "gamename"), "Ca Mod", 6)) {
+		cgs.isCaMod = qtrue;
 	}
 
 	mapname = Info_ValueForKey( info, "mapname" );

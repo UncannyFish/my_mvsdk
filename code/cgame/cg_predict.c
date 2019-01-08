@@ -85,6 +85,34 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins, const
 			continue;
 		}
 
+		//JAPRO - Clientside - Duel Passthru Prediction - Start 
+		if (cgs.isCaMod || cgs.isJK2Pro)
+		{
+			if (cg.predictedPlayerState.duelInProgress)
+			{ // we are in a private duel 
+				if (ent->number != cg.predictedPlayerState.duelIndex && ent->eType != ET_MOVER)
+				{ // we are not dueling them 
+				  // don't clip 
+					continue;
+				}
+			}
+			else if (ent->bolt1)
+			{ // we are not in a private duel, and this player is dueling don't clip 
+				continue;
+			}
+			else if (cgs.isJK2Pro && cg.predictedPlayerState.stats[STAT_RACEMODE]) {
+				if (ent->eType == ET_MOVER) { //TR_SINCE since func_bobbings are still solid, sad hack 
+					if ((VectorLengthSquared(ent->pos.trDelta) || VectorLengthSquared(ent->apos.trDelta)) && ent->pos.trType != TR_SINE) {//If its moving? //how to get classname clientside? 
+						continue; //Dont predict moving et_movers as solid..since that means they are likely func_door or func_plat.. which are nonsolid to racers serverside 
+					}
+				}
+				else {
+					continue;
+				}
+			}
+		}
+		//JAPRO - Clientside - Duel Passthru Prediction - End 
+
 		if ( ent->solid == SOLID_BMODEL ) {
 			// special value for bmodel
 

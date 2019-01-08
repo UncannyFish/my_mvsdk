@@ -6104,6 +6104,18 @@ void CG_Player( centity_t *cent ) {
 		cent->trickAlphaTime = cg.time;
 	}
 
+	//JAPRO - Clientside - Draw Duelers - Start
+	if (cent->currentState.number != cg.snap->ps.clientNum && ((cg.predictedPlayerState.clientNum != cent->currentState.owner))) { // we only care about other players
+		if (cg.snap->ps.duelInProgress) { // we are dueling
+			if (cent->currentState.number != cg.snap->ps.duelIndex) { // don't draw this entity because we aren't dueling them
+				if ((cg.predictedPlayerState.persistant[PERS_TEAM] != TEAM_SPECTATOR) || cg.predictedPlayerState.pm_flags & PMF_FOLLOW)
+					if ((cgs.isCaMod || cgs.isJK2Pro) && !cg_drawNonDuelers.integer)
+						return;
+			}
+		}
+	}
+	//JAPRO - Clientside - Draw Duelers - End
+
 	//If this client has tricked you.
 	if (CG_IsMindTricked(cent->currentState.trickedentindex,
 		cent->currentState.trickedentindex2,

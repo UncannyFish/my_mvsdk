@@ -1516,6 +1516,7 @@ Ghoul2 Insert End
 	//jk2pro
 	int				jcinfo;
 	qboolean		isJK2Pro;
+	qboolean		isCaMod;
 
 } cgs_t;
 
@@ -1659,6 +1660,7 @@ extern	vmCvar_t		cg_jumpSounds;
 extern	vmCvar_t		cg_rollSounds;
 extern	vmCvar_t		cg_hitSounds;
 extern	vmCvar_t		cg_thirdPersonFlagAlpha;
+extern	vmCvar_t		cg_drawNonDuelers;
 extern	vmCvar_t		cg_brightskins;
 extern	vmCvar_t		cg_playerLOD;
 extern	vmCvar_t		cg_privateDuelShell;
