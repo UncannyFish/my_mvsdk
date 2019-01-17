@@ -707,6 +707,7 @@ Ghoul2 Insert End
 				if (weapon->altMuzzleEffect)
 				{
 					trap_FX_PlayEffectID(weapon->altMuzzleEffect, flashorigin, flashdir);
+					cent->muzzleFlashTime = 0; //japro - fix loud gunshots with high fps
 				}
 			}
 			else
@@ -714,6 +715,7 @@ Ghoul2 Insert End
 				if (weapon->muzzleEffect)
 				{
 					trap_FX_PlayEffectID(weapon->muzzleEffect, flashorigin, flashdir);
+					cent->muzzleFlashTime = 0; //japro - fix loud gunshots with high fps
 				}
 			}
 		}
