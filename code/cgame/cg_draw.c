@@ -2420,6 +2420,7 @@ static void CG_DrawReward( void ) {
 	int		i, count;
 	float	x, y;
 	char	buf[32];
+	float	iconSize = ICON_SIZE, time = 0.0f;
 
 	if ( !cg_drawRewards.integer ) {
 		return;

@@ -500,6 +500,11 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops ) {
 		CG_CheckLocalSounds( ps, ops );
 	}
 
+	if (ops->weapon != ps->weapon) { // show weapon switching on HUD while spectating
+		cg.weaponSelect = ps->weapon;
+		cg.weaponSelectTime = cg.time;
+	}
+
 	// check for going low on ammo
 	CG_CheckAmmo();
 

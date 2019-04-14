@@ -745,7 +745,7 @@ void CG_LoadClientInfo( clientInfo_t *ci ) {
 		COM_StripExtension(soundName, soundName, sizeof(soundName));
 		//strip the extension because we might want .mp3's
 
-		//ci->sounds[i] = 0;
+		ci->sounds[i] = 0;
 		// if the model didn't load use the sounds of the default model
 		if (soundpath[0])
 		{
