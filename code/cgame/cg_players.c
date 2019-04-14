@@ -6224,12 +6224,13 @@ void CG_Player( centity_t *cent ) {
 	}
 
 	// option to use a different run animation with active saber (like SP and JKA)
-	if (cg_SPRunAnim.integer && (jk2gameplay != VERSION_1_02 || cg_fixlean.integer) && cent->currentState.weapon == WP_SABER && !cent->currentState.saberInFlight && cent->saberLength > 0) {
-		if (cent->currentState.torsoAnim == BOTH_RUN1) {
+	if (cg_SPRunAnim.integer && (ci->jk2gameplay != VERSION_1_02 || cg_fixlean.integer) && cent->currentState.weapon == WP_SABER && !cent->currentState.saberInFlight && cent->saberLength > 0)
+	{
+		if ((cent->currentState.torsoAnim & ~ANIM_TOGGLEBIT) == BOTH_RUN1) {
 			cent->currentState.torsoAnim = BOTH_RUN2;
 		}
 
-		if (cent->currentState.legsAnim == BOTH_RUN1) {
+		if ((cent->currentState.legsAnim & ~ANIM_TOGGLEBIT) == BOTH_RUN1) {
 			cent->currentState.legsAnim = BOTH_RUN2;
 		}
 	}
