@@ -398,11 +398,9 @@ static void CG_Camera_f( void ) {
 */
 
 //jk2pro stuff
-
 typedef struct bitInfo_S {
 	const char	*string;
 } bitInfo_T;
-
 
 static bitInfo_T strafeTweaks[] = {
 	{ "Original style" },//0
@@ -535,36 +533,160 @@ void cg_speedometer_f(void)
 	}
 }
 
+void CG_SanitizeString2(const char *in, char *out)
+{
+	int i = 0, r = 0;
+
+	while (in[i]) {
+		if (i >= MAX_NAME_LENGTH - 1) {//the ui truncates the name here..
+			break;
+		}
+		if (in[i] == '^') {
+			if (in[i + 1] >= 48 && in[i + 1] <= 57) { //only skip it if there's a number after it for the color
+				i += 2;
+				continue;
+			}
+			else { //just skip the ^
+				i++;
+				continue;
+			}
+		}
+		if (in[i] < 32) {
+			i++;
+			continue;
+		}
+		out[r] = tolower(in[i]);//lowercase please
+		r++;
+		i++;
+	}
+	out[r] = 0;
+}
+
+int CG_ClientNumberFromString(const char *s)
+{
+	clientInfo_t *cl;
+	int			idnum, i, match = -1;
+	char		s2[MAX_STRING_CHARS];
+	char		n2[MAX_STRING_CHARS];
+	idnum = atoi(s);
+
+	if (s[0] == '-') { //- returns id of target in our crosshair
+		idnum = CG_CrosshairPlayer();
+		return idnum;
+	}
+
+	// numeric values are just slot numbers
+	if (s[0] >= '0' && s[0] <= '9' && strlen(s) == 1) //changed this to only recognize numbers 0-31 as client numbers, otherwise interpret as a name, in which case sanitize2 it and accept partial matches (return error if multiple matches)
+	{
+		idnum = atoi(s);
+		cl = &cgs.clientinfo[idnum];
+		if (!cl->infoValid) {
+			Com_Printf("Client '%i' is not active\n", idnum);
+			return -1;
+		}
+		return idnum;
+	}
+
+	if ((s[0] == '1' || s[0] == '2') && (s[1] >= '0' && s[1] <= '9' && strlen(s) == 2))  //changed and to or ..
+	{
+		idnum = atoi(s);
+		cl = &cgs.clientinfo[idnum];
+		if (!cl->infoValid) {
+			Com_Printf("Client '%i' is not active\n", idnum);
+			return -1;
+		}
+		return idnum;
+	}
+
+	if (s[0] == '3' && (s[1] >= '0' && s[1] <= '1' && strlen(s) == 2))
+	{
+		idnum = atoi(s);
+		cl = &cgs.clientinfo[idnum];
+		if (!cl->infoValid) {
+			Com_Printf("Client '%i' is not active\n", idnum);
+			return -1;
+		}
+		return idnum;
+	}
+
+	// check for a name match
+	CG_SanitizeString2(s, s2);
+	for (idnum = 0, cl = cgs.clientinfo; idnum < cgs.maxclients; ++idnum, ++cl) {
+		if (!cl->infoValid) {
+			continue;
+		}
+		CG_SanitizeString2(cl->name, n2);
+
+		for (i = 0; i < cgs.maxclients; i++)
+		{
+			cl = &cgs.clientinfo[i];
+			if (!cl->infoValid) {
+				continue;
+			}
+			CG_SanitizeString2(cl->name, n2);
+			if (strstr(n2, s2))
+			{
+				if (match != -1)
+				{ //found more than one match
+					Com_Printf("More than one user '%s' on the server\n", s);
+					return -2;
+				}
+				match = i;
+			}
+		}
+		if (match != -1)//uhh
+			return match;
+	}
+	if (!atoi(s)) //Uhh.. well.. whatever. fixes amtele spam problem when teleporting to x y z yaw
+		Com_Printf("User '%s' is not on the server\n", s);
+	return -1;
+}
+
 void CG_Say_f( void ) {
 	char msg[MAX_SAY_TEXT] = {0};
 	char word[MAX_SAY_TEXT] = {0};
 	char numberStr[MAX_SAY_TEXT] = {0};
 	int i, number = 0, numWords = trap_Argc();
+	int clientNum = -1, messagetype = 0;
+
+	if (!Q_stricmp(CG_Argv(0), "say")) {
+		messagetype = 1;
+	}
+	else if (!Q_stricmp(CG_Argv(0), "say_team")) {
+		messagetype = 2;
+	}
+	else if (!Q_stricmp(CG_Argv(0), "tell")) {
+		clientNum = CG_ClientNumberFromString(CG_Argv(1));
+		messagetype = 3;
+		if (clientNum < 0) //couldn't find target or multiple matches found
+			return;
+	}
+	else {//shouldn't happen...
+		return;
+	}
 
 	for (i = 1; i < numWords; i++) {
-		trap_Argv( i, word, sizeof(word));
+		if (i == 1 && clientNum > -1) //skip 1st argument in PM since that's the name of the person we're trying to PM
+			continue;
+		trap_Argv(i, word, sizeof(word));
 
 		if (!Q_stricmp(word, "%H%")) {
-			if (pm)
-				number = pm->ps->stats[STAT_HEALTH];
+			number = cg.predictedPlayerState.stats[STAT_HEALTH];
 			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
-			Q_strncpyz( word, numberStr, sizeof(word) );
+			Q_strncpyz(word, numberStr, sizeof(word));
 		}
 		else if (!Q_stricmp(word, "%S%")) {
-			if (pm)
-				number = pm->ps->stats[STAT_ARMOR];
+			number = cg.predictedPlayerState.stats[STAT_ARMOR];
 			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
-			Q_strncpyz( word, numberStr, sizeof(word) );
+			Q_strncpyz(word, numberStr, sizeof(word));
 		}
 		else if (!Q_stricmp(word, "%F%")) {
-			if (pm)
-				number = pm->ps->fd.forcePower;
+			number = cg.predictedPlayerState.fd.forcePower;
 			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
-			Q_strncpyz( word, numberStr, sizeof(word) );
+			Q_strncpyz(word, numberStr, sizeof(word));
 		}
 		else if (!Q_stricmp(word, "%W%")) {
-			if (pm)
-				number = pm->ps->weapon;
+			number = cg.predictedPlayerState.weapon;
 			switch (number) {
 				case 1:	Com_sprintf(numberStr, sizeof(numberStr), "Stun baton"); break;
 				case 2: Com_sprintf(numberStr, sizeof(numberStr), "Melee"); break;
@@ -580,81 +702,56 @@ void CG_Say_f( void ) {
 				case 13: Com_sprintf(numberStr, sizeof(numberStr), "Tripmine"); break;
 				case 14: Com_sprintf(numberStr, sizeof(numberStr), "Detpack"); break;
 				default: Com_sprintf(numberStr, sizeof(numberStr), "Saber"); break;
-				}
-			Q_strncpyz( word, numberStr, sizeof(word) );
+			}
+			Q_strncpyz(word, numberStr, sizeof(word));
 		}
 		else if (!Q_stricmp(word, "%A%")) {
-			if (pm)
-				number = pm->ps->ammo[weaponData[pm->ps->weapon].ammoIndex];
+			number = cg.predictedPlayerState.ammo[weaponData[cg.predictedPlayerState.weapon].ammoIndex];
 			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
-			Q_strncpyz( word, numberStr, sizeof(word) );
+			Q_strncpyz(word, numberStr, sizeof(word));
 		}
+#ifndef Q3_VM
+		else if (!Q_stricmp(word, "%T%")) { //insert time in 12-hour format
+			struct tm *newtime;
+			qboolean AM = qtrue;
+			time_t rawtime;
+			time(&rawtime);
+			newtime = localtime(&rawtime);
+			if (newtime->tm_hour >= 12) AM = qfalse;
+			if (newtime->tm_hour > 12) newtime->tm_hour -= 12;
+			if (newtime->tm_hour == 0) newtime->tm_hour = 12;
+			Com_sprintf(numberStr, sizeof(numberStr), "%i:%02i %s", newtime->tm_hour, newtime->tm_min, AM ? "AM" : "PM");
+			Q_strncpyz(word, numberStr, sizeof(word));
+		}
+		else if (!Q_stricmp(word, "%T2%")) { //insert time in 24-hour format
+			struct tm *newtime;
+			time_t rawtime;
+			time(&rawtime);
+			newtime = localtime(&rawtime);
+			Com_sprintf(numberStr, sizeof(numberStr), "%02i:%02i", newtime->tm_hour, newtime->tm_min);
+			Q_strncpyz(word, numberStr, sizeof(word));
+		}
+#endif
 
 		Q_strcat(word, MAX_SAY_TEXT, " ");
 		Q_strcat(msg, MAX_SAY_TEXT, word);
 	}
 
-	trap_SendClientCommand(va("say %s", msg));
-}
-
-void CG_TeamSay_f( void ) { 
-	char word[MAX_SAY_TEXT] = {0}, msg[MAX_SAY_TEXT] = {0}, numberStr[MAX_SAY_TEXT] = {0};//eh
-	int i, number = 0, numWords = trap_Argc();
-
-	for (i = 1; i < numWords; i++) {
-		trap_Argv( i, word, sizeof(word));
-
-		if (!Q_stricmp(word, "%H%")) {
-			if (pm)
-				number = pm->ps->stats[STAT_HEALTH];
-			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
-			Q_strncpyz( word, numberStr, sizeof(word) );
-		}
-		else if (!Q_stricmp(word, "%S%")) {
-			if (pm)
-				number = pm->ps->stats[STAT_ARMOR];
-			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
-			Q_strncpyz( word, numberStr, sizeof(word));
-		}
-		else if (!Q_stricmp(word, "%F%")) {
-			if (pm)
-				number = pm->ps->fd.forcePower;
-			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
-			Q_strncpyz( word, numberStr, sizeof(word) );
-		}
-		else if (!Q_stricmp(word, "%W%")) {
-			if (pm)
-				number = pm->ps->weapon;
-			switch (number) {
-				case 1:	Com_sprintf(numberStr, sizeof(numberStr), "Stun baton"); break;
-				case 2: Com_sprintf(numberStr, sizeof(numberStr), "Melee"); break;
-				case 4:	Com_sprintf(numberStr, sizeof(numberStr), "Bryar"); break;
-				case 5:	Com_sprintf(numberStr, sizeof(numberStr), "E11"); break;
-				case 6:	Com_sprintf(numberStr, sizeof(numberStr), "Sniper"); break;
-				case 7:	Com_sprintf(numberStr, sizeof(numberStr), "Bowcaster");	break;
-				case 8:	Com_sprintf(numberStr, sizeof(numberStr), "Repeater"); break;
-				case 9:	Com_sprintf(numberStr, sizeof(numberStr), "Demp2");	break;
-				case 10: Com_sprintf(numberStr, sizeof(numberStr), "Flechette"); break;
-				case 11: Com_sprintf(numberStr, sizeof(numberStr), "Rocket"); break;
-				case 12: Com_sprintf(numberStr, sizeof(numberStr), "Thermal"); break;
-				case 13: Com_sprintf(numberStr, sizeof(numberStr), "Tripmine"); break;
-				case 14: Com_sprintf(numberStr, sizeof(numberStr), "Detpack"); break;
-				default: Com_sprintf(numberStr, sizeof(numberStr), "Saber"); break;
-				}
-			Q_strncpyz( word, numberStr, sizeof(word) );
-		}
-		else if (!Q_stricmp(word, "%A%")) {
-			if (pm)
-				number = pm->ps->ammo[weaponData[pm->ps->weapon].ammoIndex];
-			Com_sprintf(numberStr, sizeof(numberStr), "%i", number);
-			Q_strncpyz( word, numberStr, sizeof(word) );
-		}
-
-		Q_strcat(word, MAX_SAY_TEXT, " ");
-		Q_strcat(msg, MAX_SAY_TEXT, word);
+	switch (messagetype)
+	{
+		default:
+			Com_Printf("%sUnrecognized command %s\n", S_COLOR_YELLOW, CG_Argv(0));
+			break;
+		case 1:
+			trap_SendClientCommand(va("say %s", msg));
+			break;
+		case 2:
+			trap_SendClientCommand(va("say_team %s", msg));
+			break;
+		case 3:
+			if (clientNum > -1) trap_SendClientCommand(va("tell %i %s", clientNum, msg));
+			break;
 	}
-
-	trap_SendClientCommand(va("say_team %s", msg));
 }
 
 void CG_ClientList_f( void )
@@ -898,7 +995,8 @@ static consoleCommand_t	commands[] = {
 	{ "-zoom", CG_ZoomUp_f },
 
 	{ "say", CG_Say_f },
-	{ "say_team", CG_TeamSay_f },
+	{ "say_team", CG_Say_f },
+	{ "tell", CG_Say_f },
 
 	{ "clientlist", CG_ClientList_f },
 
