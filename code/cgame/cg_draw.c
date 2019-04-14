@@ -3633,7 +3633,7 @@ static void CG_DrawCrosshairNames( void ) {
 		tcolor[0] = colorTable[baseColor][0];
 		tcolor[1] = colorTable[baseColor][1];
 		tcolor[2] = colorTable[baseColor][2];
-		tcolor[3] = colorTable[baseColor][3]; //color[3]*0.8f;
+		tcolor[3] =  color[3]*1.0f;//colorTable[baseColor][3]; //color[3]*0.8f;
 
 		//JAPRO - Clientside - Colored crosshair names - Start
 		UI_DrawProportionalString(0.5f * cgs.screenWidth, 170, name, UI_CENTER | UI_DROPSHADOW, tcolor);
@@ -3644,7 +3644,7 @@ static void CG_DrawCrosshairNames( void ) {
 		tcolor[0] = colorTable[baseColor][0];
 		tcolor[1] = colorTable[baseColor][1];
 		tcolor[2] = colorTable[baseColor][2];
-		tcolor[3] = color[3]*0.8f;
+		tcolor[3] = color[3]*1.0f;//color[3]*0.8f;
 
 		//JAPRO - Clientside - Colored crosshair names - Start
 		UI_DrawProportionalString(0.5f * cgs.screenWidth, 170, name, UI_CENTER, tcolor);
@@ -4130,11 +4130,11 @@ void CG_DrawEnhancedFlagStatus(void)
 	int myFlagTakenShader = 0;
 	int theirFlagShader = 0;
 	int team = 0;
-	char myFlagStatus[256];
-	char myFlagStatusHP[16];
+	char myFlagStatus[256] = {0};
+	char myFlagStatusHP[16] = {0};
 	const char *theirFlagStatus = NULL;
 	const char *myFlagTimer = NULL, *theirFlagTimer = NULL;
-	char redFlagTimeStr[8], blueFlagTimeStr[8];
+	char redFlagTimeStr[8] = {0}, blueFlagTimeStr[8] = {0};
 	int secs, mins;
 	vec4_t hcolor;
 	int startDrawPos = 365;
@@ -4192,7 +4192,7 @@ void CG_DrawEnhancedFlagStatus(void)
 		}
 
 
-		if (cgs.redFlagCarrier && cgs.blueflag == FLAG_TAKEN) {
+		if (cgs.redFlagCarrier && cgs.redFlagCarrier->name[0] && cgs.blueflag == FLAG_TAKEN) {
 			myFlagTimer = blueFlagTimeStr;
 			Com_sprintf(myFlagStatus, sizeof(myFlagStatus), "%s  ", cgs.redFlagCarrier->name);
 
@@ -4204,7 +4204,7 @@ void CG_DrawEnhancedFlagStatus(void)
 				Com_sprintf(myFlagStatusHP, sizeof(myFlagStatusHP), "(%i)", cgs.redFlagCarrier->health);
 		}
 
-		if (cgs.blueFlagCarrier && cgs.redflag == FLAG_TAKEN) {
+		if (cgs.blueFlagCarrier && cgs.blueFlagCarrier->name[0] && cgs.redflag == FLAG_TAKEN) {
 			theirFlagTimer = redFlagTimeStr;
 			theirFlagStatus = cgs.blueFlagCarrier->name;
 		}
@@ -4221,7 +4221,7 @@ void CG_DrawEnhancedFlagStatus(void)
 		}
 
 
-		if (cgs.blueFlagCarrier && cgs.redflag == FLAG_TAKEN) {
+		if (cgs.blueFlagCarrier && cgs.blueFlagCarrier->name[0] && cgs.redflag == FLAG_TAKEN) {
 			myFlagTimer = redFlagTimeStr;
 			Com_sprintf(myFlagStatus, sizeof(myFlagStatus), "%s  ", cgs.blueFlagCarrier->name);
 
@@ -4233,7 +4233,7 @@ void CG_DrawEnhancedFlagStatus(void)
 				Com_sprintf(myFlagStatusHP, sizeof(myFlagStatusHP), "(%i)", cgs.blueFlagCarrier->health);
 		}
 
-		if (cgs.redFlagCarrier && cgs.blueflag == FLAG_TAKEN) {
+		if (cgs.redFlagCarrier && cgs.redFlagCarrier->name[0] && cgs.blueflag == FLAG_TAKEN) {
 			theirFlagTimer = blueFlagTimeStr;
 			theirFlagStatus = cgs.redFlagCarrier->name;
 		}
@@ -4246,7 +4246,7 @@ void CG_DrawEnhancedFlagStatus(void)
 		if (cg_enhancedFlagStatus.integer > 1 && myFlagTimer != NULL)
 			CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, myFlagTimer, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 
-		if (strlen(myFlagStatus)) {
+		if (myFlagStatus[0] && strlen(myFlagStatus)) {
 			CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, myFlagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 			CG_Text_Paint(2 + ico_size + 4+CG_Text_Width(myFlagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, myFlagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 		}
@@ -5596,6 +5596,8 @@ static void CG_Speedometer(void)
 static void CG_DrawShowPos(void)
 {
 	static char showPosString[128];
+	playerState_t *ps = &cg.predictedPlayerState;
+	float vel;
 
 	if (!cg_showpos.integer)
 		return;
@@ -5603,9 +5605,16 @@ static void CG_DrawShowPos(void)
 	if (!cg.snap)
 		return;
 
-	Com_sprintf(showPosString, sizeof(showPosString), "pos:  %.2f  %.2f  %.2f\nang:  %.2f  %.2f\nvel:  %.2f", (float)cg.predictedPlayerState.origin[0], (float)cg.predictedPlayerState.origin[1], (float)cg.predictedPlayerState.origin[2], (float)cg.predictedPlayerState.viewangles[PITCH], (float)cg.predictedPlayerState.viewangles[YAW], cg.currentSpeed);
-	CG_Text_Paint(cgs.screenWidth - 340, 0, 0.45f, colorWhite,
-		showPosString, 0, 0, ITEM_TEXTSTYLE_OUTLINED, FONT_SMALL);
+	if (!ps)
+		return;
+
+	vel = (float)sqrt(cg.currentSpeed * cg.currentSpeed + ps->velocity[2] * ps->velocity[2]);
+
+	Com_sprintf(showPosString, sizeof(showPosString), "pos:   %.2f   %.2f   %.2f\nang:   %.2f   %.2f\nvel:     %.2f",
+		(float)ps->origin[0], (float)ps->origin[1], (float)ps->origin[2], (float)ps->viewangles[PITCH], (float)ps->viewangles[YAW], vel);
+
+	CG_Text_Paint(cgs.screenWidth - 340, 0, 0.6f, colorWhite,
+		showPosString, 0, 0, ITEM_TEXTSTYLE_OUTLINESHADOWED, FONT_SMALL);
 }
 
 static void CG_StrafeHelperSound(float difference) {
@@ -5651,12 +5660,13 @@ static void CG_DrawAccelMeter(void)
 	static float previousTimes[PERCENT_SAMPLES];
 	static unsigned int index;
 
-	x = speedometerXPos;
+	/*x = speedometerXPos;
 
 	if (cg_speedometer.integer & SPEEDOMETER_GROUNDSPEED)
-		x -= 88;
+		x -= 102;
 	else
-		x -= 52;
+		x -= 52;*/
+	x = cg_speedometerX.integer;
 
 	CG_DrawRect(x - 0.75,
 		cg_speedometerY.value - 10.75,

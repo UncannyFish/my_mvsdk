@@ -1152,8 +1152,8 @@ Cmd_Argc() / Cmd_Argv()
 extern void CG_ChatBox_AddString(char *chatStr);
 static void CG_ServerCommand( void ) {
 	const char	*cmd;
-	char		text[MAX_SAY_TEXT];
-	char tempChatStr[MAX_SAY_TEXT] = { 0 };
+	char		text[MAX_NETNAME+MAX_SAY_TEXT];
+	char tempChatStr[MAX_NETNAME+MAX_SAY_TEXT] = {0};
 	char *r = text, *w = tempChatStr;
 
 	cmd = CG_Argv(0);
@@ -1274,7 +1274,7 @@ static void CG_ServerCommand( void ) {
 	if ( !strcmp( cmd, "chat" ) ) {
 		if ( !cg_teamChatsOnly.integer ) {
 			trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
-			Q_strncpyz( text, CG_Argv(1), MAX_SAY_TEXT );
+			Q_strncpyz(text, CG_Argv(1), sizeof(text));
 			CG_RemoveChatEscapeChar( text );
 
 			// replace "*/." with real percent symbol, and replace two single quotes with double quote
@@ -1309,7 +1309,7 @@ static void CG_ServerCommand( void ) {
 
 	if ( !strcmp( cmd, "tchat" ) ) {
 		trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
-		Q_strncpyz( text, CG_Argv(1), MAX_SAY_TEXT );
+		Q_strncpyz( text, CG_Argv(1), sizeof(text) );
 		CG_RemoveChatEscapeChar( text );
 
 		// replace "*/." with real percent symbol, and replace two single quotes with double quote

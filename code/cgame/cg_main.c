@@ -788,9 +788,9 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_crosshairColor, "cg_crosshairColor", "0 0 0 255", CVAR_ARCHIVE },
 	{ &cg_crosshairIdentifyTarget, "cg_crosshairIdentifyTarget", "1", CVAR_ARCHIVE },
 
-	{ &cg_enhancedFlagStatus, "cg_enhancedFlagStatus", "2", 0 },
+	{ &cg_enhancedFlagStatus, "cg_enhancedFlagStatus", "2", CVAR_ARCHIVE },
 	{ &cg_drawTimerMsec, "cg_drawTimerMsec", "1", CVAR_ARCHIVE },
-	{ &cg_movementKeys, "cg_movementKeys", "1", CVAR_ARCHIVE }, //"0"
+	{ &cg_movementKeys, "cg_movementKeys", "0", CVAR_ARCHIVE },
 	{ &cg_movementKeysX, "cg_movementKeysX", "148", CVAR_ARCHIVE },
 	{ &cg_movementKeysY, "cg_movementKeysY", "428", CVAR_ARCHIVE },
 	{ &cg_movementKeysSize, "cg_movementKeysSize", "1.0", CVAR_ARCHIVE },
@@ -813,7 +813,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_newFont, "cg_newFont", "0", CVAR_ARCHIVE },
 
 	{ &cg_remaps, "cg_remaps", "1",	CVAR_LATCH|CVAR_TEMP },
-	{ &cg_autoKillWhenFalling, "cg_autoKillWhenFalling", "1", CVAR_ARCHIVE },
+	{ &cg_autoKillWhenFalling, "cg_autoKillWhenFalling", "0", CVAR_ARCHIVE },
 
 	{ &cg_jumpSounds, "cg_jumpSounds", "1", CVAR_ARCHIVE },
 	{ &cg_rollSounds, "cg_rollSounds", "1", CVAR_ARCHIVE },
@@ -2956,8 +2956,8 @@ Ghoul2 Insert End
 
 	// get the rendering configuration from the client system
 	trap_GetGlconfig( &cgs.glconfig );
-	cgs.screenXScale = cgs.glconfig.vidWidth / 640.0;
-	cgs.screenYScale = cgs.glconfig.vidHeight / 480.0;
+	cgs.screenXScale = cgs.glconfig.vidWidth / SCREEN_WIDTH;
+	cgs.screenYScale = cgs.glconfig.vidHeight / SCREEN_HEIGHT;
 
 
 	CG_RegisterCvars();

@@ -507,6 +507,10 @@ static void CG_General( centity_t *cent ) {
 		}
 	}
 
+	if (cent->currentState.eType == ET_BODY && cg.predictedPlayerState.duelInProgress) {
+		return;
+	}
+
 	if (cent->currentState.modelGhoul2 >= G2_MODELPART_HEAD &&
 		cent->currentState.modelGhoul2 <= G2_MODELPART_RLEG &&
 		cent->currentState.modelindex < MAX_CLIENTS &&
