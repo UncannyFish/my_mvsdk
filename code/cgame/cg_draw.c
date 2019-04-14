@@ -2442,6 +2442,14 @@ static void CG_DrawReward( void ) {
 		}
 	}
 
+	time = cg.time - cg.rewardTime;
+	if (time <= ITEM_BLOB_TIME) { //fade in
+		iconSize *= time * (1.0/ITEM_BLOB_TIME);
+	}
+	else if (time > 0 && REWARD_TIME - time <= ITEM_BLOB_TIME) { //fade out
+		iconSize *= (REWARD_TIME - time) * (1.0/ITEM_BLOB_TIME);
+	}
+
 	trap_R_SetColor( color );
 
 	/*
@@ -2460,23 +2468,21 @@ static void CG_DrawReward( void ) {
 	*/
 
 	if ( cg.rewardCount[0] >= 10 ) {
-		y = 56;
-		x = 0.5f * (cgs.screenWidth - ICON_SIZE);
-		CG_DrawPic( x + 2, y, ICON_SIZE-4, ICON_SIZE-4, cg.rewardShader[0] );
+		y = 56+((ICON_SIZE-iconSize)/2);
+		x = 0.5f * (cgs.screenWidth - iconSize);
+		CG_DrawPic( x + 2, y, iconSize-4, iconSize-4, cg.rewardShader[0] );
 		Com_sprintf(buf, sizeof(buf), "%d", cg.rewardCount[0]);
 		x = ( cgs.screenWidth - SMALLCHAR_WIDTH * CG_DrawStrlen( buf ) ) * 0.5f;
-		CG_DrawStringExt( x, y+ICON_SIZE, buf, color, qfalse, qtrue,
+		CG_DrawStringExt( x, 104/*y+ICON_SIZE*/, buf, color, qfalse, qtrue,
 								SMALLCHAR_WIDTH, SMALLCHAR_HEIGHT, 0 );
 	}
 	else {
-
 		count = cg.rewardCount[0];
-
-		y = 56;
-		x = 0.5f * (cgs.screenWidth - count * ICON_SIZE);
+		y = 56+((ICON_SIZE-iconSize)/2);
+		x = 0.5f * (cgs.screenWidth - count * iconSize);
 		for ( i = 0 ; i < count ; i++ ) {
-			CG_DrawPic(x + 2, y, ICON_SIZE - 4, ICON_SIZE - 4, cg.rewardShader[0]);
-			x += ICON_SIZE;
+			CG_DrawPic(x + 2, y, iconSize - 4, iconSize - 4, cg.rewardShader[0]);
+			x += iconSize;
 		}
 	}
 	trap_R_SetColor( NULL );
@@ -3580,7 +3586,7 @@ static void CG_DrawCrosshairNames( void ) {
 	// draw the name of the player being looked at
 	color = CG_FadeColor( cg.crosshairClientTime, 1000 );
 	if ( !color ) {
-		trap_R_SetColor( colorTable[CT_WHITE] );
+		trap_R_SetColor(NULL);
 		return;
 	}
 
