@@ -2340,10 +2340,10 @@ static void CG_DrawInventory(int y)
 	int ico_size = 32;
 	float xAlign = cgs.screenWidth - ico_size * 1.1f;
 
-	if (!cg.snap)
+	if (!cg_drawInventory.integer)
 		return;
 
-	if (!cg_drawInventory.integer)
+	if (!cg.snap)
 		return;
 
 	if (cg.snap->ps.pm_type == PM_SPECTATOR)
@@ -2402,7 +2402,9 @@ static void CG_DrawUpperRight( void ) {
 
 	y = CG_DrawMiniScoreboard ( y );
 
-	y = CG_DrawPowerupIcons(y);
+	if (cg_drawPowerUpIcons.integer) {
+		y = CG_DrawPowerupIcons(y);
+	}
 
 	CG_DrawInventory(y);
 }

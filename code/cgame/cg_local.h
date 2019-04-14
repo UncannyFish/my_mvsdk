@@ -1690,6 +1690,7 @@ extern	vmCvar_t		cg_drawInventory;
 extern	vmCvar_t		cg_smallScoreboard;
 extern	vmCvar_t		cg_colorScoreboard;
 extern	vmCvar_t		cg_drawScoreboardIcons;
+extern	vmCvar_t		cg_drawPowerUpIcons;
 extern	vmCvar_t		cg_drawDemoName;
 extern	vmCvar_t		cg_lowhpsound;
 //jk2 pro stuff end
