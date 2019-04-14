@@ -299,6 +299,24 @@ static void CG_CalcIdealThirdPersonViewLocation(void)
 {
 	float thirdPersonRange = cg_thirdPersonRange.value;
 
+	if (cg.predictedPlayerState.saberMove == LS_A_BACK || cg.predictedPlayerState.saberMove == LS_A_BACK_CR
+		|| cg.predictedPlayerState.saberMove == LS_A_BACKSTAB) 
+	{
+		float animLength = bgGlobalAnimations[cg.predictedPlayerState.legsAnim&~ANIM_TOGGLEBIT].numFrames * abs(bgGlobalAnimations[cg.predictedPlayerState.legsAnim&~ANIM_TOGGLEBIT].frameLerp);
+		float elapsedTime = (float)(animLength - cg.predictedPlayerState.legsTimer);
+		float backDist = 0;
+		if (elapsedTime < animLength / 2.0f)
+		{//starting anim
+			backDist = (elapsedTime / animLength)*120.0f;
+		}
+		else
+		{//endinganim
+			backDist = ((animLength - elapsedTime) / animLength)*120.0f;
+		}
+		if (cg_backSwingCameraRange.integer && cg.predictedPlayerState.stats[STAT_HEALTH] > 0)
+			thirdPersonRange += backDist;
+	}
+
 	if (cg.snap && cg.snap->ps.usingATST)
 	{
 		thirdPersonRange = 300;

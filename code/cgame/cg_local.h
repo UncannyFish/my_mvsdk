@@ -1693,6 +1693,7 @@ extern	vmCvar_t		cg_drawScoreboardIcons;
 extern	vmCvar_t		cg_drawPowerUpIcons;
 extern	vmCvar_t		cg_drawDemoName;
 extern	vmCvar_t		cg_lowhpsound;
+extern	vmCvar_t		cg_backSwingCameraRange;
 //jk2 pro stuff end
 
 extern	vmCvar_t		cg_thirdPerson;

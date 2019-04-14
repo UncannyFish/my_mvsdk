@@ -601,6 +601,7 @@ vmCvar_t	cg_drawScoreboardIcons;
 vmCvar_t	cg_drawPowerUpIcons;
 vmCvar_t	cg_drawDemoName;
 vmCvar_t	cg_lowhpsound;
+vmCvar_t	cg_backSwingCameraRange;
 //jk2 pro stuff end
 
 vmCvar_t	cg_thirdPerson;
@@ -848,7 +849,8 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_drawScoreboardIcons, "cg_drawScoreboardIcons", "0", CVAR_ARCHIVE },
 	{ &cg_drawPowerUpIcons, "cg_drawPowerUpIcons", "1", CVAR_ARCHIVE },
 	{ &cg_drawDemoName, "cg_drawDemoName", "1", 0 },
-	{ &cg_lowhpsound,	"cg_lowhpsound", "35", 0 },
+	{ &cg_lowhpsound,	"cg_lowhpsound", "35", CVAR_ARCHIVE },
+	{ &cg_backSwingCameraRange, "cg_backSwingCameraRange", "1", CVAR_ARCHIVE },
 	//jk2pro stuff end
 
 	{ &cg_thirdPerson, "cg_thirdPerson", "0", CVAR_ARCHIVE },
