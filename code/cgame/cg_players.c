@@ -4485,9 +4485,14 @@ Ghoul2 Insert Start
 			{
 				if ( trace.entityNum == ENTITYNUM_WORLD )
 				{//only put marks on architecture
-					// Let's do some cool burn/glowing mark bits!!!
-					CG_CreateSaberMarks( client->saberTrail.oldPos[i], trace.endpos, trace.plane.normal );
-				
+					float markDistance = Distance(client->saberTrail.oldPos[i], trace.endpos);
+					if (markDistance > 8.0f)
+					{ // Let's do some cool burn/glowing mark bits!!!
+						CG_CreateSaberMarks(client->saberTrail.oldPos[i], trace.endpos, trace.plane.normal);
+						// stash point so we can connect-the-dots later
+						VectorCopy(trace.endpos, client->saberTrail.oldPos[i]);
+						VectorCopy(trace.plane.normal, client->saberTrail.oldNormal[i]);
+					}				
 					//make a sound
 					if ( cg.time - client->saberHitWallSoundDebounceTime >= 100 )
 					{//ugh, need to have a real sound debouncer... or do this game-side
@@ -4502,11 +4507,10 @@ Ghoul2 Insert Start
 				client->saberTrail.haveOldPos[i] = qtrue;
 //				CG_ImpactMark( cgs.media.rivetMarkShader, client->saberTrail.oldPos[i], client->saberTrail.oldNormal[i],
 //						0.0f, 1.0f, 1.0f, 1.0f, 1.0f, qfalse, 1.1f, qfalse );
+				// stash point so we can connect-the-dots later
+				VectorCopy(trace.endpos, client->saberTrail.oldPos[i]);
+				VectorCopy(trace.plane.normal, client->saberTrail.oldNormal[i]);
 			}
-
-			// stash point so we can connect-the-dots later
-			VectorCopy( trace.endpos, client->saberTrail.oldPos[i] );
-			VectorCopy( trace.plane.normal, client->saberTrail.oldNormal[i] );
 		}
 		else
 		{
