@@ -1517,6 +1517,13 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	case EV_SABER_BLOCK:
 		DEBUGNAME("EV_SABER_BLOCK");
 
+		if (cgs.isCaMod && jk2version == VERSION_1_04
+			&& cg.predictedPlayerState.duelInProgress
+			&& es->otherEntityNum != cg.predictedPlayerState.clientNum
+			&& es->otherEntityNum != cg.predictedPlayerState.duelIndex
+			&& cgs.clientinfo[cg.clientNum].team != TEAM_SPECTATOR)
+			break;
+
 		if (es->eventParm)
 		{ //saber block
 			vec3_t fxDir;

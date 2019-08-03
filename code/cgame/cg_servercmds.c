@@ -131,6 +131,7 @@ and whenever the server updates any serverinfo flagged cvars
 */
 static void CG_ParseServerinfo( const char *info ) {
 	char	*mapname;
+	char	*v = NULL;
 
 	cgs.gametype = atoi( Info_ValueForKey( info, "g_gametype" ) );
 	trap_Cvar_Set("g_gametype", va("%i", cgs.gametype));
@@ -147,14 +148,32 @@ static void CG_ParseServerinfo( const char *info ) {
 	cgs.maxclients = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
 
 	cgs.isJK2Pro = qfalse;
+	cgs.isCTFMod = qfalse;
+	cgs.CTF3ModeActive = qfalse;
+	cgs.isolateDuels = qfalse;
 	cgs.isCaMod = qfalse;
 	cgs.jcinfo = 0;
-	if (!Q_stricmpn(Info_ValueForKey(info, "gamename"), "jk2pro", 5)) {
-		cgs.isJK2Pro = qtrue;
-		cgs.jcinfo = atoi(Info_ValueForKey(info, "jcinfo"));//[JAPRO - Clientside - All - Add gamename variable to get jcinfo from japro servers]
-	}
-	else if (!Q_stricmpn(Info_ValueForKey(info, "gamename"), "Ca Mod", 6)) {
-		cgs.isCaMod = qtrue;
+	v = Info_ValueForKey(info, "gamename");
+	if (v) {
+		if (!Q_stricmpn(v, "jk2pro", 5)) {
+			cgs.isJK2Pro = qtrue;
+			cgs.isolateDuels = qtrue;
+			cgs.jcinfo = atoi(Info_ValueForKey(info, "jcinfo"));//[JAPRO - Clientside - All - Add gamename variable to get jcinfo from japro servers]
+		}
+		else if (!Q_stricmpn(v, "< VvV >", 7)) {
+			cgs.isCTFMod = qtrue;
+			cgs.CTF3ModeActive = (qboolean)(atoi(Info_ValueForKey(info, "g_allowFreeTeam")));
+		}
+		else if (!Q_stricmpn(v, "Ca Mod", 6))
+		{
+			cgs.isolateDuels = qtrue;
+			cgs.isCaMod = qtrue;
+		}
+		else if (!Q_stricmpn(v, "fgcMod", 6))
+		{
+			cgs.isolateDuels = qtrue;
+			cgs.isCaMod = qfalse;
+		}
 	}
 
 	mapname = Info_ValueForKey( info, "mapname" );
@@ -1308,7 +1327,8 @@ static void CG_ServerCommand( void ) {
 	}
 
 	if ( !strcmp( cmd, "tchat" ) ) {
-		trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
+		if (cg_chatSounds.integer)
+			trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
 		Q_strncpyz( text, CG_Argv(1), sizeof(text) );
 		CG_RemoveChatEscapeChar( text );
 

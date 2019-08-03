@@ -1516,6 +1516,9 @@ Ghoul2 Insert End
 	//jk2pro
 	int				jcinfo;
 	qboolean		isJK2Pro;
+	qboolean		isCTFMod;
+	qboolean		CTF3ModeActive;
+	qboolean		isolateDuels;
 	qboolean		isCaMod;
 
 } cgs_t;

@@ -80,13 +80,8 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins, const
 			continue;
 		}
 
-		if (ent->number >= MAX_CLIENTS && cg.snap && ent->genericenemyindex && (ent->genericenemyindex-1024) == cg.snap->ps.clientNum)
-		{ //rww - method of keeping objects from colliding in client-prediction (in case of ownership)
-			continue;
-		}
-
 		//JAPRO - Clientside - Duel Passthru Prediction - Start 
-		if (cgs.isCaMod || cgs.isJK2Pro)
+		if (cgs.isolateDuels && ent->eType == ET_PLAYER)
 		{
 			if (cg.predictedPlayerState.duelInProgress)
 			{ // we are in a private duel 
@@ -111,7 +106,12 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins, const
 				}
 			}
 		}
-		//JAPRO - Clientside - Duel Passthru Prediction - End 
+		//JAPRO - Clientside - Duel Passthru Prediction - End
+
+		if (ent->number >= MAX_CLIENTS && cg.snap && ent->genericenemyindex && (ent->genericenemyindex-1024) == cg.snap->ps.clientNum)
+		{ //rww - method of keeping objects from colliding in client-prediction (in case of ownership)
+			continue;
+		}
 
 		if ( ent->solid == SOLID_BMODEL ) {
 			// special value for bmodel
