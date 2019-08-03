@@ -4479,6 +4479,8 @@ void CG_ChatBox_AddString(char *chatStr)
 	if (strstr(chatStr, "^7]: ^6")) {
 		personal = qtrue;
 		search = "^7]: ^6";
+		if (cg_chatSounds.integer == 2) //check here since these are sent with normal chat commands
+			trap_S_StartLocalSound(cgs.media.talkSound, CHAN_LOCAL_SOUND);
 	}
 
 	if (regular || teamchat || personal) {
