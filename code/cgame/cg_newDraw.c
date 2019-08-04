@@ -253,6 +253,12 @@ clientInfo_t *CG_GetFlagCarrier(team_t flag) {
 			flagStatus = cgs.blueflag;
 			flagBit = PW_BLUEFLAG;
 			break;
+		case TEAM_FREE:
+			if (cgs.isCTFMod && cgs.CTF3ModeActive) {
+				flagStatus = cgs.yellowflag;
+				flagBit = PW_NEUTRALFLAG;
+				break;
+			}
 		default:
 			return NULL;
 			break;

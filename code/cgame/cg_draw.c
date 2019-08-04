@@ -56,8 +56,9 @@ static void CG_DrawShowPos(void); //jk2pro
 // used for scoreboard
 extern displayContextDef_t cgDC;
 menuDef_t *menuScoreboard = NULL;
-vec4_t	bluehudtint = {0.5, 0.5, 1.0, 1.0};
-vec4_t	redhudtint = {1.0, 0.5, 0.5, 1.0};
+vec4_t	bluehudtint = {0.5f, 0.5f, 1.0f, 1.0f};
+vec4_t	redhudtint = {1.0f, 0.5f, 0.5f, 1.0f};
+vec4_t	yellowhudtint = {1.0f, 1.0f, 0.0f, 1.0f};
 float	*hudTintColor;
 
 int sortedTeamPlayers[TEAM_MAXOVERLAY];
@@ -1248,12 +1249,23 @@ void CG_DrawHUD(centity_t	*cent)
 
 	if (cgs.gametype >= GT_TEAM)
 	{	// tint the hud items based on team
-		if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_RED )
-			hudTintColor = redhudtint;
-		else if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_BLUE )
-			hudTintColor = bluehudtint;
-		else // If we're not on a team for whatever reason, leave things as they are.
-			hudTintColor = colorTable[CT_WHITE];
+		switch (cg.snap->ps.persistant[PERS_TEAM])
+		{
+			case TEAM_RED:
+				hudTintColor = redhudtint;
+				break;
+			case TEAM_BLUE:
+				hudTintColor = bluehudtint;
+				break;
+			case TEAM_FREE:
+			if (cgs.isCTFMod && cgs.CTF3ModeActive) {
+				hudTintColor = yellowhudtint;
+				break;
+			}
+			default:
+				hudTintColor = colorTable[CT_WHITE];
+				break;
+		}
 	}
 	else
 	{	// tint the hud items white (dont' tint)
@@ -1791,7 +1803,7 @@ CG_DrawMiniScoreboard
 */
 static float CG_DrawMiniScoreboard ( float y ) 
 {
-	char temp[MAX_QPATH];
+	char temp[MAX_QPATH] = { 0 };
 
 	if ( !cg_drawScores.integer )
 	{
@@ -1801,11 +1813,16 @@ static float CG_DrawMiniScoreboard ( float y )
 	if ( cgs.gametype >= GT_TEAM )
 	{
 		strcpy ( temp, "Red: " );
-		Q_strcat ( temp, MAX_QPATH, cgs.scores1==SCORE_NOT_PRESENT?"-":(va("%i",cgs.scores1)) );
+		Q_strcat ( temp, MAX_QPATH, cgs.scores1 == SCORE_NOT_PRESENT ? "-" : va("%i", cgs.scores1) );
 		Q_strcat ( temp, MAX_QPATH, " Blue: " );
-		Q_strcat ( temp, MAX_QPATH, cgs.scores2==SCORE_NOT_PRESENT?"-":(va("%i",cgs.scores2)) );
+		Q_strcat ( temp, MAX_QPATH, cgs.scores2 == SCORE_NOT_PRESENT ? "-" : va("%i", cgs.scores2) );
 
-		CG_Text_Paint( cgs.screenWidth - 10 - CG_Text_Width ( temp, 0.7f, FONT_MEDIUM ), y, 0.7f, colorWhite, temp, 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_MEDIUM );
+		if (cgs.isCTFMod && cgs.CTF3ModeActive) {
+			Q_strcat ( temp, MAX_QPATH, " Yellow: " );
+			Q_strcat(temp, MAX_QPATH, cgs.scores3 == SCORE_NOT_PRESENT ? "-" : va("%i", cgs.scores3));
+		}
+
+		CG_Text_Paint( cgs.screenWidth - 10 - CG_Text_Width( temp, 0.7f, FONT_MEDIUM ), y, 0.7f, colorWhite, temp, 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_MEDIUM );
 		y += 15;
 	}
 	else
@@ -3003,7 +3020,7 @@ static void CG_DrawCrosshair( vec3_t worldPoint, int chEntValid ) {
 			vec4_t	ecolor = {0,0,0,0};
 			centity_t *crossEnt = &cg_entities[cg.crosshairClientNum];
 
-			if ( crossEnt->currentState.number < MAX_CLIENTS )
+			if ( crossEnt->currentState.number >= 0 && crossEnt->currentState.number < MAX_CLIENTS )
 			{
 				if (cgs.gametype >= GT_TEAM &&
 					cgs.clientinfo[crossEnt->currentState.number].team == cgs.clientinfo[cg.snap->ps.clientNum].team )
@@ -3669,7 +3686,7 @@ static void CG_DrawCrosshairNames( void ) {
 		tcolor[0] = colorTable[baseColor][0];
 		tcolor[1] = colorTable[baseColor][1];
 		tcolor[2] = colorTable[baseColor][2];
-		tcolor[3] = color[3]*1.0f;//color[3]*0.8f;
+		tcolor[3] = color[3]*0.8f;//color[3]*1.0f;
 
 		//JAPRO - Clientside - Colored crosshair names - Start
 		UI_DrawProportionalString(0.5f * cgs.screenWidth, 170, name, UI_CENTER, tcolor);
@@ -4152,10 +4169,10 @@ void CG_DrawTimedMenus() {
 
 void CG_DrawEnhancedFlagStatus(void)
 {
-	qhandle_t redFlagShader = 0, blueFlagShader = 0;
+	qhandle_t redFlagShader = 0, blueFlagShader = 0, yellowFlagShader = 0;
 	int team = 0;
 	char flagStatus[256] = { 0 }, flagStatusHP[16] = { 0 };
-	char redFlagTimeStr[8] = { 0 }, blueFlagTimeStr[8] = { 0 };
+	char redFlagTimeStr[8] = { 0 }, blueFlagTimeStr[8] = { 0 }, yellowFlagTimeStr[8] = { 0 };
 	int secs, mins;
 	vec4_t hcolor = { 0 };
 	int startDrawPos = 365;
@@ -4210,6 +4227,28 @@ void CG_DrawEnhancedFlagStatus(void)
 		cgs.blueFlagTime = 0;
 	}
 
+	if (cgs.isCTFMod && cgs.CTF3ModeActive)
+	{
+		if (cgs.yellowflag == FLAG_TAKEN)
+		{
+			if (!cgs.yellowFlagTime)
+				cgs.yellowFlagTime = cg.time;
+
+			secs = (cg.time - cgs.yellowFlagTime) / 1000;
+			mins = secs / 60;
+			secs %= 60;
+
+			Com_sprintf(yellowFlagTimeStr, sizeof(yellowFlagTimeStr), "%i:%02i", mins, secs);
+
+			if (!cgs.yellowFlagCarrier)
+				cgs.yellowFlagCarrier = CG_GetFlagCarrier(TEAM_FREE);
+		}
+		else {
+			cgs.yellowFlagCarrier = 0;
+			cgs.yellowFlagTime = 0;
+		}
+	}
+
 	hcolor[0] = hcolor[1] = hcolor[2] = hcolor[3] = 1.0f;
 	team = cg.snap->ps.persistant[PERS_TEAM];
 
@@ -4222,6 +4261,39 @@ void CG_DrawEnhancedFlagStatus(void)
 		else {
 			redFlagShader = cgs.media.flagShaderTaken[TEAM_RED];
 			blueFlagShader = cgs.media.flagShader[TEAM_BLUE];
+			yellowFlagShader = cgs.media.flagShader[TEAM_FREE];
+		}
+
+		if (cgs.isCTFMod && cgs.CTF3ModeActive) {
+			if (cgs.yellowflag != FLAG_ATBASE)
+			{
+				if (cgs.yellowflag == FLAG_TAKEN)
+				{
+					if (cgs.yellowFlagCarrier && cgs.yellowFlagCarrier->infoValid) {
+						Com_sprintf(flagStatus, sizeof(flagStatus), "%s  ", cgs.yellowFlagCarrier->name);
+
+						if (cgs.yellowFlagCarrier->team == team) {
+							CG_GetColorForHealth(cgs.yellowFlagCarrier->health, cgs.yellowFlagCarrier->armor, hcolor);
+
+							if (cgs.yellowFlagCarrier->armor)
+								Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i/%i)", cgs.yellowFlagCarrier->health, cgs.yellowFlagCarrier->armor);
+							else
+								Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i)", cgs.yellowFlagCarrier->health);
+
+							CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, flagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+							CG_Text_Paint(2 + ico_size + 4 + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, flagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						}
+						else {
+							yellowFlagShader = cgs.media.flagShaderTaken[TEAM_FREE];
+							CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, cgs.yellowFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						}
+					}
+					if (cg_enhancedFlagStatus.integer > 1 && yellowFlagTimeStr[0] != '\0')
+						CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, yellowFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+				}
+				CG_DrawPic(2, startDrawPos, ico_size, ico_size, yellowFlagShader);
+				startDrawPos -= ico_size + 2;
+			}
 		}
 
 		if (cgs.blueflag != FLAG_ATBASE)
@@ -4259,13 +4331,100 @@ void CG_DrawEnhancedFlagStatus(void)
 			if (cgs.redflag == FLAG_TAKEN)
 			{
 				if (cgs.redFlagCarrier && cgs.redFlagCarrier->infoValid) {
-					redFlagShader = cgs.media.flagShaderTaken[TEAM_RED];
 					CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, cgs.redFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && redFlagTimeStr[0] != '\0')
 					CG_Text_Paint(2 + ico_size + 4, startDrawPos - 3, 0.65f, colorWhite, redFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
 			CG_DrawPic(2, startDrawPos, ico_size, ico_size, redFlagShader);
+			startDrawPos -= ico_size + 2;
+		}
+	}
+	else if (cgs.CTF3ModeActive && cgs.CTF3ModeActive && team == TEAM_FREE)
+	{
+		if (cgs.gametype == GT_CTY) {
+			redFlagShader = cgs.media.flagShaderYsal[TEAM_RED];
+			blueFlagShader = cgs.media.flagShaderTaken[TEAM_BLUE];
+		}
+		else {
+			redFlagShader = cgs.media.flagShader[TEAM_RED];
+			blueFlagShader = cgs.media.flagShader[TEAM_BLUE];
+			yellowFlagShader = cgs.media.flagShaderTaken[TEAM_FREE];
+		}
+
+		if (cgs.blueflag != FLAG_ATBASE)
+		{
+			if (cgs.blueflag == FLAG_TAKEN)
+			{
+				if (cgs.blueFlagCarrier && cgs.blueFlagCarrier->infoValid) {
+					Com_sprintf(flagStatus, sizeof(flagStatus), "%s  ", cgs.blueFlagCarrier->name);
+
+					if (cgs.blueFlagCarrier->team == team) {
+						CG_GetColorForHealth(cgs.blueFlagCarrier->health, cgs.blueFlagCarrier->armor, hcolor);
+
+						if (cgs.blueFlagCarrier->armor)
+							Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i/%i)", cgs.blueFlagCarrier->health, cgs.blueFlagCarrier->armor);
+						else
+							Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i)", cgs.blueFlagCarrier->health);
+
+						CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, flagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2 + ico_size + 4 + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, flagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+					}
+					else {
+						blueFlagShader = cgs.media.flagShaderTaken[TEAM_BLUE];
+						CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, cgs.blueFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+					}
+				}
+				if (cg_enhancedFlagStatus.integer > 1 && blueFlagTimeStr[0] != '\0')
+					CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, blueFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+			}
+			CG_DrawPic(2, startDrawPos, ico_size, ico_size, blueFlagShader);
+			startDrawPos -= ico_size + 2;
+		}
+
+		if (cgs.redflag != FLAG_ATBASE)
+		{
+			if (cgs.redflag == FLAG_TAKEN)
+			{
+				if (cgs.redFlagCarrier && cgs.redFlagCarrier->infoValid) {
+					Com_sprintf(flagStatus, sizeof(flagStatus), "%s  ", cgs.redFlagCarrier->name);
+
+					if (cgs.redFlagCarrier->team == team) {
+						redFlagShader = cgs.media.flagShader[TEAM_RED];
+
+						CG_GetColorForHealth(cgs.redFlagCarrier->health, cgs.redFlagCarrier->armor, hcolor);
+
+						if (cgs.redFlagCarrier->armor)
+							Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i/%i)", cgs.redFlagCarrier->health, cgs.redFlagCarrier->armor);
+						else
+							Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i)", cgs.redFlagCarrier->health);
+
+						CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, flagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2 + ico_size + 4 + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, flagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+					}
+					else {
+						redFlagShader = cgs.media.flagShaderTaken[TEAM_RED];
+						CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, cgs.redFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+					}
+				}
+				if (cg_enhancedFlagStatus.integer > 1 && redFlagTimeStr[0] != '\0')
+					CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, redFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+			}
+			CG_DrawPic(2, startDrawPos, ico_size, ico_size, redFlagShader);
+			startDrawPos -= ico_size + 2;
+		}
+
+		if (cgs.yellowflag != FLAG_ATBASE)
+		{
+			if (cgs.yellowflag == FLAG_TAKEN)
+			{
+				if (cgs.yellowFlagCarrier && cgs.yellowFlagCarrier->infoValid) {
+					CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, cgs.yellowFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+				}
+				if (cg_enhancedFlagStatus.integer > 1 && yellowFlagTimeStr[0] != '\0')
+					CG_Text_Paint(2 + ico_size + 4, startDrawPos - 3, 0.65f, colorWhite, yellowFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+			}
+			CG_DrawPic(2, startDrawPos, ico_size, ico_size, yellowFlagShader);
 			startDrawPos -= ico_size + 2;
 		}
 	}
@@ -4278,6 +4437,39 @@ void CG_DrawEnhancedFlagStatus(void)
 		else {
 			redFlagShader = cgs.media.flagShader[TEAM_RED];
 			blueFlagShader = cgs.media.flagShaderTaken[TEAM_BLUE];
+			yellowFlagShader = cgs.media.flagShader[TEAM_FREE];
+		}
+
+		if (cgs.isCTFMod && cgs.CTF3ModeActive) {
+			if (cgs.yellowflag != FLAG_ATBASE)
+			{
+				if (cgs.yellowflag == FLAG_TAKEN)
+				{
+					if (cgs.yellowFlagCarrier && cgs.yellowFlagCarrier->infoValid) {
+						Com_sprintf(flagStatus, sizeof(flagStatus), "%s  ", cgs.yellowFlagCarrier->name);
+
+						if (cgs.yellowFlagCarrier->team == team) {
+							CG_GetColorForHealth(cgs.yellowFlagCarrier->health, cgs.yellowFlagCarrier->armor, hcolor);
+
+							if (cgs.yellowFlagCarrier->armor)
+								Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i/%i)", cgs.yellowFlagCarrier->health, cgs.yellowFlagCarrier->armor);
+							else
+								Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i)", cgs.yellowFlagCarrier->health);
+
+							CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, flagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+							CG_Text_Paint(2 + ico_size + 4 + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, flagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						}
+						else {
+							yellowFlagShader = cgs.media.flagShaderTaken[TEAM_FREE];
+							CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, cgs.yellowFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						}
+					}
+					if (cg_enhancedFlagStatus.integer > 1 && yellowFlagTimeStr[0] != '\0')
+						CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, yellowFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+				}
+				CG_DrawPic(2, startDrawPos, ico_size, ico_size, yellowFlagShader);
+				startDrawPos -= ico_size + 2;
+			}
 		}
 
 		if (cgs.redflag != FLAG_ATBASE)
@@ -4317,7 +4509,6 @@ void CG_DrawEnhancedFlagStatus(void)
 			if (cgs.blueflag == FLAG_TAKEN)
 			{
 				if (cgs.blueFlagCarrier && cgs.blueFlagCarrier->infoValid) {
-					blueFlagShader = cgs.media.flagShaderTaken[TEAM_BLUE];
 					CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, cgs.blueFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && blueFlagTimeStr[0] != '\0')

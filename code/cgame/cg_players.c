@@ -6262,13 +6262,22 @@ void CG_Player( centity_t *cent ) {
 		if ((cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR || cg.snap->ps.persistant[PERS_TEAM] == team) &&
 			!(cent->currentState.eFlags & EF_DEAD))
 		{
-			if (team == TEAM_RED)
+			switch (team)
 			{
-				CG_PlayerFloatSprite( cent, cgs.media.teamRedShader);
-			}
-			else	// if (team == TEAM_BLUE)
-			{
-				CG_PlayerFloatSprite( cent, cgs.media.teamBlueShader);
+				case TEAM_RED:
+					CG_PlayerFloatSprite( cent, cgs.media.teamRedShader);
+					break;
+				case TEAM_BLUE:
+					CG_PlayerFloatSprite( cent, cgs.media.teamBlueShader);
+					break;
+				case TEAM_FREE:
+					if (cgs.isCTFMod && cgs.CTF3ModeActive && team == TEAM_FREE) {
+						CG_PlayerFloatSprite( cent, cgs.media.teamYellowShader);
+						break;
+					}
+				default:
+					CG_PlayerFloatSprite( cent, cgs.media.teamBlueShader); // old fallback behavior
+					break;
 			}
 		}
 	}

@@ -65,7 +65,7 @@ static void CG_Viewpos_f (void) {
 static void CG_ScoresDown_f( void ) {
 
 	CG_BuildSpectatorString();
-	if ( (cg.scoresRequestTime + 1500 < cg.time) && !cg.demoPlayback ) {
+	if (!cg.demoPlayback && cg.scoresRequestTime + 2000 < cg.time) { //don't clear the scoreboard when watching a demo
 		// the scores are more than two seconds out of data,
 		// so request new ones
 		cg.scoresRequestTime = cg.time;
@@ -740,7 +740,7 @@ void CG_Say_f( void ) {
 	switch (messagetype)
 	{
 		default:
-			Com_Printf("%sUnrecognized command %s\n", S_COLOR_YELLOW, CG_Argv(0));
+			CG_Printf("%sUnrecognized command %s\n", S_COLOR_YELLOW, CG_Argv(0));
 			break;
 		case 1:
 			trap_SendClientCommand(va("say %s", msg));
@@ -769,23 +769,29 @@ void CG_ClientList_f( void )
 		switch( ci->team ) 
 		{
 		case TEAM_FREE:
-			Com_Printf( "%2d " S_COLOR_YELLOW "F   " S_COLOR_WHITE "%s" S_COLOR_WHITE "%s\n", i,
-				ci->name, (ci->botSkill != 0) ? " (bot)" : "" );
+			if (cgs.isCTFMod && cgs.CTF3ModeActive) {
+				CG_Printf( "%2d " S_COLOR_YELLOW "Y   " S_COLOR_WHITE "%s" S_COLOR_WHITE "%s\n", i,
+					ci->name, (ci->botSkill != 0) ? " (bot)" : "" );
+			}
+			else {
+				CG_Printf( "%2d " S_COLOR_YELLOW "F   " S_COLOR_WHITE "%s" S_COLOR_WHITE "%s\n", i,
+					ci->name, (ci->botSkill != 0) ? " (bot)" : "" );
+			}
  			break;
  
 		case TEAM_RED:
-			Com_Printf( "%2d " S_COLOR_RED "R   " S_COLOR_WHITE "%s" S_COLOR_WHITE "%s\n", i,
+			CG_Printf( "%2d " S_COLOR_RED "R   " S_COLOR_WHITE "%s" S_COLOR_WHITE "%s\n", i,
 				ci->name, (ci->botSkill != 0) ? " (bot)" : "" );
 			break;
 
 		case TEAM_BLUE:
-			Com_Printf( "%2d " S_COLOR_BLUE "B   " S_COLOR_WHITE "%s" S_COLOR_WHITE "%s\n", i,
+			CG_Printf( "%2d " S_COLOR_BLUE "B   " S_COLOR_WHITE "%s" S_COLOR_WHITE "%s\n", i,
 				ci->name, (ci->botSkill != 0) ? " (bot)" : "" );
 			break;
 
 		default:
 		case TEAM_SPECTATOR:
-			Com_Printf( "%2d " S_COLOR_YELLOW "S   " S_COLOR_WHITE "%s" S_COLOR_WHITE "%s\n", i,
+			CG_Printf( "%2d " S_COLOR_YELLOW "S   " S_COLOR_WHITE "%s" S_COLOR_WHITE "%s\n", i,
 				ci->name, (ci->botSkill != 0) ? " (bot)" : "" );
 			break;
 		}
@@ -793,14 +799,134 @@ void CG_ClientList_f( void )
 		count++;
 	}
 
-	Com_Printf( "Listed %2d clients\n", count );
+	CG_Printf( "Listed %2d clients\n", count );
+}
+
+static void CG_ModVersion_f(void)
+{
+	CG_Printf("^5Your client version of the mod was compiled on %s at %s\n", __DATE__, __TIME__);
+	//trap_SendConsoleCommand("ui_modversion\n");
+	if (cgs.isJK2Pro) {
+		trap_SendClientCommand( "modversion" );
+		trap_Cvar_Set("cjp_client", "1.4JAPRO"); //Do this manually here i guess, just incase it does not do it when game is created due to ja+ or something
+	}
+}
+
+static void CG_Follow_f(void) {
+	int clientNum = -1;
+
+	if (trap_Argc() < 2) {
+		CG_Printf("usage /follow <name>\n");
+		return;
+	}
+
+	clientNum = CG_ClientNumberFromString(CG_Argv(1));
+
+	if (clientNum < 0)
+		return;
+
+	CG_SendConsoleCommand("cmd follow %i", clientNum);
+}
+
+static void CG_FollowRedFlag_f(void) {
+	int i;
+	clientInfo_t	*ci;
+
+	if (!cg.snap)
+		return;
+
+	for (i = 0 ; i < cgs.maxclients ; i++) {
+		if (i == cg.snap->ps.clientNum)
+			continue;
+
+		ci = &cgs.clientinfo[ i ];
+
+		if (ci->powerups & (1 << PW_REDFLAG)) {
+			CG_SendConsoleCommand("cmd follow %i", i);
+			return;
+		}
+	}
+}
+
+static void CG_FollowBlueFlag_f(void) {
+	int i;
+	clientInfo_t	*ci;
+
+	if (!cg.snap)
+		return;
+
+	for (i = 0 ; i < cgs.maxclients ; i++) {
+		if (i == cg.snap->ps.clientNum)
+			continue;
+
+		ci = &cgs.clientinfo[ i ];
+
+		if (ci->powerups & (1 << PW_BLUEFLAG)) {
+			CG_SendConsoleCommand("follow %i", i);
+			return;
+		}
+	}
+}
+
+static void CG_FollowYellowFlag_f(void) {
+	int i;
+	clientInfo_t	*ci;
+
+	if (!cg.snap)
+		return;
+
+	if (!cgs.isCTFMod || !cgs.CTF3ModeActive)
+		return;
+
+	for (i = 0 ; i < cgs.maxclients ; i++) {
+		if (i == cg.snap->ps.clientNum)
+			continue;
+
+		ci = &cgs.clientinfo[ i ];
+
+		if (ci->powerups & (1 << PW_NEUTRALFLAG)) {
+			CG_SendConsoleCommand("cmd follow %i", i);
+			return;
+		}
+	}
+}
+
+
+static void CG_FollowFastest_f(void) {
+	int i, fastestPlayer = -1, currentSpeed, fastestSpeed = 0;
+	centity_t *cent;
+
+	if (!cg.snap)
+		return;
+
+	for (i=0;i<MAX_CLIENTS;i++) {
+		if (i == cg.snap->ps.clientNum)
+			continue;
+
+		cent = &cg_entities[i];
+
+		if (!cent)
+			continue;
+		if (cent->currentState.eType != ET_PLAYER)
+			continue;
+
+		currentSpeed = VectorLengthSquared(cent->currentState.pos.trDelta);
+
+		if (currentSpeed > fastestSpeed) {
+			fastestSpeed = currentSpeed;
+			fastestPlayer = i;
+		}
+
+	}
+	if (fastestPlayer >= 0 && fastestPlayer < MAX_CLIENTS)
+		CG_SendConsoleCommand("cmd follow %i", fastestPlayer);
 }
 
 static void CG_RemapShader_f(void) {
 	char oldShader[MAX_QPATH], newShader[MAX_QPATH];
 
 	if (trap_Argc() != 3) {
-		Com_Printf("Usage: /remapShader <old> <new>\n");
+		CG_Printf("Usage: /remapShader <old> <new>\n");
 		return;
 	}
 
@@ -823,7 +949,7 @@ static void CG_ListRemaps_f(void) {
 
 	Q_strstrip( info2, ":", "\n" );	
 
-	Com_Printf("Remaps: \n %s \n", info2);
+	CG_Printf("Remaps: \n %s \n", info2);
 
 	//Replace : with newline
 	//replace 0.30@ with null?
@@ -860,7 +986,6 @@ void CG_Do_f(void) //loda fixme
 
 static void CG_Flipkick_f(void)
 {
-
 	//Well we always want to do the first kick, unless we are doing some really advanced predictive shit..
 
 	//Ok, we started out flipkick.  Each frame we want to remove/add jump (+moveup and -moveup).
@@ -883,6 +1008,15 @@ static void CG_Lowjump_f(void)
 
 static void CG_NorollDown_f(void)
 {
+	if (trap_Key_IsDown(trap_Key_GetKey("+moveup"))) {
+		trap_SendConsoleCommand("-moveup\n");
+	}
+
+	if (cg.predictedPlayerState.weapon != WP_SABER || cg.predictedPlayerState.powerups[PW_YSALAMIRI] > cg.time)
+	{
+		trap_SendConsoleCommand("+movedown\n");
+		return;
+	}
 
 	trap_SendConsoleCommand("+speed\n");
 	Q_strncpyz(cg.doVstr, "-moveup;+movedown;-speed\n", sizeof(cg.doVstr));
@@ -891,6 +1025,12 @@ static void CG_NorollDown_f(void)
 
 static void CG_NorollUp_f(void)
 {
+	if (cg.predictedPlayerState.weapon != WP_SABER || cg.predictedPlayerState.powerups[PW_YSALAMIRI] > cg.time)
+	{
+		trap_SendConsoleCommand("-movedown\n");
+		return;
+	}
+
 	Q_strncpyz(cg.doVstr, "-movedown;-speed\n", sizeof(cg.doVstr)); //?
 	cg.doVstrTime = cg.time;
 }
@@ -999,6 +1139,14 @@ static consoleCommand_t	commands[] = {
 	{ "tell", CG_Say_f },
 
 	{ "clientlist", CG_ClientList_f },
+
+	{ "modversion", CG_ModVersion_f },
+
+	{ "follow", CG_Follow_f },
+	{ "followRedFlag", CG_FollowRedFlag_f },
+	{ "followBlueFlag", CG_FollowBlueFlag_f },
+	{ "followYellowFlag", CG_FollowYellowFlag_f },
+	{ "followFastest", CG_FollowFastest_f },
 
 	{ "remapShader", CG_RemapShader_f },
 	{ "listRemaps", CG_ListRemaps_f },

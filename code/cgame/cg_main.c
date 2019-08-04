@@ -1791,12 +1791,15 @@ static void CG_RegisterGraphics( void ) {
 
 		cgs.media.flagShaderYsal[TEAM_RED] = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_rflag_ys" );
 		cgs.media.flagShaderYsal[TEAM_BLUE] = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_bflag_ys" );
+		cgs.media.flagShaderYsal[TEAM_FREE] = trap_R_RegisterShaderNoMip( "icons/iconf_neutral1" ); //will have to do for now
 
 		cgs.media.flagShader[TEAM_RED] = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_rflag" );
 		cgs.media.flagShader[TEAM_BLUE] = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_bflag" );
+		cgs.media.flagShader[TEAM_FREE] = trap_R_RegisterShaderNoMip( "icons/iconf_neutral1" );
 
 		cgs.media.flagShaderTaken[TEAM_RED] = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_rflag_x" );
 		cgs.media.flagShaderTaken[TEAM_BLUE] = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_bflag_x" );
+		cgs.media.flagShaderTaken[TEAM_FREE] = trap_R_RegisterShaderNoMip( "icons/iconf_neutral1_x" );
 
 
 		trap_R_RegisterShaderNoMip("gfx/2d/net.tga");
@@ -1817,6 +1820,7 @@ static void CG_RegisterGraphics( void ) {
 	if ( cgs.gametype >= GT_TEAM || cg_buildScript.integer ) {
 		cgs.media.teamRedShader = trap_R_RegisterShader( "sprites/team_red" );
 		cgs.media.teamBlueShader = trap_R_RegisterShader( "sprites/team_blue" );
+		cgs.media.teamYellowShader = trap_R_RegisterShader( "sprites/team_yellow" );
 		cgs.media.redQuadShader = trap_R_RegisterShader("powerups/blueflag" );
 		cgs.media.teamStatusBar = trap_R_RegisterShader( "gfx/2d/colorbar.tga" );
 	}

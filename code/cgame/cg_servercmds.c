@@ -318,7 +318,10 @@ void CG_UpdateConfigString( int num, qboolean init )
 			cgs.scores2 = atoi( str );
 			break;
 		case CS_CLIENT_JEDIMASTER:
-			cgs.jediMaster = atoi ( str );
+			if (!cgs.isCTFMod || !cgs.CTF3ModeActive)
+				cgs.jediMaster = atoi ( str );
+			else
+				cgs.scores3 = atoi(str);
 			break;
 		case CS_CLIENT_DUELWINNER:
 			cgs.duelWinner = atoi ( str );

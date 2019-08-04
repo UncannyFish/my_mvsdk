@@ -1059,6 +1059,7 @@ typedef struct {
 
 	qhandle_t	teamRedShader;
 	qhandle_t	teamBlueShader;
+	qhandle_t	teamYellowShader;
 
 	qhandle_t	balloonShader;
 	qhandle_t	connectionShader;
@@ -1452,7 +1453,7 @@ typedef struct {
 
 	int				levelStartTime;
 
-	int				scores1, scores2;		// from configstrings
+	int				scores1, scores2, scores3;		// from configstrings
 	int				jediMaster;
 	int				duelWinner;
 	int				duelist1;
@@ -1461,8 +1462,8 @@ typedef struct {
 	int				flagStatus;
 
 	//new flagstatus stuff
-	clientInfo_t	*redFlagCarrier, *blueFlagCarrier;
-	int				redFlagTime, blueFlagTime;
+	clientInfo_t	*redFlagCarrier, *blueFlagCarrier, *yellowFlagCarrier;
+	int				redFlagTime, blueFlagTime, yellowFlagTime;
 
 	qboolean  newHud;
 
@@ -1784,6 +1785,8 @@ const char *CG_Argv( int arg );
 
 void QDECL CG_Printf( const char *msg, ... ) __attribute__ ((format (printf, 1, 2)));
 Q_NORETURN void QDECL CG_Error( const char *msg, ... ) __attribute__ ((format (printf, 1, 2)));
+
+void QDECL CG_SendConsoleCommand(const char *fmt, ...);
 
 void CG_StartMusic( qboolean bForceStart );
 
