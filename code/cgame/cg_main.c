@@ -515,6 +515,8 @@ vmCvar_t	cg_animBlend;
 vmCvar_t	cg_dismember;
 
 //jk2pro Client Cvars - start
+vmCvar_t	cjp_client;
+
 vmCvar_t	cg_raceTimer;
 vmCvar_t	cg_raceTimerSize;
 vmCvar_t	cg_raceTimerX;
@@ -763,6 +765,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_dismember, "cg_dismember", "0", CVAR_ARCHIVE },
 
 	//jk2pro Client Cvars start
+	{ &cjp_client, "cjp_client", "1.4JAPRO", CVAR_USERINFO|CVAR_ROM },
 	{ &cg_raceTimer, "cg_raceTimer", "3", 0 },
 	{ &cg_raceTimerSize, "cg_raceTimerSize", "0.75", 0 },
 	{ &cg_raceTimerX, "cg_raceTimerX", "5", 0 },
@@ -1413,12 +1416,14 @@ static void CG_RegisterSounds( void ) {
 		cgs.media.redScoredSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM044");
 		cgs.media.blueScoredSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM043" );
 
-		if ( cgs.gametype == GT_CTF || cgs.gametype == GT_CTY || cg_buildScript.integer ) {
+		if ( cgs.gametype == GT_CTF || cg_buildScript.integer ) {
 			cgs.media.redFlagReturnedSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM042" );
 			cgs.media.blueFlagReturnedSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM041" );
 			cgs.media.redTookFlagSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM040" );
 			cgs.media.blueTookFlagSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM039" );
+		}
 
+		if ( cgs.gametype == GT_CTY || cg_buildScript.integer ) {
 			cgs.media.redYsalReturnedSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM050" );
 			cgs.media.blueYsalReturnedSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM049" );
 			cgs.media.redTookYsalSound = trap_S_RegisterSound( "sound/chars/mothma/misc/40MOM048" );
@@ -1722,6 +1727,8 @@ static void CG_RegisterGraphics( void ) {
 		}
 	}
 
+	cgs.media.neutralFlagModel = trap_R_RegisterModel( "models/flags/n_flag.md3" );
+
 	if ( cgs.gametype == GT_CTF || cgs.gametype == GT_CTY || cg_buildScript.integer ) {
 		if (cg_buildScript.integer)
 		{
@@ -1742,14 +1749,15 @@ static void CG_RegisterGraphics( void ) {
 			cgs.media.blueFlagModel = trap_R_RegisterModel( "models/flags/b_flag_ysal.md3" );
 		}
 
-		trap_R_RegisterShaderNoMip( "gfx/hud/mpi_rflag_x" );
-		trap_R_RegisterShaderNoMip( "gfx/hud/mpi_bflag_x" );
+		cgs.media.flagShaderYsal[TEAM_RED] = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_rflag_ys" );
+		cgs.media.flagShaderYsal[TEAM_BLUE] = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_bflag_ys" );
 
-		trap_R_RegisterShaderNoMip( "gfx/hud/mpi_rflag_ys" );
-		trap_R_RegisterShaderNoMip( "gfx/hud/mpi_bflag_ys" );
+		cgs.media.flagShader[TEAM_RED] = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_rflag" );
+		cgs.media.flagShader[TEAM_BLUE] = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_bflag" );
 
-		trap_R_RegisterShaderNoMip( "gfx/hud/mpi_rflag" );
-		trap_R_RegisterShaderNoMip( "gfx/hud/mpi_bflag" );
+		cgs.media.flagShaderTaken[TEAM_RED] = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_rflag_x" );
+		cgs.media.flagShaderTaken[TEAM_BLUE] = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_bflag_x" );
+
 
 		trap_R_RegisterShaderNoMip("gfx/2d/net.tga");
 
@@ -1763,14 +1771,6 @@ static void CG_RegisterGraphics( void ) {
 		cgs.media.redFlagBaseModel = trap_R_RegisterModel( "models/mapobjects/flagbase/red_base.md3" );
 		cgs.media.blueFlagBaseModel = trap_R_RegisterModel( "models/mapobjects/flagbase/blue_base.md3" );
 		cgs.media.neutralFlagBaseModel = trap_R_RegisterModel( "models/mapobjects/flagbase/ntrl_base.md3" );
-	}
-
-	if ( cg_buildScript.integer ) {
-		cgs.media.neutralFlagModel = 0;//trap_R_RegisterModel( "models/flags/n_flag.md3" );
-		cgs.media.flagShader[0] = 0;//trap_R_RegisterShaderNoMip( "icons/iconf_neutral1" );
-		cgs.media.flagShader[1] = 0;//trap_R_RegisterShaderNoMip( "icons/iconf_red2" );
-		cgs.media.flagShader[2] = 0;//trap_R_RegisterShaderNoMip( "icons/iconf_blu2" );
-		cgs.media.flagShader[3] = 0;//trap_R_RegisterShaderNoMip( "icons/iconf_neutral3" );
 	}
 
 

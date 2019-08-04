@@ -1754,13 +1754,17 @@ void CG_DrawTeamBackground( int x, int y, int w, int h, float alpha, int team )
 
 	hcolor[3] = alpha;
 	if ( team == TEAM_RED ) {
-		hcolor[0] = 1;
-		hcolor[1] = .2f;
-		hcolor[2] = .2f;
+		hcolor[0] = 1.0f;
+		hcolor[1] = 0.2f;
+		hcolor[2] = 0.2f;
 	} else if ( team == TEAM_BLUE ) {
-		hcolor[0] = .2f;
-		hcolor[1] = .2f;
-		hcolor[2] = 1;
+		hcolor[0] = 0.2f;
+		hcolor[1] = 0.2f;
+		hcolor[2] = 1.0f;
+	} else if ( team == TEAM_FREE && cgs.isCTFMod && cgs.CTF3ModeActive ) {
+		hcolor[0] = 0.8f;
+		hcolor[1] = 0.8f;
+		hcolor[2] = 0.0f;
 	} else {
 		return;
 	}
@@ -2102,16 +2106,16 @@ static float CG_DrawTeamOverlay( float y, qboolean right, qboolean upper ) {
 	char st[16];
 	clientInfo_t *ci;
 	gitem_t	*item;
+	team_t team = (team_t)cg.snap->ps.persistant[PERS_TEAM];
 	int ret_y, count;
 
 	if ( !cg_drawTeamOverlay.integer ) {
 		return y;
 	}
 
-	if ( cg.snap->ps.persistant[PERS_TEAM] != TEAM_RED && cg.snap->ps.persistant[PERS_TEAM] != TEAM_BLUE ) {
+	if ( cg.snap->ps.persistant[PERS_TEAM] != TEAM_RED && cg.snap->ps.persistant[PERS_TEAM] != TEAM_BLUE && !(cg.snap->ps.persistant[PERS_TEAM] == TEAM_FREE && cgs.isCTFMod && cgs.CTF3ModeActive) ) {
 		return y; // Not on any team
 	}
-
 	plyrs = 0;
 
 	// max player name width
@@ -2119,7 +2123,7 @@ static float CG_DrawTeamOverlay( float y, qboolean right, qboolean upper ) {
 	count = numSortedTeamPlayers;
 	for (i = 0; i < count; i++) {
 		ci = cgs.clientinfo + sortedTeamPlayers[i];
-		if ( ci->infoValid && ci->team == (team_t)cg.snap->ps.persistant[PERS_TEAM]) {
+		if ( ci->infoValid && ci->team == team ) {
 			plyrs++;
 			len = CG_DrawStrlen(ci->name);
 			if (len > pwidth)
@@ -2163,25 +2167,38 @@ static float CG_DrawTeamOverlay( float y, qboolean right, qboolean upper ) {
 		ret_y = y;
 	}
 
-	if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_RED ) {
-		hcolor[0] = 1.0f;
-		hcolor[1] = 0.0f;
-		hcolor[2] = 0.0f;
-		hcolor[3] = 0.33f;
-	} else { // if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_BLUE )
-		hcolor[0] = 0.0f;
-		hcolor[1] = 0.0f;
-		hcolor[2] = 1.0f;
-		hcolor[3] = 0.33f;
+	switch (team) {
+		case TEAM_RED:
+			hcolor[0] = 1.0f;
+			hcolor[1] = 0.0f;
+			hcolor[2] = 0.0f;
+			break;
+		case TEAM_BLUE:
+			hcolor[0] = 0.0f;
+			hcolor[1] = 0.0f;
+			hcolor[2] = 1.0f;
+			break;
+		case TEAM_FREE:
+			if (cgs.isCTFMod && cgs.CTF3ModeActive) {
+				hcolor[0] = 0.8f;
+				hcolor[1] = 0.8f;
+				hcolor[2] = 0.0f;
+				break;
+			}
+		default:
+			hcolor[0] = 0.8f;
+			hcolor[1] = 0.8f;
+			hcolor[2] = 0.8f;
+			break;
 	}
+	hcolor[3] = 0.33f;
 	trap_R_SetColor( hcolor );
 	CG_DrawPic( x, y, w, h, cgs.media.teamStatusBar );
 	trap_R_SetColor( NULL );
 
 	for (i = 0; i < count; i++) {
 		ci = cgs.clientinfo + sortedTeamPlayers[i];
-		if ( ci->infoValid && ci->team == (team_t)cg.snap->ps.persistant[PERS_TEAM]) {
-
+		if ( ci->infoValid && ci->team == team ) {
 			hcolor[0] = hcolor[1] = hcolor[2] = hcolor[3] = 1.0;
 
 			xx = x + TINYCHAR_WIDTH;
@@ -2306,16 +2323,16 @@ static int CG_DrawPowerupIcons(int y)
 				{
 					if (j == PW_REDFLAG)
 					{
-						icoShader = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_rflag_ys" );
+						icoShader = cgs.media.flagShaderYsal[TEAM_RED];
 					}
 					else
 					{
-						icoShader = trap_R_RegisterShaderNoMip( "gfx/hud/mpi_bflag_ys" );
+						icoShader = cgs.media.flagShaderYsal[TEAM_BLUE];
 					}
 				}
 				else
 				{
-					icoShader = trap_R_RegisterShader( item->icon );
+					icoShader = trap_R_RegisterShaderNoMip( item->icon );
 				}
 
 				CG_DrawPic( xAlign, y, ico_size, ico_size, icoShader );
@@ -2385,7 +2402,7 @@ static void CG_DrawUpperRight( void ) {
 
 	y = 0;
 
-	if ( cgs.gametype >= GT_TEAM && cg_drawTeamOverlay.integer == 1 ) {
+	if ( cgs.gametype >= GT_TEAM && cg_drawTeamOverlay.integer ) {
 		y = CG_DrawTeamOverlay( y, qtrue, qtrue );
 	} 
 	if ( cg_drawSnapshot.integer ) {

@@ -397,6 +397,10 @@ void CG_UpdateConfigString( int num, qboolean init )
 				// format is rb where its red/blue, 0 is at base, 1 is taken, 2 is dropped
 				cgs.redflag = str[0] - '0';
 				cgs.blueflag = str[1] - '0';
+				if (cgs.isCTFMod && cgs.CTF3ModeActive)
+					cgs.yellowflag = str[2] - '0';
+				else
+					cgs.yellowflag = 0;
 			}
 			break;
 		case CS_SHADERSTATE:

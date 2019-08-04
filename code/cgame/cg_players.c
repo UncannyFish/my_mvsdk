@@ -3338,7 +3338,13 @@ static void CG_PlayerPowerups( centity_t *cent, refEntity_t *torso ) {
 
 	// neutralflag
 	if ( powerups & ( 1 << PW_NEUTRALFLAG ) ) {
-		trap_R_AddLightToScene( cent->lerpOrigin, 200 + (rand()&31), 1.0, 1.0, 1.0 );
+		if (cgs.isCTFMod && cgs.CTF3ModeActive) {
+			CG_PlayerFlag( cent, cgs.media.neutralFlagModel );
+			trap_R_AddLightToScene( cent->lerpOrigin, 200 + (rand()&31), 0.8f, 0.8f, 0.0f );
+		}
+		else {
+			trap_R_AddLightToScene( cent->lerpOrigin, 200 + (rand()&31), 1.0f, 1.0f, 1.0f );
+		}
 	}
 
 	// haste leaves smoke trails
@@ -6108,7 +6114,7 @@ void CG_Player( centity_t *cent ) {
 		cent->trickAlphaTime = cg.time;
 	}
 
-	//JAPRO - Clientside - Draw Duelers - Start
+	//JAPRO - Clientside - Draw Non-Duelers - Start
 	if (cent->currentState.number != cg.snap->ps.clientNum && ((cg.predictedPlayerState.clientNum != cent->currentState.owner))) { // we only care about other players
 		if (cg.snap->ps.duelInProgress) { // we are dueling
 			if (cent->currentState.number != cg.snap->ps.duelIndex) { // don't draw this entity because we aren't dueling them
@@ -6118,7 +6124,7 @@ void CG_Player( centity_t *cent ) {
 			}
 		}
 	}
-	//JAPRO - Clientside - Draw Duelers - End
+	//JAPRO - Clientside - Draw Non-Duelers - End
 
 	//If this client has tricked you.
 	if (CG_IsMindTricked(cent->currentState.trickedentindex,

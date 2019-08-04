@@ -995,7 +995,9 @@ typedef struct {
 	qhandle_t	redFlagModel;
 	qhandle_t	blueFlagModel;
 	qhandle_t	neutralFlagModel;
-	qhandle_t	flagShader[4];
+	qhandle_t	flagShaderYsal[3];
+	qhandle_t	flagShader[3];
+	qhandle_t	flagShaderTaken[3];
 
 	qhandle_t	flagPoleModel;
 	qhandle_t	flagFlapModel;
@@ -1452,7 +1454,7 @@ typedef struct {
 	int				duelWinner;
 	int				duelist1;
 	int				duelist2;
-	int				redflag, blueflag;		// flag status from configstrings
+	int				redflag, blueflag, yellowflag;	// flag status from configstrings
 	int				flagStatus;
 
 	//new flagstatus stuff
