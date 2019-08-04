@@ -2030,7 +2030,12 @@ static float CG_DrawFPS( float y ) {
 		s = va( "%ifps", fps );
 
 		//JAPRO - Clientside - Add cg_drawfps 2 - Start
-		if (cg_drawFPS.integer == 2)
+		if (jk2version != VERSION_1_02 && trap_Language_IsAsian())
+		{
+			w = CG_Text_Width(s, 1.0f, FONT_MEDIUM);
+			CG_Text_Paint(cgs.screenWidth - 5 - w, y + 2, 1.0f, colorTable[CT_WHITE], s, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM); //this is what the other cgame drawstring functions call for asian languages
+		}
+		else if (cg_drawFPS.integer == 2)
 		{
 			w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
 			CG_DrawSmallString(cgs.screenWidth - 5 - w, y + 2, s, 1.0f);
@@ -2073,7 +2078,12 @@ static float CG_DrawTimer( float y ) {
 	else
 		s = va("%i:%02i", mins, secs);
 
-	if (cg_drawTimer.integer == 2)
+	if (jk2version != VERSION_1_02 && trap_Language_IsAsian())
+	{
+		w = CG_Text_Width(s, 1.0f, FONT_MEDIUM);
+		CG_Text_Paint(cgs.screenWidth - 5 - w, y + 2, 1.0f, colorTable[CT_WHITE], s, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+	}
+	else if (cg_drawTimer.integer == 2)
 	{
 		w = CG_DrawStrlen(s) * SMALLCHAR_WIDTH;
 		CG_DrawSmallString(cgs.screenWidth - 5 - w, y + 2, s, 1.0f);
