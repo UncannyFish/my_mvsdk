@@ -892,13 +892,13 @@ void CG_GetCTFMessageEvent(entityState_t *es)
 
 	if (teamIndex == TEAM_RED) {
 		if (es->eventParm == CTFMESSAGE_PLAYER_GOT_FLAG) {
-			cgs.blueFlagCarrier = ci;
+			cgs.redFlagCarrier = ci;
 			cgs.redFlagTime = cg.time;
 		}
 	}
 	else { //if (teamIndex == TEAM_BLUE) {
 		if (es->eventParm == CTFMESSAGE_PLAYER_GOT_FLAG) {
-			cgs.redFlagCarrier = ci;
+			cgs.blueFlagCarrier = ci;
 			cgs.blueFlagTime = cg.time;
 		}
 	}

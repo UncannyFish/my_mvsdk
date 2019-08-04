@@ -2266,18 +2266,6 @@ static float CG_DrawTeamOverlay( float y, qboolean right, qboolean upper ) {
 
 					item = BG_FindItemForPowerup( j );
 
-					if (j == PW_REDFLAG || j == PW_BLUEFLAG) { //this is prety bad sorry
-						if (!cgs.redFlagTime)
-							cgs.redFlagTime = cg.time;
-						if (!cgs.blueFlagTime)
-							cgs.blueFlagTime = cg.time;
-
-						if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_RED)
-							cgs.redFlagCarrier = ci;
-						else if (cg.snap->ps.persistant[PERS_TEAM] == TEAM_BLUE)
-							cgs.blueFlagCarrier = ci;
-					}
-
 					if (item) {
 						CG_DrawPic( xx, y, TINYCHAR_WIDTH, TINYCHAR_HEIGHT, 
 						trap_R_RegisterShader( item->icon ) );
@@ -4164,21 +4152,16 @@ void CG_DrawTimedMenus() {
 
 void CG_DrawEnhancedFlagStatus(void)
 {
-	int myFlagTakenShader = 0;
-	int theirFlagShader = 0;
+	qhandle_t redFlagShader = 0, blueFlagShader = 0;
 	int team = 0;
-	char myFlagStatus[256] = {0};
-	char myFlagStatusHP[16] = {0};
-	const char *theirFlagStatus = NULL;
-	const char *myFlagTimer = NULL, *theirFlagTimer = NULL;
-	char redFlagTimeStr[8] = {0}, blueFlagTimeStr[8] = {0};
+	char flagStatus[256] = { 0 }, flagStatusHP[16] = { 0 };
+	char redFlagTimeStr[8] = { 0 }, blueFlagTimeStr[8] = { 0 };
 	int secs, mins;
-	vec4_t hcolor;
+	vec4_t hcolor = { 0 };
 	int startDrawPos = 365;
 	int ico_size = 32;
 
-	if (!cg.snap)
-	{
+	if (!cg.snap) {
 		return;
 	}
 
@@ -4189,125 +4172,164 @@ void CG_DrawEnhancedFlagStatus(void)
 		return;
 	}
 
-	team = cg.snap->ps.persistant[PERS_TEAM];
-
-	if (cgs.blueFlagCarrier && cgs.redflag == FLAG_TAKEN) {
+	if (cgs.redflag == FLAG_TAKEN)
+	{
 		if (!cgs.redFlagTime)
 			cgs.redFlagTime = cg.time;
 
 		secs = (cg.time - cgs.redFlagTime) / 1000;
 		mins = secs / 60;
-
 		secs %= 60;
 
 		Com_sprintf(redFlagTimeStr, sizeof(redFlagTimeStr), "%i:%02i", mins, secs);
+
+		if (!cgs.redFlagCarrier)
+			cgs.redFlagCarrier = CG_GetFlagCarrier(TEAM_RED);
+	}
+	else if (cgs.blueFlagCarrier || cgs.redFlagTime) {
+		cgs.redFlagCarrier = NULL;
+		cgs.redFlagTime = 0;
 	}
 
-	if (cgs.redFlagCarrier && cgs.blueflag == FLAG_TAKEN) {
+	if (cgs.blueflag == FLAG_TAKEN)
+	{
 		if (!cgs.blueFlagTime)
 			cgs.blueFlagTime = cg.time;
 
 		secs = (cg.time - cgs.blueFlagTime) / 1000;
 		mins = secs / 60;
-
 		secs %= 60;
 
 		Com_sprintf(blueFlagTimeStr, sizeof(blueFlagTimeStr), "%i:%02i", mins, secs);
+
+		if (!cgs.blueFlagCarrier)
+			cgs.blueFlagCarrier = CG_GetFlagCarrier(TEAM_BLUE);
+	}
+	else if (cgs.blueFlagCarrier || cgs.blueFlagTime) {
+		cgs.blueFlagCarrier = NULL;
+		cgs.blueFlagTime = 0;
 	}
 
-	hcolor[0] = hcolor[1] = hcolor[2] = hcolor[3] = 1.0;
+	hcolor[0] = hcolor[1] = hcolor[2] = hcolor[3] = 1.0f;
+	team = cg.snap->ps.persistant[PERS_TEAM];
 
 	if (team == TEAM_RED)
 	{
 		if (cgs.gametype == GT_CTY) {
-			myFlagTakenShader = trap_R_RegisterShaderNoMip("gfx/hud/mpi_rflag_x");
-			theirFlagShader = trap_R_RegisterShaderNoMip("gfx/hud/mpi_bflag_ys");
+			redFlagShader = cgs.media.flagShaderTaken[TEAM_RED];
+			blueFlagShader = cgs.media.flagShaderYsal[TEAM_BLUE];
 		}
 		else {
-			myFlagTakenShader = trap_R_RegisterShaderNoMip("gfx/hud/mpi_rflag_x");
-			theirFlagShader = trap_R_RegisterShaderNoMip("gfx/hud/mpi_bflag");
+			redFlagShader = cgs.media.flagShaderTaken[TEAM_RED];
+			blueFlagShader = cgs.media.flagShader[TEAM_BLUE];
 		}
 
+		if (cgs.blueflag != FLAG_ATBASE)
+		{
+			if (cgs.blueflag == FLAG_TAKEN)
+			{
+				if (cgs.blueFlagCarrier && cgs.blueFlagCarrier->infoValid) {
+					Com_sprintf(flagStatus, sizeof(flagStatus), "%s  ", cgs.blueFlagCarrier->name);
 
-		if (cgs.redFlagCarrier && cgs.redFlagCarrier->name[0] && cgs.blueflag == FLAG_TAKEN) {
-			myFlagTimer = blueFlagTimeStr;
-			Com_sprintf(myFlagStatus, sizeof(myFlagStatus), "%s  ", cgs.redFlagCarrier->name);
+					if (cgs.blueFlagCarrier->team == team) {
+						CG_GetColorForHealth(cgs.blueFlagCarrier->health, cgs.blueFlagCarrier->armor, hcolor);
 
-			CG_GetColorForHealth(cgs.redFlagCarrier->health, cgs.redFlagCarrier->armor, hcolor);
+						if (cgs.blueFlagCarrier->armor)
+							Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i/%i)", cgs.blueFlagCarrier->health, cgs.blueFlagCarrier->armor);
+						else
+							Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i)", cgs.blueFlagCarrier->health);
 
-			if (cgs.redFlagCarrier->armor)
-				Com_sprintf(myFlagStatusHP, sizeof(myFlagStatusHP), "(%i/%i)", cgs.redFlagCarrier->health, cgs.redFlagCarrier->armor);
-			else
-				Com_sprintf(myFlagStatusHP, sizeof(myFlagStatusHP), "(%i)", cgs.redFlagCarrier->health);
+						CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, flagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2 + ico_size + 4 + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, flagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+					}
+					else {
+						blueFlagShader = cgs.media.flagShaderTaken[TEAM_BLUE];
+						CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, cgs.blueFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+					}
+				}
+				if (cg_enhancedFlagStatus.integer > 1 && blueFlagTimeStr[0] != '\0')
+					CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, blueFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+			}
+			CG_DrawPic(2, startDrawPos, ico_size, ico_size, blueFlagShader);
+			startDrawPos -= ico_size + 2;
 		}
 
-		if (cgs.blueFlagCarrier && cgs.blueFlagCarrier->name[0] && cgs.redflag == FLAG_TAKEN) {
-			theirFlagTimer = redFlagTimeStr;
-			theirFlagStatus = cgs.blueFlagCarrier->name;
+		if (cgs.redflag != FLAG_ATBASE)
+		{
+			if (cgs.redflag == FLAG_TAKEN)
+			{
+				if (cgs.redFlagCarrier && cgs.redFlagCarrier->infoValid) {
+					redFlagShader = cgs.media.flagShaderTaken[TEAM_RED];
+					CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, cgs.redFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+				}
+				if (cg_enhancedFlagStatus.integer > 1 && redFlagTimeStr[0] != '\0')
+					CG_Text_Paint(2 + ico_size + 4, startDrawPos - 3, 0.65f, colorWhite, redFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+			}
+			CG_DrawPic(2, startDrawPos, ico_size, ico_size, redFlagShader);
+			startDrawPos -= ico_size + 2;
 		}
 	}
-	else
+	else //if (team == TEAM_BLUE)
 	{
 		if (cgs.gametype == GT_CTY) {
-			myFlagTakenShader = trap_R_RegisterShaderNoMip("gfx/hud/mpi_bflag_x");
-			theirFlagShader = trap_R_RegisterShaderNoMip("gfx/hud/mpi_rflag_ys");
+			redFlagShader = cgs.media.flagShaderYsal[TEAM_RED];
+			blueFlagShader = cgs.media.flagShaderTaken[TEAM_BLUE];
 		}
 		else {
-			myFlagTakenShader = trap_R_RegisterShaderNoMip("gfx/hud/mpi_bflag_x");
-			theirFlagShader = trap_R_RegisterShaderNoMip("gfx/hud/mpi_rflag");
+			redFlagShader = cgs.media.flagShader[TEAM_RED];
+			blueFlagShader = cgs.media.flagShaderTaken[TEAM_BLUE];
 		}
 
+		if (cgs.redflag != FLAG_ATBASE)
+		{
+			if (cgs.redflag == FLAG_TAKEN)
+			{
+				if (cgs.redFlagCarrier && cgs.redFlagCarrier->infoValid) {
+					Com_sprintf(flagStatus, sizeof(flagStatus), "%s  ", cgs.redFlagCarrier->name);
 
-		if (cgs.blueFlagCarrier && cgs.blueFlagCarrier->name[0] && cgs.redflag == FLAG_TAKEN) {
-			myFlagTimer = redFlagTimeStr;
-			Com_sprintf(myFlagStatus, sizeof(myFlagStatus), "%s  ", cgs.blueFlagCarrier->name);
+					if (cgs.redFlagCarrier->team == team) {
+						redFlagShader = cgs.media.flagShader[TEAM_RED];
 
-			CG_GetColorForHealth(cgs.blueFlagCarrier->health, cgs.blueFlagCarrier->armor, hcolor);
+						CG_GetColorForHealth(cgs.redFlagCarrier->health, cgs.redFlagCarrier->armor, hcolor);
 
-			if (cgs.blueFlagCarrier->armor)
-				Com_sprintf(myFlagStatusHP, sizeof(myFlagStatusHP), "(%i/%i)", cgs.blueFlagCarrier->health, cgs.blueFlagCarrier->armor);
-			else
-				Com_sprintf(myFlagStatusHP, sizeof(myFlagStatusHP), "(%i)", cgs.blueFlagCarrier->health);
+						if (cgs.redFlagCarrier->armor)
+							Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i/%i)", cgs.redFlagCarrier->health, cgs.redFlagCarrier->armor);
+						else
+							Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i)", cgs.redFlagCarrier->health);
+
+						CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, flagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2 + ico_size + 4 + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, flagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+					}
+					else {
+						redFlagShader = cgs.media.flagShaderTaken[TEAM_RED];
+						CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, cgs.redFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+					}
+				}
+				if (cg_enhancedFlagStatus.integer > 1 && redFlagTimeStr[0] != '\0')
+					CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, redFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+			}
+			CG_DrawPic(2, startDrawPos, ico_size, ico_size, redFlagShader);
+			startDrawPos -= ico_size + 2;
 		}
 
-		if (cgs.redFlagCarrier && cgs.redFlagCarrier->name[0] && cgs.blueflag == FLAG_TAKEN) {
-			theirFlagTimer = blueFlagTimeStr;
-			theirFlagStatus = cgs.redFlagCarrier->name;
+		if (cgs.blueflag != FLAG_ATBASE)
+		{
+			if (cgs.blueflag == FLAG_TAKEN)
+			{
+				if (cgs.blueFlagCarrier && cgs.blueFlagCarrier->infoValid) {
+					blueFlagShader = cgs.media.flagShaderTaken[TEAM_BLUE];
+					CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, cgs.blueFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+				}
+				if (cg_enhancedFlagStatus.integer > 1 && blueFlagTimeStr[0] != '\0')
+					CG_Text_Paint(2 + ico_size + 4, startDrawPos - 3, 0.65f, colorWhite, blueFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+			}
+			CG_DrawPic(2, startDrawPos, ico_size, ico_size, blueFlagShader);
+			startDrawPos -= ico_size + 2;
 		}
-	}
-
-	if (CG_YourTeamHasFlag())
-	{
-		CG_DrawPic(2, startDrawPos, ico_size, ico_size, theirFlagShader);
-
-		if (cg_enhancedFlagStatus.integer > 1 && myFlagTimer != NULL)
-			CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, myFlagTimer, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
-
-		if (myFlagStatus[0] && strlen(myFlagStatus)) {
-			CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, myFlagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
-			CG_Text_Paint(2 + ico_size + 4+CG_Text_Width(myFlagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, myFlagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
-		}
-		
-		startDrawPos -= ico_size + 2;
-
-		trap_R_SetColor(NULL);
-	}
-
-	if (CG_OtherTeamHasFlag())
-	{
-		CG_DrawPic(2, startDrawPos, ico_size, ico_size, myFlagTakenShader);
-
-		if (cg_enhancedFlagStatus.integer > 1 && theirFlagTimer != NULL)
-			CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, theirFlagTimer, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
-
-		if (theirFlagStatus != NULL)
-			CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, theirFlagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
-
-		trap_R_SetColor(NULL);
 	}
 }
 
-void CG_DrawFlagStatus()
+void CG_DrawFlagStatus(void)
 {
 	int myFlagTakenShader = 0;
 	int theirFlagShader = 0;
