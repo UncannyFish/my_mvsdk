@@ -1219,6 +1219,37 @@ const char *CG_Argv( int arg ) {
 	return buffer;
 }
 
+/*
+================
+CG_SendConsoleCommand
+	Ensures trailing newline & handles va formatting
+================
+*/
+void QDECL CG_SendConsoleCommand(const char *fmt, ...)
+{
+	va_list argptr;
+	char buf[MAX_STRING_CHARS];
+	int len;
+
+	if (!fmt || !fmt[0])
+		return;
+
+	va_start(argptr, fmt);
+	vsprintf(buf, fmt, argptr);
+	va_end(argptr);
+
+	if (!buf || !buf[0])
+		return;
+
+	len = strlen(buf);
+	if (!len)
+		return;
+	if (buf[len - 1] != '\n') //check for trailing newline
+		Q_strcat(buf, sizeof(buf), "\n"); //append one if we don't have one already
+
+	trap_SendConsoleCommand(buf);
+}
+
 
 //========================================================================
 
@@ -2479,7 +2510,7 @@ static qboolean CG_FeederSelection(float feederID, int index) {
 }
 
 static float CG_Cvar_Get(const char *cvar) {
-	char buff[128];
+	char buff[MAX_CVAR_VALUE_STRING];
 	memset(buff, 0, sizeof(buff));
 	trap_Cvar_VariableStringBuffer(cvar, buff, sizeof(buff));
 	return atof(buff);
@@ -3038,6 +3069,20 @@ Ghoul2 Insert End
 	CG_UpdateConfigString( CS_SHADERSTATE, qtrue );
 
 	trap_S_ClearLoopingSounds( qtrue );
+
+	s = cgs.mapname+5;
+	if (s) { //exec cfg for custom map specific remaps/skies/other stuff
+		char mapname_noExt[MAX_QPATH] = {0};
+
+		COM_StripExtension(s, mapname_noExt);
+		if (mapname_noExt && mapname_noExt[0]) {
+			int cl_noPrint = (int)CG_Cvar_Get("cl_noprint");
+			if (!cl_noPrint)
+				CG_SendConsoleCommand("cl_noprint 1; exec %s.cfg; cl_noprint 0\n", mapname_noExt);
+			else
+				CG_SendConsoleCommand("exec %s.cfg\n", mapname_noExt);
+		}
+	}
 }
 
 /*
@@ -3062,6 +3107,10 @@ void CG_Shutdown( void )
 qboolean CG_NoUseableForce(void)
 {
 	int i = FP_HEAL;
+
+	if (cg.predictedPlayerState.stats[STAT_HEALTH] <= 0)
+		return qtrue;
+
 	while (i < NUM_FORCE_POWERS)
 	{ 
 		if (i != FP_SABERTHROW &&
