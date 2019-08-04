@@ -560,6 +560,7 @@ vmCvar_t	cg_chatBox;
 vmCvar_t	cg_chatBoxFontSize;
 vmCvar_t	cg_chatBoxHeight;
 //japro chatbox stuff
+vmCvar_t	cg_chatBoxShowHistory;
 vmCvar_t	cg_chatBoxX;
 vmCvar_t	cg_chatBoxCutOffLength;
 vmCvar_t	cg_chatSounds;
@@ -572,6 +573,7 @@ vmCvar_t	cg_autoKillWhenFalling;
 vmCvar_t	cg_jumpSounds;
 vmCvar_t	cg_rollSounds;
 vmCvar_t	cg_hitSounds;
+vmCvar_t	cg_newSaberHitSounds;
 vmCvar_t	cg_thirdPersonFlagAlpha;
 vmCvar_t	cg_drawNonDuelers;
 vmCvar_t	cg_brightskins;
@@ -810,6 +812,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_chatBoxFontSize, "cg_chatBoxFontSize", "1.0", CVAR_ARCHIVE },
 	{ &cg_chatBoxHeight, "cg_chatBoxHeight", "360", CVAR_ARCHIVE },
 	//japro chatbox stuff
+	{ &cg_chatBoxShowHistory, "cg_chatBoxShowHistory", "1", CVAR_ARCHIVE },
 	{ &cg_chatBoxX, "cg_chatBoxX", "16", CVAR_ARCHIVE },
 	{ &cg_chatBoxCutOffLength, "cg_chatBoxCutOffLength", "375", CVAR_ARCHIVE },
 	{ &cg_chatSounds, "cg_chatSounds", "1", CVAR_ARCHIVE },
@@ -822,6 +825,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_jumpSounds, "cg_jumpSounds", "1", CVAR_ARCHIVE },
 	{ &cg_rollSounds, "cg_rollSounds", "1", CVAR_ARCHIVE },
 	{ &cg_hitSounds, "cg_hitSounds", "0", CVAR_ARCHIVE },
+	{ &cg_newSaberHitSounds, "cg_newSaberHitSounds", "0", CVAR_ARCHIVE },
 	{ &cg_thirdPersonFlagAlpha, "cg_thirdPersonFlagAlpha", "1.0", CVAR_ARCHIVE },
 	{ &cg_drawNonDuelers, "cg_drawNonDuelers", "0", 0 },
 	{ &cg_brightskins, "cg_brightskins", "0", CVAR_ARCHIVE },
@@ -853,7 +857,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_drawPowerUpIcons, "cg_drawPowerUpIcons", "1", CVAR_ARCHIVE },
 	{ &cg_drawDemoName, "cg_drawDemoName", "1", 0 },
 	{ &cg_lowhpsound,	"cg_lowhpsound", "35", CVAR_ARCHIVE },
-	{ &cg_backSwingCameraRange, "cg_backSwingCameraRange", "1", CVAR_ARCHIVE },
+	{ &cg_backSwingCameraRange, "cg_backSwingCameraRange", "0", CVAR_ARCHIVE },
 	//jk2pro stuff end
 
 	{ &cg_thirdPerson, "cg_thirdPerson", "0", CVAR_ARCHIVE },
@@ -1338,7 +1342,12 @@ static void CG_RegisterSounds( void ) {
 		trap_S_RegisterSound(va("sound/weapons/saber/bounce%i.wav", i));
 	}
 
-	trap_S_RegisterSound( "sound/weapons/saber/saberhum1.wav" );
+	for (i = 0; i < 5; i++) {//JAPRO - Clientside - Use all saber hum sounds
+		cgs.media.saberHumSounds[i] = trap_S_RegisterSound(va("sound/weapons/saber/saberhum%i.wav", i + 1));
+		if (!cgs.media.saberHumSounds[i])
+			Com_Printf("failed to register sound \"sound/weapons/saber/saberhum%i.wav\"\n", i + 1);
+	}
+
 	trap_S_RegisterSound( "sound/weapons/saber/saberon.wav" );
 	trap_S_RegisterSound( "sound/weapons/saber/saberoffquick.wav" );
 	trap_S_RegisterSound( "sound/weapons/saber/saberhitwall1" );

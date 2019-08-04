@@ -1485,43 +1485,57 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 
 	case EV_SABER_HIT:
 		DEBUGNAME("EV_SABER_HIT");
-		if (es->eventParm == 16)
-		{ //Make lots of sparks, something special happened
-			vec3_t fxDir;
+		{
+			int hitSoundNum = 0;
+			qhandle_t hitSound;
+
+			if (cg_newSaberHitSounds.integer == 1)
+				hitSoundNum = Q_irand(1, 3);
+			else if (cg_newSaberHitSounds.integer > 1) 
+				hitSoundNum = Q_irand(0, 3);
+
+			hitSound = hitSoundNum ? trap_S_RegisterSound(va("sound/weapons/saber/saberhit%i.wav", hitSoundNum)) : trap_S_RegisterSound("sound/weapons/saber/saberhit.wav");
+			if (cgs.isCaMod && cg.snap->ps.duelInProgress && es->otherEntityNum != cg.snap->ps.clientNum && es->otherEntityNum != cg.snap->ps.duelIndex)
+				break;
+
+			if (es->eventParm == 16)
+			{ //Make lots of sparks, something special happened
+				vec3_t fxDir;
 			VectorCopy(es->angles, fxDir);
 			if (!fxDir[0] && !fxDir[1] && !fxDir[2])
-			{
-				fxDir[1] = 1;
+				{
+					fxDir[1] = 1;
+				}
+				trap_S_StartSound(es->origin, es->number, CHAN_AUTO, hitSound);
+				trap_FX_PlayEffectID(trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir);
+				trap_FX_PlayEffectID(trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir);
+				trap_FX_PlayEffectID(trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir);
+				trap_FX_PlayEffectID(trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir);
+				trap_FX_PlayEffectID(trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir);
+				trap_FX_PlayEffectID(trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir);
 			}
-			trap_S_StartSound(es->origin, es->number, CHAN_AUTO, trap_S_RegisterSound("sound/weapons/saber/saberhit.wav"));
-			trap_FX_PlayEffectID( trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir );
-			trap_FX_PlayEffectID( trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir );
-			trap_FX_PlayEffectID( trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir );
-			trap_FX_PlayEffectID( trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir );
-			trap_FX_PlayEffectID( trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir );
-			trap_FX_PlayEffectID( trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir );
-		}
-		else if (es->eventParm)
-		{ //hit a person
+			else if (es->eventParm)
+			{ //hit a person
 			vec3_t fxDir;
 			VectorCopy(es->angles, fxDir);
 			if (!fxDir[0] && !fxDir[1] && !fxDir[2])
-			{
-				fxDir[1] = 1;
+				{
+					fxDir[1] = 1;
+				}
+				trap_S_StartSound(es->origin, es->number, CHAN_AUTO, hitSound);
+				trap_FX_PlayEffectID(trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir);
 			}
-			trap_S_StartSound(es->origin, es->number, CHAN_AUTO, trap_S_RegisterSound("sound/weapons/saber/saberhit.wav"));
-			trap_FX_PlayEffectID( trap_FX_RegisterEffect("saber/blood_sparks.efx"), es->origin, fxDir );
-		}
-		else
-		{ //hit something else
+			else
+			{ //hit something else
 			vec3_t fxDir;
 			VectorCopy(es->angles, fxDir);
 			if (!fxDir[0] && !fxDir[1] && !fxDir[2])
 			{
-				fxDir[1] = 1;
-			}			
-			trap_S_StartSound(es->origin, es->number, CHAN_AUTO, trap_S_RegisterSound("sound/weapons/saber/saberhit.wav"));
-			trap_FX_PlayEffectID( trap_FX_RegisterEffect("saber/spark.efx"), es->origin, fxDir );
+					fxDir[1] = 1;
+				}
+				trap_S_StartSound(es->origin, es->number, CHAN_AUTO, trap_S_RegisterSound("sound/weapons/saber/saberhit.wav"));
+				trap_FX_PlayEffectID(trap_FX_RegisterEffect("saber/spark.efx"), es->origin, fxDir);
+			}
 		}
 		break;
 
@@ -1567,7 +1581,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		break;
 
 	case EV_BECOME_JEDIMASTER:
-		DEBUGNAME("EV_SABER_UNHOLSTER");
+		DEBUGNAME("EV_BECOME_JEDIMASTER");
 		{
 			trace_t tr;
 			vec3_t playerMins = {-15, -15, DEFAULT_MINS_2+8};

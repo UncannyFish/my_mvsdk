@@ -581,8 +581,6 @@ void CG_LoadClientInfo( clientInfo_t *ci ) {
 		clientNum = -1;
 	}
 
-	ci->deferred = qfalse;
-
 	/*
 	if (ci->team == TEAM_SPECTATOR)
 	{
@@ -727,13 +725,9 @@ void CG_LoadClientInfo( clientInfo_t *ci ) {
 	}
 
 	if (isFemale)
-	{
 		ci->gender = GENDER_FEMALE;
-	}
 	else
-	{
 		ci->gender = GENDER_MALE;
-	}
 
 	for ( i = 0 ; i < MAX_CUSTOM_SOUNDS ; i++ ) {
 		s = cg_customSoundNames[i];
@@ -7124,17 +7118,18 @@ doEssentialTwo:
 stillDoSaber:
 	if (cent->currentState.weapon == WP_SABER && !cent->currentState.shouldtarget)
 	{
+		//JAPRO - Clientside - Use all saber hum sounds
 		if (!cent->currentState.saberInFlight && !(cent->currentState.eFlags & EF_DEAD))
 		{
 			if (cg.snap->ps.clientNum == cent->currentState.number)
 			{
 				trap_S_AddLoopingSound( cent->currentState.number, cg.refdef.vieworg, vec3_origin, 
-					trap_S_RegisterSound( "sound/weapons/saber/saberhum1.wav" ) );
+					cgs.media.saberHumSounds[cent->currentState.number % 4] );
 			}
 			else
 			{
 				trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, 
-					trap_S_RegisterSound( "sound/weapons/saber/saberhum1.wav" ) );
+					cgs.media.saberHumSounds[cent->currentState.number % 4] );
 			}
 		}
 

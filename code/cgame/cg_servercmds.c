@@ -1175,8 +1175,8 @@ Cmd_Argc() / Cmd_Argv()
 extern void CG_ChatBox_AddString(char *chatStr);
 static void CG_ServerCommand( void ) {
 	const char	*cmd;
-	char		text[MAX_NETNAME+MAX_SAY_TEXT];
-	char tempChatStr[MAX_NETNAME+MAX_SAY_TEXT] = {0};
+	char		text[MAX_STRING_CHARS] = { 0 };
+	char tempChatStr[MAX_STRING_CHARS] = {0};
 	char *r = text, *w = tempChatStr;
 
 	cmd = CG_Argv(0);

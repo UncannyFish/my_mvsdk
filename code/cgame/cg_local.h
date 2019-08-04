@@ -669,7 +669,7 @@ typedef struct {
 #define	MAX_CHATBOX_ITEMS		5
 typedef struct chatBoxItem_s
 {
-	char	string[MAX_NETNAME+MAX_SAY_TEXT];
+	char	string[MAX_STRING_CHARS];
 	int		time;
 	int		lines;
 } chatBoxItem_t;
@@ -793,7 +793,7 @@ typedef struct {
 	int			centerPrintTime;
 	int			centerPrintCharWidth;
 	int			centerPrintY;
-	char		centerPrint[1024];
+	char		centerPrint[MAX_STRING_CHARS];
 	int			centerPrintLines;
 
 	// low ammo warning state
@@ -1053,6 +1053,9 @@ typedef struct {
 	qhandle_t	rivetMarkShader;
 
 	qhandle_t	saberClashFlare;
+
+//JAPRO - Clientside - Use all saber hum sounds
+	qhandle_t	saberHumSounds[4];
 
 	qhandle_t	teamRedShader;
 	qhandle_t	teamBlueShader;
@@ -1655,6 +1658,7 @@ extern	vmCvar_t		cg_chatBox;
 extern	vmCvar_t		cg_chatBoxFontSize;
 extern	vmCvar_t		cg_chatBoxHeight;
 //japro chatbox stuff
+extern	vmCvar_t		cg_chatBoxShowHistory;
 extern	vmCvar_t		cg_chatBoxX;
 extern	vmCvar_t		cg_chatBoxCutOffLength;
 extern	vmCvar_t		cg_chatSounds;
@@ -1664,6 +1668,7 @@ extern	vmCvar_t		cg_newFont;
 extern	vmCvar_t		cg_jumpSounds;
 extern	vmCvar_t		cg_rollSounds;
 extern	vmCvar_t		cg_hitSounds;
+extern	vmCvar_t		cg_newSaberHitSounds;
 extern	vmCvar_t		cg_thirdPersonFlagAlpha;
 extern	vmCvar_t		cg_drawNonDuelers;
 extern	vmCvar_t		cg_brightskins;

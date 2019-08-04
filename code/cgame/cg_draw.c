@@ -2288,7 +2288,6 @@ static float CG_DrawTeamOverlay( float y, qboolean right, qboolean upper ) {
 //#endif
 }
 
-
 static int CG_DrawPowerupIcons(int y)
 {
 	int j;
@@ -2516,7 +2515,7 @@ LAGOMETER
 ===============================================================================
 */
 
-#define	LAG_SAMPLES		128
+#define	LAG_SAMPLES		256
 
 
 typedef struct {
@@ -2734,24 +2733,28 @@ static void CG_DrawLagometer( void ) {
 	}
 
 	//TnG NoVe
-	else if (cg.snap && cg_lagometer.integer == 2 || cg_lagometer.integer == 3)
+	else if (cg.snap && (cg_lagometer.integer == 2 || cg_lagometer.integer == 3))
 	{
-		int total = 0;
-		float avgInterp;
 		int i;
+		int total = 0;
+		char *s = va("%i", cg.snap->ping);
+		float avgInterp, strW;
 
-		CG_Text_Paint(ax + 2, ay - 1, 0.5f, colorWhite, va("%i", cg.snap->ping), 0, 0, ITEM_ALIGN_LEFT|ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_SMALL);
+		if (!s)
+			return;
+
+		//CG_Text_Paint(400, 400, 1.0, colorWhite, va("%i", cg.snap->ping), 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_LARGE);
+		CG_Text_Paint(ax + 3.0f, ay - 1.0f, 0.5f, colorWhite, s, 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_SMALL);
 
 		for (i = 0; i < LAG_SAMPLES; i++) {
 			total += lagometer.frameSamples[i];
 		}
 		avgInterp = total / (float)LAG_SAMPLES * -1;
 
-#ifndef Q3_VM
-		CG_Text_Paint(ax + 26, ay - 1, 0.5f, colorWhite, va("%04.1f", avgInterp), 0, 0, ITEM_ALIGN_RIGHT|ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_SMALL);
-#else
-		CG_Text_Paint(ax + 16, ay - 1, 0.5f, colorWhite, va("%04.1f", avgInterp), 0, 0, ITEM_ALIGN_RIGHT|ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_SMALL);
-#endif
+		//CG_Text_Paint(400, 300, 1.0, colorBlue, va("%04.1f", avgInterp), 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_LARGE);
+		s = va("%04.1f", avgInterp);
+		strW = CG_Text_Width(s, 0.5f, FONT_SMALL);
+		CG_Text_Paint(ax + aw - strW, ay - 1.0f, 0.5f, colorWhite, s, 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE, FONT_SMALL);
 	}
 
 	CG_DrawDisconnect();
@@ -4540,7 +4543,6 @@ void CG_ChatBox_AddString(char *chatStr)
 		Q_strcat(name, sizeof(name), msg);
 
 		strcpy(chatStr, name);
-
 	}
 
 	strcpy(chat->string, chatStr);
@@ -4559,7 +4561,7 @@ void CG_ChatBox_AddString(char *chatStr)
 		while (chat->string[i])
 		{
 			const char *checkColor = (const char *)(chat->string + i);
-			if (Q_IsColorString(checkColor)) {
+			if (Q_IsColorString(checkColor) || Q_IsColorString_1_02(checkColor)) {
 				i += 2;
 				continue; // duo: fix for messages with lots of colors being broken up too early
 			}
@@ -4628,6 +4630,7 @@ ID_INLINE void CG_ChatBox_DrawStrings(void) //o, ID_INLINE is static Q_INLINE
 	//float y = cg.scoreBoardShowing ? 475 : cg_chatBoxHeight.integer;
 	float y = cg_chatBoxHeight.integer;
 	float fontScale = 0.65 * cg_chatBoxFontSize.value;//JAPRO - Clientside - Chatbox Font Size Scaler
+	qboolean drawAnyway = qfalse;
 
 	//y = cg_chatBoxHeight.integer;
 
@@ -4637,15 +4640,16 @@ ID_INLINE void CG_ChatBox_DrawStrings(void) //o, ID_INLINE is static Q_INLINE
 		y -= 35;
 
 	if (!cg_chatBox.integer)
-	{
 		return;
-	}
+
+	if (cg_chatBoxShowHistory.integer)
+		drawAnyway = (qboolean)(trap_Key_GetCatcher() & KEYCATCH_CONSOLE);
 
 	memset(drawThese, 0, sizeof(drawThese));
 
 	while (i < MAX_CHATBOX_ITEMS)
 	{
-		if (cg.chatItems[i].time >= cg.time)
+		if (cg.chatItems[i].time >= cg.time || drawAnyway)
 		{
 			int check = numToDraw;
 			int insertionPoint = numToDraw;
@@ -5553,21 +5557,21 @@ static void CG_Speedometer(void)
 
 	if (avgAccel > 0.0f)
 	{
-		accelStr = "^2\xb5:";
-		accelStr2 = "^2k:";
-		accelStr3 = "^2m: ";
+		accelStr = S_COLOR_GREEN "\xb5:";
+		accelStr2 = S_COLOR_GREEN "k:";
+		accelStr3 = S_COLOR_GREEN "m:  ";
 	}
 	else if (avgAccel < 0.0f)
 	{
-		accelStr = "^1\xb5:";
-		accelStr2 = "^1k:";
-		accelStr3 = "^1m: ";
+		accelStr = S_COLOR_RED "\xb5:";
+		accelStr2 = S_COLOR_RED "k:";
+		accelStr3 = S_COLOR_RED "m:  ";
 	}
 	else
 	{
-		accelStr = "^7\xb5:";
-		accelStr2 = "^7k:";
-		accelStr3 = "^7m: ";
+		accelStr = S_COLOR_WHITE "\xb5:";
+		accelStr2 = S_COLOR_WHITE "k:";
+		accelStr3 = S_COLOR_WHITE "m:";
 	}
 
 	if (!(cg_speedometer.integer & SPEEDOMETER_KPH) && !(cg_speedometer.integer & SPEEDOMETER_MPH))
@@ -5578,13 +5582,13 @@ static void CG_Speedometer(void)
 	}
 	else if (cg_speedometer.integer & SPEEDOMETER_KPH)
 	{
-		Com_sprintf(speedStr2, sizeof(speedStr2), "   %.1f", currentSpeed * 0.05);
+		Com_sprintf(speedStr2, sizeof(speedStr2), "   %.1f", currentSpeed * 0.05f);
 		CG_Text_Paint(speedometerXPos, cg_speedometerY.integer, cg_speedometerSize.value, colorWhite, accelStr2, 0.0f, 0, ITEM_ALIGN_RIGHT | ITEM_TEXTSTYLE_OUTLINED, FONT_NONE);
 		CG_Text_Paint(speedometerXPos, cg_speedometerY.integer, cg_speedometerSize.value, colorSpeed, speedStr2, 0.0f, 0, ITEM_ALIGN_RIGHT | ITEM_TEXTSTYLE_OUTLINED, FONT_NONE);
 	}
 	else if (cg_speedometer.integer & SPEEDOMETER_MPH)
 	{
-		Com_sprintf(speedStr3, sizeof(speedStr3), "   %.1f", currentSpeed * 0.03106855);
+		Com_sprintf(speedStr3, sizeof(speedStr3), "    %.1f", currentSpeed * 0.03106855f);
 		CG_Text_Paint(speedometerXPos, cg_speedometerY.integer, cg_speedometerSize.value, colorWhite, accelStr3, 0.0f, 0, ITEM_ALIGN_RIGHT | ITEM_TEXTSTYLE_OUTLINED, FONT_NONE);
 		CG_Text_Paint(speedometerXPos, cg_speedometerY.integer, cg_speedometerSize.value, colorSpeed, speedStr3, 0.0f, 0, ITEM_ALIGN_RIGHT | ITEM_TEXTSTYLE_OUTLINED, FONT_NONE);
 	}
