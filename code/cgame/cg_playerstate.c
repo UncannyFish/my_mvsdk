@@ -286,6 +286,18 @@ static void pushReward(sfxHandle_t sfx, qhandle_t shader, int rewardCount) {
 		cg.rewardCount[cg.rewardStack] = rewardCount;
 	}
 }
+
+static void CG_ResetRewards(void)
+{
+	//called on map_restart or when switching perspectives in specA
+	if (cg.rewardStack || cg.rewardCount) {
+		cg.rewardStack = 0;
+		cg.rewardTime = 0;
+		memset(&cg.rewardCount, 0, sizeof(cg.rewardCount));
+		memset(&cg.rewardShader, 0, sizeof(cg.rewardShader));
+		memset(&cg.rewardSound, 0, sizeof(cg.rewardSound));
+	}
+}
 #endif
 
 int cgAnnouncerTime = 0; //to prevent announce sounds from playing on top of each other
@@ -478,6 +490,7 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops ) {
 		cg.thisFrameTeleport = qtrue;
 		// make sure we don't get any unwanted transition effects
 		*ops = *ps;
+		CG_ResetRewards();
 	}
 
 	// damage events (player is getting wounded)
@@ -492,6 +505,7 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops ) {
 
 	if ( cg.mapRestart ) {
 		CG_Respawn();
+		CG_ResetRewards();
 		cg.mapRestart = qfalse;
 	}
 
@@ -517,4 +531,3 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops ) {
 		cg.duckTime = cg.time;
 	}
 }
-

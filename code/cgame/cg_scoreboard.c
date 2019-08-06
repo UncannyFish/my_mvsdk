@@ -318,7 +318,7 @@ qboolean CG_DrawOldScoreboard( void ) {
 
 	if ( cg.showScores || cg.predictedPlayerState.pm_type == PM_DEAD ||
 		 cg.predictedPlayerState.pm_type == PM_INTERMISSION ) {
-		fade = 1.0;
+		fade = 1.0f;
 		fadeColor = colorWhite;
 	} else {
 		fadeColor = CG_FadeColor( cg.scoreFadeTime, FADE_TIME );

@@ -395,6 +395,9 @@ static void CG_TouchItem( centity_t *cent ) {
 		if (cg.predictedPlayerState.persistant[PERS_TEAM] == TEAM_BLUE &&
 			item->giTag == PW_BLUEFLAG)
 			return;
+		if (cg.predictedPlayerState.persistant[PERS_TEAM] == TEAM_FREE &&
+			item->giTag == PW_NEUTRALFLAG)
+			return;
 	}
 
 	if (item->giType == IT_POWERUP &&

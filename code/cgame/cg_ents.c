@@ -258,27 +258,20 @@ void FX_DrawPortableShield(centity_t *cent)
 	start[2] += height/2;
 	end[2] += height/2;
 
-	if (team == TEAM_RED)
+	switch (team)
 	{
-		if (cent->currentState.trickedentindex)
-		{
-			shader = trap_R_RegisterShader( "gfx/misc/red_dmgshield" );
-		}
-		else
-		{
-			shader = trap_R_RegisterShader( "gfx/misc/red_portashield" );
-		}
-	}
-	else
-	{
-		if (cent->currentState.trickedentindex)
-		{
-			shader = trap_R_RegisterShader( "gfx/misc/blue_dmgshield" );
-		}
-		else
-		{
-			shader = trap_R_RegisterShader( "gfx/misc/blue_portashield" );
-		}
+		case TEAM_RED:
+			shader = (cent->currentState.trickedentindex ? cgs.media.forcefieldDmgShader[TEAM_RED] : cgs.media.forcefieldShader[TEAM_RED]);
+			break;
+		case TEAM_FREE:
+			if (cgs.isCTFMod && cgs.CTF3ModeActive) {
+				shader = (cent->currentState.trickedentindex ? cgs.media.forcefieldDmgShader[TEAM_FREE] : cgs.media.forcefieldShader[TEAM_FREE]);
+				break;
+			}
+		default:
+		case TEAM_BLUE:
+			shader = (cent->currentState.trickedentindex ? cgs.media.forcefieldDmgShader[TEAM_BLUE] : cgs.media.forcefieldShader[TEAM_BLUE]);
+			break;
 	}
 
 	FX_AddOrientedLine(start, end, normal, 1.0f, height, 0.0f, 1.0f, 1.0f, 50.0, shader);
@@ -1779,11 +1772,11 @@ Ghoul2 Insert End
 	else
 	{	// add to refresh list  -- normal item
 		if (item->giType == IT_TEAM &&
-			(item->giTag == PW_REDFLAG || item->giTag == PW_BLUEFLAG))
+			(item->giTag == PW_REDFLAG || item->giTag == PW_BLUEFLAG || item->giTag == PW_NEUTRALFLAG))
 		{
-			ent.modelScale[0] = 0.7;
-			ent.modelScale[1] = 0.7;
-			ent.modelScale[2] = 0.7;
+			ent.modelScale[0] = 0.7f;
+			ent.modelScale[1] = 0.7f;
+			ent.modelScale[2] = 0.7f;
 			ScaleModelAxis(&ent);
 		}
 		trap_R_AddRefEntityToScene(&ent);

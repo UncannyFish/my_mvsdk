@@ -996,7 +996,7 @@ typedef struct {
 	qhandle_t	blueFlagModel;
 	qhandle_t	neutralFlagModel;
 	qhandle_t	flagShaderYsal[3];
-	qhandle_t	flagShader[3];
+	qhandle_t	flagShader[3]; //JK2
 	qhandle_t	flagShaderTaken[3];
 
 	qhandle_t	flagPoleModel;
@@ -1031,6 +1031,9 @@ typedef struct {
 	qhandle_t	keyRightOffShader;
 	qhandle_t	keyRightOnShader;
 //JAPRO - Clientside - Movement keys - End
+
+	qhandle_t	forcefieldShader[3];
+	qhandle_t	forcefieldDmgShader[3];
 
 	qhandle_t	lightningShader;
 
@@ -1823,20 +1826,6 @@ void CG_ZoomUp_f( void );
 void CG_AddBufferedSound( sfxHandle_t sfx);
 
 void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demoPlayback );
-/*
-Ghoul2 Insert Start
-*/
-
-void CG_TestG2Model_f (void);
-void CG_TestModelSurfaceOnOff_f(void);
-void CG_ListModelSurfaces_f (void);
-void CG_ListModelBones_f (void);
-void CG_TestModelSetAnglespre_f(void);
-void CG_TestModelSetAnglespost_f(void);
-void CG_TestModelAnimate_f(void);
-/*
-Ghoul2 Insert End
-*/
 
 //
 // cg_drawtools.c
@@ -1845,8 +1834,6 @@ void CG_FillRect( float x, float y, float width, float height, const float *colo
 void CG_DrawPic( float x, float y, float width, float height, qhandle_t hShader );
 void CG_DrawRotatePic( float x, float y, float width, float height,float angle, qhandle_t hShader );
 void CG_DrawRotatePic2( float x, float y, float width, float height,float angle, qhandle_t hShader );
-void CG_DrawString( float x, float y, const char *string, 
-				   float charWidth, float charHeight, const float *modulate );
 
 void CG_DrawNumField (int x, int y, int width, int value,int charWidth,int charHeight,int style,qboolean zeroFill);
 

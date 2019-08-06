@@ -1678,36 +1678,15 @@ static void CG_SetLerpFrameAnimation( centity_t *cent, clientInfo_t *ci, lerpFra
 				cgs.clientinfo[cent->currentState.number].legsAnim = newAnimation;
 			}
 
-			//if ( jk2gameplay == VERSION_1_02 )
-			if ( jk2gameplay == VERSION_1_02 && cg_fixlean.integer != 2 )
-			{ // 1.02
-				if (cg.snap && cg.snap->ps.clientNum == cent->currentState.number)
-				{ //go ahead and use the predicted state if you can.
-					if ((cg.predictedPlayerState.torsoAnim&~ANIM_TOGGLEBIT) == newAnimation)
-					{
-						trap_G2API_SetBoneAnim(cent->ghoul2, 0, "Motion", anim->firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed, cg.time, -1, blendTime);
-					}
+			if ((cent->currentState.torsoAnim&~ANIM_TOGGLEBIT) == newAnimation)
+			{
+				if (beginFrame != anim->firstFrame)
+				{
+					trap_G2API_SetBoneAnim(cent->ghoul2, 0, "Motion", anim->firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed, cg.time, beginFrame, blendTime);
 				}
 				else
 				{
-					if ((cent->currentState.torsoAnim&~ANIM_TOGGLEBIT) == newAnimation)
-					{
-						trap_G2API_SetBoneAnim(cent->ghoul2, 0, "Motion", anim->firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed, cg.time, -1, blendTime);
-					}
-				}
-			}
-			else
-			{ // 1.03 & 1.04
-				if ((cent->currentState.torsoAnim&~ANIM_TOGGLEBIT) == newAnimation)
-				{
-					if (beginFrame != anim->firstFrame)
-					{
-						trap_G2API_SetBoneAnim(cent->ghoul2, 0, "Motion", anim->firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed, cg.time, beginFrame, blendTime);
-					}
-					else
-					{
-						trap_G2API_SetBoneAnim(cent->ghoul2, 0, "Motion", anim->firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed, cg.time, -1, blendTime);
-					}
+					trap_G2API_SetBoneAnim(cent->ghoul2, 0, "Motion", anim->firstFrame, anim->firstFrame + anim->numFrames, flags, animSpeed, cg.time, -1, blendTime);
 				}
 			}
 		}
@@ -3315,26 +3294,26 @@ static void CG_PlayerPowerups( centity_t *cent, refEntity_t *torso ) {
 
 	// quad gives a dlight
 	if ( powerups & ( 1 << PW_QUAD ) ) {
-		trap_R_AddLightToScene( cent->lerpOrigin, 200 + (rand()&31), 0.2f, 0.2f, 1 );
+		trap_R_AddLightToScene( cent->lerpOrigin, 200 + (rand()&31), 0.2f, 0.2f, 1.0f );
 	}
 
 	// redflag
 	if ( powerups & ( 1 << PW_REDFLAG ) ) {
 		CG_PlayerFlag( cent, cgs.media.redFlagModel );
-		trap_R_AddLightToScene( cent->lerpOrigin, 200 + (rand()&31), 1.0, 0.2f, 0.2f );
+		trap_R_AddLightToScene( cent->lerpOrigin, 200 + (rand()&31), 1.0f, 0.2f, 0.2f );
 	}
 
 	// blueflag
 	if ( powerups & ( 1 << PW_BLUEFLAG ) ) {
 		CG_PlayerFlag( cent, cgs.media.blueFlagModel );
-		trap_R_AddLightToScene( cent->lerpOrigin, 200 + (rand()&31), 0.2f, 0.2f, 1.0 );
+		trap_R_AddLightToScene( cent->lerpOrigin, 200 + (rand()&31), 0.2f, 0.2f, 1.0f );
 	}
 
 	// neutralflag
 	if ( powerups & ( 1 << PW_NEUTRALFLAG ) ) {
 		if (cgs.isCTFMod && cgs.CTF3ModeActive) {
 			CG_PlayerFlag( cent, cgs.media.neutralFlagModel );
-			trap_R_AddLightToScene( cent->lerpOrigin, 200 + (rand()&31), 0.8f, 0.8f, 0.0f );
+			trap_R_AddLightToScene( cent->lerpOrigin, 200 + (rand()&31), 1.0f, 1.0f, 0.2f );
 		}
 		else {
 			trap_R_AddLightToScene( cent->lerpOrigin, 200 + (rand()&31), 1.0f, 1.0f, 1.0f );
@@ -3973,11 +3952,11 @@ void CG_DoSaber( vec3_t origin, vec3_t dir, float length, saber_colors_t color, 
 	// It's not quite what I'd hoped tho.  If you have any ideas, go for it!  --Pat
 	if (length < SABER_LENGTH_MAX)
 	{
-		radiusmult = 1.0 + (2.0 / length);		// Note this creates a curve, and length cannot be < 0.5.
+		radiusmult = 1.0f + (2.0f / length);		// Note this creates a curve, and length cannot be < 0.5.
 	}
 	else
 	{
-		radiusmult = 1.0;
+		radiusmult = 1.0f;
 	}
 
 
@@ -6238,7 +6217,7 @@ void CG_Player( centity_t *cent ) {
 			cent->currentState.legsAnim = BOTH_RUN2;
 		}
 	}
-	
+
 	memset (&legs, 0, sizeof(legs));
 
 	CG_SetGhoul2Info(&legs, cent);
@@ -7114,11 +7093,22 @@ doEssentialTwo:
 
 	if (cent->currentState.eFlags & EF_INVULNERABLE)
 	{
-		if (cgs.gametype != GT_CTY && cg_teamRespawnShield.integer) {
-			if (cgs.clientinfo[cent->currentState.number].team == TEAM_RED)
-				CG_DrawPlayerSphere(cent, cent->lerpOrigin, 1.4, cgs.media.ysaliredShader);
-			else
-				CG_DrawPlayerSphere(cent, cent->lerpOrigin, 1.4, cgs.media.ysaliblueShader);
+		if (cg_teamRespawnShield.integer && ci && cgs.gametype != GT_CTY) {
+			switch (ci->team)
+			{
+				case TEAM_RED:
+					CG_DrawPlayerSphere(cent, cent->lerpOrigin, 1.4, cgs.media.ysaliredShader);
+					break;
+				case TEAM_FREE:
+					if (cgs.isCTFMod && cgs.CTF3ModeActive) {
+						CG_DrawPlayerSphere(cent, cent->lerpOrigin, 1.4, cgs.media.ysalimariShader);
+						break;
+					}
+				case TEAM_BLUE:
+				default:
+					CG_DrawPlayerSphere(cent, cent->lerpOrigin, 1.4, cgs.media.ysaliblueShader);
+					break;
+			}
 		}
 		else {
 			CG_DrawPlayerSphere(cent, cent->lerpOrigin, 1.4, cgs.media.invulnerabilityShader );

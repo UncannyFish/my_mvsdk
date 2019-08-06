@@ -58,7 +58,7 @@ extern displayContextDef_t cgDC;
 menuDef_t *menuScoreboard = NULL;
 vec4_t	bluehudtint = {0.5f, 0.5f, 1.0f, 1.0f};
 vec4_t	redhudtint = {1.0f, 0.5f, 0.5f, 1.0f};
-vec4_t	yellowhudtint = {1.0f, 1.0f, 0.0f, 1.0f};
+vec4_t	yellowhudtint = {1.0f, 1.0f, 0.5f, 1.0f};
 float	*hudTintColor;
 
 int sortedTeamPlayers[TEAM_MAXOVERLAY];
@@ -2332,16 +2332,23 @@ static int CG_DrawPowerupIcons(int y)
 
 			if (item)
 			{
-				int icoShader = 0;
-				if (cgs.gametype == GT_CTY && (j == PW_REDFLAG || j == PW_BLUEFLAG))
+				qhandle_t icoShader = 0;
+				if (cgs.gametype == GT_CTY)
 				{
-					if (j == PW_REDFLAG)
+					switch (j)
 					{
-						icoShader = cgs.media.flagShaderYsal[TEAM_RED];
-					}
-					else
-					{
-						icoShader = cgs.media.flagShaderYsal[TEAM_BLUE];
+						case PW_REDFLAG:
+							icoShader = cgs.media.flagShaderYsal[TEAM_RED];
+							break;
+						case PW_BLUEFLAG:
+							icoShader = cgs.media.flagShaderYsal[TEAM_BLUE];
+							break;
+						case PW_NEUTRALFLAG:
+							icoShader = cgs.media.flagShader[TEAM_FREE];
+							break;
+						default:
+							icoShader = trap_R_RegisterShaderNoMip(item->icon);
+							break;
 					}
 				}
 				else
@@ -2353,7 +2360,7 @@ static int CG_DrawPowerupIcons(int y)
 	
 				y += ico_size;
 
-				if (j != PW_REDFLAG && j != PW_BLUEFLAG && secondsleft < 999)
+				if (j != PW_REDFLAG && j != PW_BLUEFLAG && j != PW_NEUTRALFLAG && secondsleft < 999)
 				{
 					UI_DrawProportionalString(xAlign + (ico_size / 2), y - 8, va("%i", secondsleft), UI_CENTER | UI_BIGFONT | UI_DROPSHADOW, colorTable[CT_WHITE]);
 				}
@@ -4175,8 +4182,8 @@ void CG_DrawEnhancedFlagStatus(void)
 	char redFlagTimeStr[8] = { 0 }, blueFlagTimeStr[8] = { 0 }, yellowFlagTimeStr[8] = { 0 };
 	int secs, mins;
 	vec4_t hcolor = { 0 };
-	int startDrawPos = 365;
-	int ico_size = 32;
+	float startDrawPos = 365.0f;
+	float ico_size = 32.0f;
 
 	if (!cg.snap) {
 		return;
@@ -4243,8 +4250,8 @@ void CG_DrawEnhancedFlagStatus(void)
 			if (!cgs.yellowFlagCarrier)
 				cgs.yellowFlagCarrier = CG_GetFlagCarrier(TEAM_FREE);
 		}
-		else {
-			cgs.yellowFlagCarrier = 0;
+		else if (cgs.yellowFlagCarrier || cgs.yellowFlagTime) {
+			cgs.yellowFlagCarrier = NULL;
 			cgs.yellowFlagTime = 0;
 		}
 	}
@@ -4280,19 +4287,19 @@ void CG_DrawEnhancedFlagStatus(void)
 							else
 								Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i)", cgs.yellowFlagCarrier->health);
 
-							CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, flagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
-							CG_Text_Paint(2 + ico_size + 4 + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, flagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+							CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, flagStatus, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+							CG_Text_Paint(2.0f + ico_size + 4.0f + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9.0f, 0.65f, hcolor, flagStatusHP, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 						}
 						else {
 							yellowFlagShader = cgs.media.flagShaderTaken[TEAM_FREE];
-							CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, cgs.yellowFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+							CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, cgs.yellowFlagCarrier->name, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 						}
 					}
 					if (cg_enhancedFlagStatus.integer > 1 && yellowFlagTimeStr[0] != '\0')
-						CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, yellowFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, yellowFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 				}
-				CG_DrawPic(2, startDrawPos, ico_size, ico_size, yellowFlagShader);
-				startDrawPos -= ico_size + 2;
+				CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, yellowFlagShader);
+				startDrawPos -= ico_size + 2.0f;
 			}
 		}
 
@@ -4311,19 +4318,19 @@ void CG_DrawEnhancedFlagStatus(void)
 						else
 							Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i)", cgs.blueFlagCarrier->health);
 
-						CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, flagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
-						CG_Text_Paint(2 + ico_size + 4 + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, flagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, flagStatus, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2.0f + ico_size + 4.0f + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9.0f, 0.65f, hcolor, flagStatusHP, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 					}
 					else {
 						blueFlagShader = cgs.media.flagShaderTaken[TEAM_BLUE];
-						CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, cgs.blueFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, cgs.blueFlagCarrier->name, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 					}
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && blueFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, blueFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, blueFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
-			CG_DrawPic(2, startDrawPos, ico_size, ico_size, blueFlagShader);
-			startDrawPos -= ico_size + 2;
+			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, blueFlagShader);
+			startDrawPos -= ico_size + 2.0f;
 		}
 
 		if (cgs.redflag != FLAG_ATBASE)
@@ -4331,16 +4338,16 @@ void CG_DrawEnhancedFlagStatus(void)
 			if (cgs.redflag == FLAG_TAKEN)
 			{
 				if (cgs.redFlagCarrier && cgs.redFlagCarrier->infoValid) {
-					CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, cgs.redFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, cgs.redFlagCarrier->name, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && redFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2 + ico_size + 4, startDrawPos - 3, 0.65f, colorWhite, redFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, redFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
-			CG_DrawPic(2, startDrawPos, ico_size, ico_size, redFlagShader);
-			startDrawPos -= ico_size + 2;
+			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, redFlagShader);
+			startDrawPos -= ico_size + 2.0f;
 		}
 	}
-	else if (cgs.CTF3ModeActive && cgs.CTF3ModeActive && team == TEAM_FREE)
+	else if (cgs.isCTFMod && cgs.CTF3ModeActive && team == TEAM_FREE)
 	{
 		if (cgs.gametype == GT_CTY) {
 			redFlagShader = cgs.media.flagShaderYsal[TEAM_RED];
@@ -4367,19 +4374,19 @@ void CG_DrawEnhancedFlagStatus(void)
 						else
 							Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i)", cgs.blueFlagCarrier->health);
 
-						CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, flagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
-						CG_Text_Paint(2 + ico_size + 4 + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, flagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, flagStatus, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2.0f + ico_size + 4.0f + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9.0f, 0.65f, hcolor, flagStatusHP, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 					}
 					else {
 						blueFlagShader = cgs.media.flagShaderTaken[TEAM_BLUE];
-						CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, cgs.blueFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, cgs.blueFlagCarrier->name, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 					}
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && blueFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, blueFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, blueFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
-			CG_DrawPic(2, startDrawPos, ico_size, ico_size, blueFlagShader);
-			startDrawPos -= ico_size + 2;
+			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, blueFlagShader);
+			startDrawPos -= ico_size + 2.0f;
 		}
 
 		if (cgs.redflag != FLAG_ATBASE)
@@ -4399,19 +4406,19 @@ void CG_DrawEnhancedFlagStatus(void)
 						else
 							Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i)", cgs.redFlagCarrier->health);
 
-						CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, flagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
-						CG_Text_Paint(2 + ico_size + 4 + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, flagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, flagStatus, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2.0f + ico_size + 4.0f + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9.0f, 0.65f, hcolor, flagStatusHP, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 					}
 					else {
 						redFlagShader = cgs.media.flagShaderTaken[TEAM_RED];
-						CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, cgs.redFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos+9.0f, 0.65f, colorWhite, cgs.redFlagCarrier->name, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 					}
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && redFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, redFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, redFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
-			CG_DrawPic(2, startDrawPos, ico_size, ico_size, redFlagShader);
-			startDrawPos -= ico_size + 2;
+			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, redFlagShader);
+			startDrawPos -= ico_size + 2.0f;
 		}
 
 		if (cgs.yellowflag != FLAG_ATBASE)
@@ -4419,13 +4426,13 @@ void CG_DrawEnhancedFlagStatus(void)
 			if (cgs.yellowflag == FLAG_TAKEN)
 			{
 				if (cgs.yellowFlagCarrier && cgs.yellowFlagCarrier->infoValid) {
-					CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, cgs.yellowFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, cgs.yellowFlagCarrier->name, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && yellowFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2 + ico_size + 4, startDrawPos - 3, 0.65f, colorWhite, yellowFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, yellowFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
-			CG_DrawPic(2, startDrawPos, ico_size, ico_size, yellowFlagShader);
-			startDrawPos -= ico_size + 2;
+			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, yellowFlagShader);
+			startDrawPos -= ico_size + 2.0f;
 		}
 	}
 	else //if (team == TEAM_BLUE)
@@ -4456,19 +4463,19 @@ void CG_DrawEnhancedFlagStatus(void)
 							else
 								Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i)", cgs.yellowFlagCarrier->health);
 
-							CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, flagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
-							CG_Text_Paint(2 + ico_size + 4 + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, flagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+							CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, flagStatus, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+							CG_Text_Paint(2.0f + ico_size + 4.0f + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9.0f, 0.65f, hcolor, flagStatusHP, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 						}
 						else {
 							yellowFlagShader = cgs.media.flagShaderTaken[TEAM_FREE];
-							CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, cgs.yellowFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+							CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, cgs.yellowFlagCarrier->name, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 						}
 					}
 					if (cg_enhancedFlagStatus.integer > 1 && yellowFlagTimeStr[0] != '\0')
-						CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, yellowFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, yellowFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 				}
-				CG_DrawPic(2, startDrawPos, ico_size, ico_size, yellowFlagShader);
-				startDrawPos -= ico_size + 2;
+				CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, yellowFlagShader);
+				startDrawPos -= ico_size + 2.0f;
 			}
 		}
 
@@ -4489,19 +4496,19 @@ void CG_DrawEnhancedFlagStatus(void)
 						else
 							Com_sprintf(flagStatusHP, sizeof(flagStatusHP), "(%i)", cgs.redFlagCarrier->health);
 
-						CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, flagStatus, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
-						CG_Text_Paint(2 + ico_size + 4 + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9, 0.65f, hcolor, flagStatusHP, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, flagStatus, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2.0f + ico_size + 4.0f + CG_Text_Width(flagStatus, 0.65f, FONT_MEDIUM), startDrawPos + 9.0f, 0.65f, hcolor, flagStatusHP, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 					}
 					else {
 						redFlagShader = cgs.media.flagShaderTaken[TEAM_RED];
-						CG_Text_Paint(2 + ico_size + 4, startDrawPos+9, 0.65f, colorWhite, cgs.redFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos+9.0f, 0.65f, colorWhite, cgs.redFlagCarrier->name, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 					}
 				}
-				if (cg_enhancedFlagStatus.integer > 1 && redFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2 + ico_size + 4, startDrawPos-3, 0.65f, colorWhite, redFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+				if (cg_enhancedFlagStatus.integer > 1.0f && redFlagTimeStr[0] != '\0')
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, redFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
-			CG_DrawPic(2, startDrawPos, ico_size, ico_size, redFlagShader);
-			startDrawPos -= ico_size + 2;
+			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, redFlagShader);
+			startDrawPos -= ico_size + 2.0f;
 		}
 
 		if (cgs.blueflag != FLAG_ATBASE)
@@ -4509,14 +4516,20 @@ void CG_DrawEnhancedFlagStatus(void)
 			if (cgs.blueflag == FLAG_TAKEN)
 			{
 				if (cgs.blueFlagCarrier && cgs.blueFlagCarrier->infoValid) {
-					CG_Text_Paint(2 + ico_size + 4, startDrawPos + 9, 0.65f, colorWhite, cgs.blueFlagCarrier->name, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, cgs.blueFlagCarrier->name, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && blueFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2 + ico_size + 4, startDrawPos - 3, 0.65f, colorWhite, blueFlagTimeStr, 0, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, blueFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
-			CG_DrawPic(2, startDrawPos, ico_size, ico_size, blueFlagShader);
-			startDrawPos -= ico_size + 2;
+			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, blueFlagShader);
+			startDrawPos -= ico_size + 2.0f;
 		}
+	}
+
+	trap_Cvar_Update(&cg_chatBoxHeight);
+	startDrawPos += ico_size*2.0f;
+	if (startDrawPos <= cg_chatBoxHeight.value) {
+		cg_chatBoxHeight.value = startDrawPos;
 	}
 }
 
@@ -4849,10 +4862,9 @@ ID_INLINE void CG_ChatBox_DrawStrings(void) //o, ID_INLINE is static Q_INLINE
 	int numToDraw = 0;
 	int linesToDraw = 0;
 	int i = 0;
-	float x = cg_chatBoxX.integer;
-	//float y = cg.scoreBoardShowing ? 475 : cg_chatBoxHeight.integer;
-	float y = cg_chatBoxHeight.integer;
-	float fontScale = 0.65 * cg_chatBoxFontSize.value;//JAPRO - Clientside - Chatbox Font Size Scaler
+	float x = cg_chatBoxX.value;
+	float y = cg.scoreBoardShowing ? 475 : cg_chatBoxHeight.integer;
+	float fontScale = 0.65f * cg_chatBoxFontSize.value;//JAPRO - Clientside - Chatbox Font Size Scaler
 	qboolean drawAnyway = qfalse;
 
 	//y = cg_chatBoxHeight.integer;

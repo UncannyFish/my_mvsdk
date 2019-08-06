@@ -582,7 +582,7 @@ static void CG_ItemPickup( int itemNum ) {
 
 	//rww - print pickup messages
 	if (bg_itemlist[itemNum].classname && bg_itemlist[itemNum].classname[0] &&
-		(bg_itemlist[itemNum].giType != IT_TEAM || (bg_itemlist[itemNum].giTag != PW_REDFLAG && bg_itemlist[itemNum].giTag != PW_BLUEFLAG)) )
+		(bg_itemlist[itemNum].giType != IT_TEAM || (bg_itemlist[itemNum].giTag != PW_REDFLAG && bg_itemlist[itemNum].giTag != PW_BLUEFLAG && bg_itemlist[itemNum].giTag != PW_NEUTRALFLAG)) )
 	{ //don't print messages for flags, they have their own pickup event broadcasts
 		char	text[1024];
 
@@ -894,6 +894,12 @@ void CG_GetCTFMessageEvent(entityState_t *es)
 		if (es->eventParm == CTFMESSAGE_PLAYER_GOT_FLAG) {
 			cgs.redFlagCarrier = ci;
 			cgs.redFlagTime = cg.time;
+		}
+	}
+	else if (teamIndex == TEAM_FREE) {
+		if (es->eventParm == CTFMESSAGE_PLAYER_GOT_FLAG) {
+			cgs.yellowFlagCarrier = ci;
+			cgs.yellowFlagTime = cg.time;
 		}
 	}
 	else { //if (teamIndex == TEAM_BLUE) {
@@ -1919,12 +1925,12 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 
 	case EV_ITEM_POP:
 		DEBUGNAME("EV_ITEM_POP");
-		trap_S_StartSound (NULL, es->number, CHAN_AUTO, cgs.media.respawnSound );
+		trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.respawnSound );
 		break;
 	case EV_ITEM_RESPAWN:
 		DEBUGNAME("EV_ITEM_RESPAWN");
 		cent->miscTime = cg.time;	// scale up from this
-		trap_S_StartSound (NULL, es->number, CHAN_AUTO, cgs.media.respawnSound );
+		trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.respawnSound );
 		break;
 
 	case EV_GRENADE_BOUNCE:

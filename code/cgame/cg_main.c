@@ -779,12 +779,12 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_showpos, "cg_showpos", "0", 0 },
 
 
-	{ &cg_strafeHelperCutoff, "cg_strafeHelperCutoff", "0", 0 },
+	{ &cg_strafeHelperCutoff, "cg_strafeHelperCutoff", "240", CVAR_ARCHIVE },
 	{ &cg_strafeHelper, "cg_strafeHelper", "992", CVAR_ARCHIVE },
 	{ &cg_strafeHelperPrecision, "cg_strafeHelperPrecision", "256", 0 },
-	{ &cg_strafeHelperLineWidth, "cg_strafeHelperLineWidth", "1", 0 },
-	{ &cg_strafeHelperActiveColor, "cg_strafeHelperActiveColor", "0 255 0 200", 0 },
-	{ &cg_strafeHelperInactiveAlpha, "cg_strafeHelperInactiveAlpha", "200", 0 },
+	{ &cg_strafeHelperLineWidth, "cg_strafeHelperLineWidth", "1", CVAR_ARCHIVE },
+	{ &cg_strafeHelperActiveColor, "cg_strafeHelperActiveColor", "0 255 0 200", CVAR_ARCHIVE },
+	{ &cg_strafeHelperInactiveAlpha, "cg_strafeHelperInactiveAlpha", "200", CVAR_ARCHIVE },
 
 	{ &cg_strafeHelperOffset, "cg_strafeHelperOffset", "75", CVAR_ARCHIVE },
 	{ &cg_strafeHelper_FPS, "cg_strafeHelper_FPS", "0", 0 },
@@ -1222,7 +1222,7 @@ const char *CG_Argv( int arg ) {
 /*
 ================
 CG_SendConsoleCommand
-	Ensures trailing newline & handles va formatting
+Ensures trailing newline & handles va formatting
 ================
 */
 void QDECL CG_SendConsoleCommand(const char *fmt, ...)
@@ -1351,10 +1351,12 @@ static void CG_RegisterSounds( void ) {
 	
 	trap_R_RegisterShader( "gfx/effects/forcePush" );
 
-	trap_R_RegisterShader( "gfx/misc/red_dmgshield" );
-	trap_R_RegisterShader( "gfx/misc/red_portashield" );
-	trap_R_RegisterShader( "gfx/misc/blue_dmgshield" );
-	trap_R_RegisterShader( "gfx/misc/blue_portashield" );
+	cgs.media.forcefieldShader[TEAM_RED] = trap_R_RegisterShader( "gfx/misc/red_portashield" );
+	cgs.media.forcefieldDmgShader[TEAM_RED] = 	trap_R_RegisterShader( "gfx/misc/red_dmgshield" );
+	cgs.media.forcefieldShader[TEAM_BLUE] = trap_R_RegisterShader( "gfx/misc/blue_portashield" );
+	cgs.media.forcefieldDmgShader[TEAM_BLUE] = trap_R_RegisterShader( "gfx/misc/blue_dmgshield" );
+	cgs.media.forcefieldShader[TEAM_FREE] = trap_R_RegisterShader( "gfx/misc/yellow_portashield" );
+	cgs.media.forcefieldDmgShader[TEAM_FREE] = trap_R_RegisterShader( "gfx/misc/yellow_dmgshield" );
 
 	trap_R_RegisterShader( "models/map_objects/imp_mine/turret_chair_dmg.tga" );
 
