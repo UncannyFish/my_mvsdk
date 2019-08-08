@@ -2586,6 +2586,11 @@ void CG_AddLagometerSnapshotInfo( snapshot_t *snap ) {
 	}
 
 	// add this snapshot's info
+	if (cg.demoPlayback) { //fixes lagometer in demos
+		snap->ping = (snap->serverTime - snap->ps.commandTime);
+		snap->ping -= cg.frametime; //(1000 / cg.svfps)?
+	}
+
 	lagometer.snapshotSamples[ lagometer.snapshotCount & ( LAG_SAMPLES - 1) ] = snap->ping;
 	lagometer.snapshotFlags[ lagometer.snapshotCount & ( LAG_SAMPLES - 1) ] = snap->snapFlags;
 	lagometer.snapshotCount++;
@@ -2606,7 +2611,7 @@ static void CG_DrawDisconnect( void ) {
 	int			w;  // bk010215 - FIXME char message[1024];
 	const int REAL_CMD_BACKUP = (cl_commandsize.integer >= 4 && cl_commandsize.integer <= 512) ? (cl_commandsize.integer) : (CMD_BACKUP); //Loda - FPS UNLOCK
 
-	if (cg.demoPlayback)
+	if (cgs.localServer || cg.demoPlayback)
 		return;
 
 	if (cg.mMapChange)
@@ -2662,7 +2667,7 @@ static void CG_DrawLagometer( void ) {
 	int		color;
 	float	vscale;
 
-	if ( !cg_lagometer.integer || cgs.localServer || cg.demoPlayback ) {
+	if ( !cg_lagometer.integer || cgs.localServer ) {
 		CG_DrawDisconnect();
 		return;
 	}
@@ -2752,7 +2757,7 @@ static void CG_DrawLagometer( void ) {
 
 	trap_R_SetColor( NULL );
 
-	if ( cg_nopredict.integer || cg_synchronousClients.integer ) {
+	if ( !cg.demoPlayback && (cg_nopredict.integer || cg_synchronousClients.integer) ) {
 		CG_DrawBigString( ax, ay, "snc", 1.0 );
 	}
 
