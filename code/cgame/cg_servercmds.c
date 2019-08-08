@@ -1302,7 +1302,7 @@ static void CG_ServerCommand( void ) {
 
 	if ( !strcmp( cmd, "chat" ) ) {
 		if ( !cg_teamChatsOnly.integer ) {
-			if (cg_chatSounds.integer && cg_chatSounds.integer != 2)
+			if (cg_chatSounds.integer)
 				trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
 			Q_strncpyz(text, CG_Argv(1), sizeof(text));
 			CG_RemoveChatEscapeChar( text );
@@ -1333,7 +1333,7 @@ static void CG_ServerCommand( void ) {
 			else {
 				CG_Printf( "%s\n", text );
 				if (cg_chatSounds.integer == 2 && strstr(text, "^7]: ^6")) //would be done in chatbox code otherwise
-					trap_S_StartLocalSound(cgs.media.talkSound, CHAN_LOCAL_SOUND);
+					trap_S_StartLocalSound(cgs.media.privateChatSound, CHAN_LOCAL_SOUND);
 			}
 		}
 		return;
@@ -1341,7 +1341,7 @@ static void CG_ServerCommand( void ) {
 
 	if ( !strcmp( cmd, "tchat" ) ) {
 		if (cg_chatSounds.integer)
-			trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
+			trap_S_StartLocalSound( cg_chatSounds.integer == 2 ? cgs.media.teamChatSound : cgs.media.talkSound, CHAN_LOCAL_SOUND );
 		Q_strncpyz( text, CG_Argv(1), sizeof(text) );
 		CG_RemoveChatEscapeChar( text );
 

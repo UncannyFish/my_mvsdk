@@ -1585,6 +1585,9 @@ static void CG_RegisterSounds( void ) {
 	cgs.media.hitSound4		= trap_S_RegisterSound("sound/effects/hitsound4.wav");
 	cgs.media.hitTeamSound	= trap_S_RegisterSound("sound/effects/hitsoundteam.wav");
 
+	//new chat sound options
+	cgs.media.teamChatSound = trap_S_RegisterSound("sound/movers/switches/button_11.mp3");
+	cgs.media.privateChatSound = trap_S_RegisterSound("sound/interface/commlink_off.mp3");
 }
 
 

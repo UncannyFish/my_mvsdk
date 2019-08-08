@@ -1322,11 +1322,14 @@ typedef struct {
 
 	//jk2pro
 	sfxHandle_t	lowHPSound;
-	sfxHandle_t hitSound;
-	sfxHandle_t hitSound2;
-	sfxHandle_t hitSound3;
-	sfxHandle_t hitSound4;
-	sfxHandle_t hitTeamSound;
+	sfxHandle_t	hitSound;
+	sfxHandle_t	hitSound2;
+	sfxHandle_t	hitSound3;
+	sfxHandle_t	hitSound4;
+	sfxHandle_t	hitTeamSound;
+
+	sfxHandle_t	teamChatSound;
+	sfxHandle_t	privateChatSound;
 
 } cgMedia_t;
 
