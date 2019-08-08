@@ -138,7 +138,7 @@ void CG_Text_Paint(float x, float y, float scale, const vec4_t color, const char
 	case  ITEM_TEXTSTYLE_OUTLINESHADOWED:	iStyleOR = (int)STYLE_DROPSHADOW;break;	// JK2 drop shadow ( need a color for this )
 	case  ITEM_TEXTSTYLE_SHADOWEDMORE:		iStyleOR = (int)STYLE_DROPSHADOW;break;	// JK2 drop shadow ( need a color for this )
 	}
-
+	trap_R_SetColor(color);
 	trap_R_Font_DrawString(	x,		// int ox
 							y,		// int oy
 							text,	// const char *text
@@ -147,6 +147,7 @@ void CG_Text_Paint(float x, float y, float scale, const vec4_t color, const char
 							!limit?-1:limit,		// iCharLimit (-1 = none)
 							scale	// const float scale = 1.0f
 							);
+	trap_R_SetColor(NULL);
 }
 
 /*
@@ -1098,7 +1099,8 @@ static void CG_DrawSimpleForcePower(const centity_t *cent)
 CG_DrawHUD
 ================
 */
-float speedometerXPos;
+static float speedometerXPos = 0.0f;
+static float chatBoxYPos = 0.0f;
 void Dzikie_CG_DrawLine(float x1, float y1, float x2, float y2, float size, vec4_t color, float alpha, float ycutoff);
 void CG_DrawHUD(centity_t	*cent)
 {
@@ -1113,7 +1115,7 @@ void CG_DrawHUD(centity_t	*cent)
 	if (cg_movementKeys.integer)
 		CG_MovementKeys(cent);
 
-	speedometerXPos = cg_speedometerX.integer;
+	speedometerXPos = cg_speedometerX.value;
 
 	if (cg_hudFiles.integer)
 		speedometerXPos -= 8;
@@ -1135,7 +1137,7 @@ void CG_DrawHUD(centity_t	*cent)
 		CG_StrafeHelper(cent);
 
 	if (cg_strafeHelper.integer & SHELPER_CROSSHAIR) {
-		vec3_t		hcolor;
+		vec4_t		hcolor;
 		float		lineWidth;
 
 		if (!cg.crosshairColor[0] && !cg.crosshairColor[1] && !cg.crosshairColor[2]) { //default to white
@@ -4178,9 +4180,10 @@ void CG_DrawEnhancedFlagStatus(void)
 {
 	qhandle_t redFlagShader = 0, blueFlagShader = 0, yellowFlagShader = 0;
 	int team = 0;
+	int secs, mins;
 	char flagStatus[256] = { 0 }, flagStatusHP[16] = { 0 };
 	char redFlagTimeStr[8] = { 0 }, blueFlagTimeStr[8] = { 0 }, yellowFlagTimeStr[8] = { 0 };
-	int secs, mins;
+	vec_t *redFlagTimeColor = colorTable[CT_WHITE], *blueFlagTimeColor = colorTable[CT_WHITE], *yellowFlagTimeColor = colorTable[CT_WHITE];
 	vec4_t hcolor = { 0 };
 	float startDrawPos = 365.0f;
 	float ico_size = 32.0f;
@@ -4209,8 +4212,25 @@ void CG_DrawEnhancedFlagStatus(void)
 
 		if (!cgs.redFlagCarrier)
 			cgs.redFlagCarrier = CG_GetFlagCarrier(TEAM_RED);
+
+		if (cgs.redFlagCarrier && cgs.redFlagCarrier->infoValid) {
+			switch (cgs.redFlagCarrier->team) {
+				case TEAM_RED:
+					redFlagTimeColor = colorTable[CT_RED];
+					break;
+				case TEAM_BLUE:
+					redFlagTimeColor = colorTable[CT_BLUE];
+					break;
+				case TEAM_FREE:
+					redFlagTimeColor = colorTable[CT_YELLOW];
+					break;
+				default:
+					redFlagTimeColor = colorTable[CT_WHITE];
+					break;
+			}
+		}
 	}
-	else if (cgs.blueFlagCarrier || cgs.redFlagTime) {
+	else if (cgs.redFlagCarrier || cgs.redFlagTime) {
 		cgs.redFlagCarrier = NULL;
 		cgs.redFlagTime = 0;
 	}
@@ -4228,6 +4248,23 @@ void CG_DrawEnhancedFlagStatus(void)
 
 		if (!cgs.blueFlagCarrier)
 			cgs.blueFlagCarrier = CG_GetFlagCarrier(TEAM_BLUE);
+
+		if (cgs.blueFlagCarrier && cgs.blueFlagCarrier->infoValid) {
+			switch (cgs.blueFlagCarrier->team) {
+				case TEAM_RED:
+					blueFlagTimeColor = colorTable[CT_RED];
+					break;
+				case TEAM_BLUE:
+					blueFlagTimeColor = colorTable[CT_BLUE];
+					break;
+				case TEAM_FREE:
+					blueFlagTimeColor = colorTable[CT_YELLOW];
+					break;
+				default:
+					blueFlagTimeColor = colorTable[CT_WHITE];
+					break;
+			}
+		}
 	}
 	else if (cgs.blueFlagCarrier || cgs.blueFlagTime) {
 		cgs.blueFlagCarrier = NULL;
@@ -4249,6 +4286,23 @@ void CG_DrawEnhancedFlagStatus(void)
 
 			if (!cgs.yellowFlagCarrier)
 				cgs.yellowFlagCarrier = CG_GetFlagCarrier(TEAM_FREE);
+
+			if (cgs.yellowFlagCarrier && cgs.yellowFlagCarrier->infoValid) {
+				switch (cgs.yellowFlagCarrier->team) {
+					case TEAM_RED:
+						yellowFlagTimeColor = colorTable[CT_RED];
+						break;
+					case TEAM_BLUE:
+						yellowFlagTimeColor = colorTable[CT_BLUE];
+						break;
+					case TEAM_FREE:
+						yellowFlagTimeColor = colorTable[CT_YELLOW];
+						break;
+					default:
+						yellowFlagTimeColor = colorTable[CT_WHITE];
+						break;
+				}
+			}
 		}
 		else if (cgs.yellowFlagCarrier || cgs.yellowFlagTime) {
 			cgs.yellowFlagCarrier = NULL;
@@ -4257,8 +4311,10 @@ void CG_DrawEnhancedFlagStatus(void)
 	}
 
 	hcolor[0] = hcolor[1] = hcolor[2] = hcolor[3] = 1.0f;
-	team = cg.snap->ps.persistant[PERS_TEAM];
+	if (!cgs.isCTFMod || !cgs.CTF3ModeActive) //just show white color in normal CTF
+		redFlagTimeColor = blueFlagTimeColor = yellowFlagTimeColor = colorWhite;
 
+	team = cg.snap->ps.persistant[PERS_TEAM];
 	if (team == TEAM_RED)
 	{
 		if (cgs.gametype == GT_CTY) {
@@ -4296,7 +4352,7 @@ void CG_DrawEnhancedFlagStatus(void)
 						}
 					}
 					if (cg_enhancedFlagStatus.integer > 1 && yellowFlagTimeStr[0] != '\0')
-						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, yellowFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, yellowFlagTimeColor, yellowFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 				}
 				CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, yellowFlagShader);
 				startDrawPos -= ico_size + 2.0f;
@@ -4327,7 +4383,7 @@ void CG_DrawEnhancedFlagStatus(void)
 					}
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && blueFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, blueFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, blueFlagTimeColor, blueFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
 			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, blueFlagShader);
 			startDrawPos -= ico_size + 2.0f;
@@ -4341,7 +4397,7 @@ void CG_DrawEnhancedFlagStatus(void)
 					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, cgs.redFlagCarrier->name, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && redFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, redFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, redFlagTimeColor, redFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
 			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, redFlagShader);
 			startDrawPos -= ico_size + 2.0f;
@@ -4383,7 +4439,7 @@ void CG_DrawEnhancedFlagStatus(void)
 					}
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && blueFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, blueFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, blueFlagTimeColor, blueFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
 			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, blueFlagShader);
 			startDrawPos -= ico_size + 2.0f;
@@ -4415,7 +4471,7 @@ void CG_DrawEnhancedFlagStatus(void)
 					}
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && redFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, redFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, redFlagTimeColor, redFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
 			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, redFlagShader);
 			startDrawPos -= ico_size + 2.0f;
@@ -4429,7 +4485,7 @@ void CG_DrawEnhancedFlagStatus(void)
 					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, cgs.yellowFlagCarrier->name, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && yellowFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, yellowFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, yellowFlagTimeColor, yellowFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
 			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, yellowFlagShader);
 			startDrawPos -= ico_size + 2.0f;
@@ -4472,7 +4528,7 @@ void CG_DrawEnhancedFlagStatus(void)
 						}
 					}
 					if (cg_enhancedFlagStatus.integer > 1 && yellowFlagTimeStr[0] != '\0')
-						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, yellowFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+						CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, yellowFlagTimeColor, yellowFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 				}
 				CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, yellowFlagShader);
 				startDrawPos -= ico_size + 2.0f;
@@ -4505,7 +4561,7 @@ void CG_DrawEnhancedFlagStatus(void)
 					}
 				}
 				if (cg_enhancedFlagStatus.integer > 1.0f && redFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, redFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, redFlagTimeColor, redFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
 			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, redFlagShader);
 			startDrawPos -= ico_size + 2.0f;
@@ -4519,17 +4575,20 @@ void CG_DrawEnhancedFlagStatus(void)
 					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos + 9.0f, 0.65f, colorWhite, cgs.blueFlagCarrier->name, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_MEDIUM);
 				}
 				if (cg_enhancedFlagStatus.integer > 1 && blueFlagTimeStr[0] != '\0')
-					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, colorWhite, blueFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+					CG_Text_Paint(2.0f + ico_size + 4.0f, startDrawPos - 3.0f, 0.65f, blueFlagTimeColor, blueFlagTimeStr, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
 			}
 			CG_DrawPic(2.0f, startDrawPos, ico_size, ico_size, blueFlagShader);
 			startDrawPos -= ico_size + 2.0f;
 		}
 	}
 
-	trap_Cvar_Update(&cg_chatBoxHeight);
 	startDrawPos += ico_size*2.0f;
-	if (startDrawPos <= cg_chatBoxHeight.value) {
-		cg_chatBoxHeight.value = startDrawPos;
+	//if (startDrawPos <= chatBoxYPos) {
+	if (chatBoxYPos >= 360) {
+		//chatBoxYPos = startDrawPos - (ico_size*2.0f)*2.0f;
+		chatBoxYPos -= 35.0f;
+		if (cgs.CTF3ModeActive)
+			chatBoxYPos -= 35.0f;
 	}
 }
 
@@ -4863,16 +4922,9 @@ ID_INLINE void CG_ChatBox_DrawStrings(void) //o, ID_INLINE is static Q_INLINE
 	int linesToDraw = 0;
 	int i = 0;
 	float x = cg_chatBoxX.value;
-	float y = cg.scoreBoardShowing ? 475 : cg_chatBoxHeight.integer;
+	float y = cg.scoreBoardShowing ? 475.0f : chatBoxYPos;
 	float fontScale = 0.65f * cg_chatBoxFontSize.value;//JAPRO - Clientside - Chatbox Font Size Scaler
 	qboolean drawAnyway = qfalse;
-
-	//y = cg_chatBoxHeight.integer;
-
-	if (cg.scoreBoardShowing)
-		y = 475;
-	else if (cg_chatBoxHeight.integer >= 360 && cg_enhancedFlagStatus.integer && (cgs.gametype == GT_CTF || cgs.gametype == GT_CTY))
-		y -= 35;
 
 	if (!cg_chatBox.integer)
 		return;
@@ -4974,6 +5026,7 @@ static void CG_Draw2D( void ) {
 		return;
 	}
 
+	chatBoxYPos = cg_chatBoxHeight.value;
 	if ( cg.snap->ps.pm_type == PM_INTERMISSION ) {
 		CG_DrawIntermission();
 		CG_ChatBox_DrawStrings();
@@ -5694,24 +5747,6 @@ static void CG_MovementKeys(centity_t *cent)
 
 	xOffset = 0;
 	yOffset = 0;
-
-	/*if (Q_isanumber(cg_hudFiles.string)) {
-	if (cg_hudFiles.integer == 1)
-	xOffset += 51; //516
-	else if (cg_hudFiles.integer == 2)
-	xOffset += 27; //492
-	else if (cg_hudFiles.integer == 3)
-	xOffset -= 14; //451
-
-	if (cg_drawScore.integer == 0 || cgs.gametype == GT_POWERDUEL || (cgs.isJAPro && cg.predictedPlayerState.stats[STAT_RACEMODE]))
-	yOffset += 12; // 445
-	else if (cg_drawScore.integer > 1 && cgs.gametype == GT_TEAM) {
-	yOffset -= 12; //420
-	//xOffset -= 16; //448
-	}
-	else
-	yOffset = 0;
-	}*/
 
 	x += xOffset;
 	y += yOffset;
