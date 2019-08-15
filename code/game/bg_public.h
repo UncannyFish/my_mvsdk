@@ -171,6 +171,27 @@ movement on the server game.
 ===================================================================================
 */
 
+extern Q_INLINE int PM_GetMovePhysics(void);
+typedef enum //movementstyle enum
+{
+	MV_SIEGE,
+	MV_JKA,
+	MV_QW,
+	MV_CPM,
+	MV_Q3,
+	MV_PJK,
+	MV_WSW,
+	MV_RJQ3,
+	MV_RJCPM,
+	MV_SWOOP,
+	MV_JETPACK,
+	MV_SPEED,
+	MV_SP,
+	MV_SLICK,
+	MV_BOTCPM,
+	MV_NUMSTYLES
+} movementStyle_e;
+
 
 typedef struct animation_s {
 	int		firstFrame;

@@ -9,6 +9,8 @@
 
 #ifdef JK2_GAME
 #include "g_local.h"
+#elif JK2_CGAME
+#include "../cgame/cg_local.h"
 #endif
 
 #define MAX_WEAPON_CHARGE_TIME 5000
@@ -238,24 +240,27 @@ float forceJumpStrength[NUM_FORCE_POWER_LEVELS] =
 	840
 };
 
-int PM_GetMovePhysics(void)
+Q_INLINE int PM_GetMovePhysics(void)
 {
-#ifndef CGAME
-/*	if (pm->ps->stats[STAT_RACEMODE])
+	if (!pm || !pm->ps)
+		return MV_JKA;
+#if 0//JK2_GAME
+	if (pm->ps->stats[STAT_RACEMODE])
 		return (pm->ps->stats[STAT_MOVEMENTSTYLE]);
-	else if (g_movementStyle.integer >= 0 && g_movementStyle.integer <= 6)
+	else if ((g_movementStyle.integer >= MV_SIEGE && g_movementStyle.integer <= MV_WSW) || g_movementStyle.integer == MV_SP)
 		return (g_movementStyle.integer);
-	else if (g_movementStyle.integer < 0)
+	else if (g_movementStyle.integer < MV_SIEGE)
 		return 0;
-	else if (g_movementStyle.integer > 8)
-		return 8;*/
-	return 1;
-#else
-	/*if (!cgs.isJK2Pro)
-		return 1;
-	return pm->ps->stats[STAT_MOVEMENTSTYLE];*/
-	return 1;
+	else if (g_movementStyle.integer >= MV_NUMSTYLES)
+		return MV_JKA;
+#elif JK2_CGAME
+	if (cgs.isJK2Pro) {
+		return cg.predictedPlayerState.stats[STAT_MOVEMENTSTYLE];
+	}
+	//if (cgs.gametype == GT_SIEGE)
+	//	return MV_SIEGE;
 #endif
+	return MV_JKA;
 }
 
 int PM_GetSaberStance(void)

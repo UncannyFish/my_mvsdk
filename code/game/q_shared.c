@@ -991,7 +991,6 @@ char *Q_CleanStr( char *string, qboolean use102color ) {
 	return string;
 }
 
-#if defined(_MSC_VER) && _MSC_VER < 1900
 char *Q_CleanAsciiStr( char *string ) {
 	char*	d;
 	char*	s;
@@ -1010,6 +1009,7 @@ char *Q_CleanAsciiStr( char *string ) {
 	return string;
 }
 
+#if defined(_MSC_VER) && _MSC_VER < 1900
 /*
 =============
 Q_vsnprintf
@@ -1036,6 +1036,9 @@ size_t Q_vsnprintf(char *str, size_t size, const char *format, va_list ap) {
 	return retval;
 }
 #endif
+
+/*
+Q_strstrip
 
 Description:	Replace strip[x] in string with repl[x] or remove characters entirely
 Mutates:		string

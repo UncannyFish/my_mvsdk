@@ -1235,13 +1235,12 @@ void QDECL CG_SendConsoleCommand(const char *fmt, ...)
 		return;
 
 	va_start(argptr, fmt);
-	vsprintf(buf, fmt, argptr);
+	len = Q_vsnprintf(buf, sizeof(buf), fmt, argptr);
 	va_end(argptr);
 
 	if (!buf || !buf[0])
 		return;
 
-	len = strlen(buf);
 	if (!len)
 		return;
 	if (buf[len - 1] != '\n') //check for trailing newline
@@ -3083,7 +3082,7 @@ Ghoul2 Insert End
 	if (s) { //exec cfg for custom map specific remaps/skies/other stuff
 		char mapname_noExt[MAX_QPATH] = {0};
 
-		COM_StripExtension(s, mapname_noExt);
+		COM_StripExtension(s, mapname_noExt, sizeof(mapname_noExt));
 		if (mapname_noExt && mapname_noExt[0]) {
 			int cl_noPrint = (int)CG_Cvar_Get("cl_noprint");
 			if (!cl_noPrint)

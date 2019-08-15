@@ -1951,11 +1951,7 @@ void PM_SetSaberMove(short newMove)
 	int parts = SETANIM_TORSO;
 	
 	if ( newMove == LS_READY || ((newMove == LS_A_FLIP_STAB || newMove == LS_A_FLIP_SLASH) &&
-#ifdef JK2_CGAME
-		(jk2gameplay != VERSION_1_02 || cg_fixlean.integer)))
-#else
 		jk2gameplay != VERSION_1_02) )
-#endif
 	{//finished with a kata (or in a special move) reset attack counter
 		pm->ps->saberAttackChainCount = 0;
 	}
