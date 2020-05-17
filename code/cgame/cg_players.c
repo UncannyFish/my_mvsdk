@@ -3262,15 +3262,13 @@ static void CG_PlayerFlag( centity_t *cent, qhandle_t hModel ) {
 	ScaleModelAxis(&ent);
 
 	
-	if (cent->currentState.number == cg.snap->ps.clientNum && cg_thirdPersonFlagAlpha.integer != 1)
+	ent.shaderRGBA[3] = 255;
+	if (cg_thirdPersonFlagAlpha.value < 1.0f && cent->currentState.number == cg.snap->ps.clientNum)
 	{ //If we're the current client (in third person), render the flag on our back transparently
+		float alpha = (cg_thirdPersonFlagAlpha.value * 255.0f); //JAPRO - Clientside - Transparant Flag option
+		if (alpha >= 0 && alpha <= 255)
+			ent.shaderRGBA[3] = alpha;
 		ent.renderfx |= RF_FORCE_ENT_ALPHA;
-		ent.shaderRGBA[3] = cg_thirdPersonFlagAlpha.value*255;//JAPRO - Clientside - Transparant Flag option
-	}
-	else if (cg_thirdPersonFlagAlpha.integer == -1) {
-		ent.renderfx |= RF_NODEPTH;
-		ent.renderfx |= RF_FORCE_ENT_ALPHA;
-		ent.shaderRGBA[3] = 200;//JAPRO - Clientside - Transparant Flag option
 	}
 	
 	//FIXME: Not doing this at the moment because sorting totally messes up
@@ -6098,6 +6096,84 @@ void CG_Player( centity_t *cent ) {
 		}
 	}
 	//JAPRO - Clientside - Draw Non-Duelers - End
+
+	//JAPRO - Clientside - Draw Player Collision Hitbox - Start
+	if (cg_drawHitBox.integer) {
+		vec3_t bmins = {-15, -15, DEFAULT_MINS_2}, bmaxs = {15, 15, DEFAULT_MAXS_2}, absmin, absmax;
+		int x = 0, zd = 0, zu = 0;
+
+		if (pm && cent->currentState.clientNum == pm->ps->clientNum)
+		{
+			VectorCopy(pm->mins, bmins);
+			VectorCopy(pm->maxs, bmaxs);
+		}
+		else if (cent->currentState.solid) {
+			x = (cent->currentState.solid & 255);
+			zd = ((cent->currentState.solid >> 8) & 255);
+			zu = ((cent->currentState.solid >> 16) & 255) - 32;
+
+			bmins[0] = bmins[1] = -x;
+			bmaxs[0] = bmaxs[1] = x;
+			bmins[2] = -zd;
+			bmaxs[2] = zu;
+		}
+
+		if (!CG_IsMindTricked(cent->currentState.trickedentindex,
+			cent->currentState.trickedentindex2,
+			cent->currentState.trickedentindex3,
+			cent->currentState.trickedentindex4, cg.snap->ps.clientNum))
+		{
+
+			VectorAdd( cent->lerpOrigin, bmins, absmin );
+			VectorAdd( cent->lerpOrigin, bmaxs, absmax );
+			//CG_CubeOutline( absmin, absmax, 1, COLOR_RED, 0.25 );
+			{
+				vec3_t	point1, point2, point3, point4;
+				int		vec[3];
+				int		axis, i;
+
+				for ( axis = 0, vec[0] = 0, vec[1] = 1, vec[2] = 2; axis < 3; axis++, vec[0]++, vec[1]++, vec[2]++ )
+				{
+					for ( i = 0; i < 3; i++ )
+					{
+						if ( vec[i] > 2 )
+						{
+							vec[i] = 0;
+						}
+					}
+
+					point1[vec[1]] = absmin[vec[1]];
+					point1[vec[2]] = absmin[vec[2]];
+
+					point2[vec[1]] = absmin[vec[1]];
+					point2[vec[2]] = absmax[vec[2]];
+
+					point3[vec[1]] = absmax[vec[1]];
+					point3[vec[2]] = absmax[vec[2]];
+
+					point4[vec[1]] = absmax[vec[1]];
+					point4[vec[2]] = absmin[vec[2]];
+
+					//- face
+					point1[vec[0]] = point2[vec[0]] = point3[vec[0]] = point4[vec[0]] = absmin[vec[0]];
+
+					CG_TestLine( point1, point2, /*cg.time*/1, COLOR_RED, 1 );
+					CG_TestLine( point2, point3, /*cg.time*/1, COLOR_RED, 1 );
+					CG_TestLine( point1, point4, /*cg.time*/1, COLOR_RED, 1 );
+					CG_TestLine( point4, point3, /*cg.time*/1, COLOR_RED, 1 );
+
+					//+ face
+					point1[vec[0]] = point2[vec[0]] = point3[vec[0]] = point4[vec[0]] = absmax[vec[0]];
+
+					CG_TestLine( point1, point2, /*cg.time*/1, COLOR_RED, 1 );
+					CG_TestLine( point2, point3, /*cg.time*/1, COLOR_RED, 1 );
+					CG_TestLine( point1, point4, /*cg.time*/1, COLOR_RED, 1 );
+					CG_TestLine( point4, point1, /*cg.time*/1, COLOR_RED, 1 );
+				}
+			}
+		}
+	}
+	//JAPRO - Clientside - Draw Player Collision Hitbox - End
 
 	//If this client has tricked you.
 	if (CG_IsMindTricked(cent->currentState.trickedentindex,

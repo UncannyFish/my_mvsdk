@@ -577,6 +577,7 @@ vmCvar_t	cg_newSaberHitSounds;
 vmCvar_t	cg_thirdPersonFlagAlpha;
 vmCvar_t	cg_drawNonDuelers;
 vmCvar_t	cg_brightskins;
+vmCvar_t	cg_drawHitBox;
 vmCvar_t	cg_playerLOD;
 vmCvar_t	cg_privateDuelShell;
 vmCvar_t	cg_teamRespawnShield;
@@ -829,6 +830,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_thirdPersonFlagAlpha, "cg_thirdPersonFlagAlpha", "1.0", CVAR_ARCHIVE },
 	{ &cg_drawNonDuelers, "cg_drawNonDuelers", "0", 0 },
 	{ &cg_brightskins, "cg_brightskins", "0", CVAR_ARCHIVE },
+	{ &cg_drawHitBox, "cg_drawHitBox", "0", CVAR_TEMP },
 	{ &cg_playerLOD, "cg_playerLOD", "0", CVAR_ARCHIVE },
 	{ &cg_privateDuelShell,	"cg_privateDuelShell", "1", CVAR_ARCHIVE },
 	{ &cg_teamRespawnShield, "cg_teamRespawnShield", "1", CVAR_ARCHIVE },
@@ -848,7 +850,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cl_commandsize, "cl_commandsize", "64", CVAR_ARCHIVE },//Loda - FPS UNLOCK client modcode
 
 	{ &cg_fixlean, "cg_fixlean", "0", CVAR_LATCH }, //idk man
-	{ &cg_SPRunAnim, "cg_SPRunAnim", "1", 0 },
+	{ &cg_SPRunAnim, "cg_SPRunAnim", "0", 0 },
 
 	{ &cg_drawInventory, "cg_drawInventory", "1", CVAR_ARCHIVE },
 	{ &cg_smallScoreboard, "cg_smallScoreboard", "0", CVAR_ARCHIVE },
