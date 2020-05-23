@@ -729,15 +729,18 @@ void CG_PredictPlayerState( void ) {
 		cg.physicsTime = cg.snap->serverTime;
 	}
 
-	if ( cg_pmove_msec.integer < 8 ) {
-		trap_Cvar_Set("pmove_msec", "8");
+	//JAPRO - Clientside - Unlock Pmove bounds - Start 
+	if ( cg_pmove_msec.integer < 2 ) {
+		trap_Cvar_Set("pmove_msec", "2");
 	}
-	else if (cg_pmove_msec.integer > 33) {
-		trap_Cvar_Set("pmove_msec", "33");
+	else if (cg_pmove_msec.integer > 66) {
+		trap_Cvar_Set("pmove_msec", "66");
 	}
+	//JAPRO - Clientside - Unlock Pmove bounds - End 
 
 	cg_pmove.pmove_fixed = cg_pmove_fixed.integer;// | cg_pmove_fixed.integer;
 	cg_pmove.pmove_msec = cg_pmove_msec.integer;
+	cg_pmove.pmove_float = cg_pmove_float.integer;
 
 	// run cmds
 	moved = qfalse;

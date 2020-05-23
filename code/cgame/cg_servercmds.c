@@ -133,8 +133,10 @@ static void CG_ParseServerinfo( const char *info ) {
 	char	*mapname;
 	char	*v = NULL;
 
-	cgs.gametype = atoi( Info_ValueForKey( info, "g_gametype" ) );
-	trap_Cvar_Set("g_gametype", va("%i", cgs.gametype));
+	v = Info_ValueForKey( info, "g_gametype" );
+	cgs.gametype = atoi( v );
+	trap_Cvar_Set( "g_gametype", v );
+
 	cgs.needpass = atoi( Info_ValueForKey( info, "needpass" ) );
 	cgs.jediVmerc = atoi( Info_ValueForKey( info, "g_jediVmerc" ) );
 	cgs.wDisable = atoi( Info_ValueForKey( info, "wdisable" ) );
@@ -154,15 +156,29 @@ static void CG_ParseServerinfo( const char *info ) {
 	cgs.isCaMod = qfalse;
 	cgs.jcinfo = 0;
 	v = Info_ValueForKey(info, "gamename");
-	if (v) {
+	if (v)
+	{
+		Q_CleanStr(v, qtrue);
 		if (!Q_stricmpn(v, "jk2pro", 5)) {
 			cgs.isJK2Pro = qtrue;
 			cgs.isolateDuels = qtrue;
-			cgs.jcinfo = atoi(Info_ValueForKey(info, "jcinfo"));//[JAPRO - Clientside - All - Add gamename variable to get jcinfo from japro servers]
+			v = Info_ValueForKey(info, "jcinfo");
+			cgs.jcinfo = atoi(v);//[JAPRO - Clientside - All - Add gamename variable to get jcinfo from japro servers]
+			v = Info_ValueForKey(info, "g_fixHighFPSAbuse");
+			if (v && !(cgs.jcinfo & JK2PRO_CINFO_HIGHFPSFIX)) {
+				cgs.jcinfo |= JK2PRO_CINFO_HIGHFPSFIX;
+			}
+			trap_Cvar_Set("cjp_client", "1.4JAPRO");
 		}
-		else if (!Q_stricmpn(v, "< VvV >", 7)) {
+		else if (!Q_stricmpn(v, "< VvV >", 7) || !Q_stricmpn(v, "CPT ][ Mod", 10)) {
 			cgs.isCTFMod = qtrue;
 			cgs.CTF3ModeActive = (qboolean)(atoi(Info_ValueForKey(info, "g_allowFreeTeam")));
+			v = Info_ValueForKey(info, "g_block333");
+			if (v) cgs.jcinfo = atoi(v);
+			if (cgs.jcinfo && cgs.jcinfo != 3) {
+				cgs.jcinfo = JK2PRO_CINFO_HIGHFPSFIX;
+			}
+			trap_Cvar_Set("cjp_client", "1.4JAPRO");
 		}
 		else if (!Q_stricmpn(v, "Ca Mod", 6))
 		{

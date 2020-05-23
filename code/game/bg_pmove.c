@@ -4752,7 +4752,29 @@ void PmoveSingle (pmove_t *pmove) {
 	PM_WaterEvents();
 
 	// snap some parts of playerstate to save network bandwidth
-	trap_SnapVector( pm->ps->velocity );
+	if (pm->ps->persistant[PERS_TEAM] == TEAM_SPECTATOR) {
+		trap_SnapVector( pm->ps->velocity );
+	}
+	else {
+		if (pm->ps->stats[STAT_RACEMODE] || pm->pmove_float > 2) {
+		}
+#if JK2_GAME
+		else if (g_fixHighFPSAbuse.integer
+#elif JK2_CGAME
+		else if ((cgs.jcinfo & JK2PRO_CINFO_HIGHFPSFIX) //could move these checks to cg_predict, and just set pm->pmove_float accordingly?
+#endif
+			&& (pml.msec <= 4 || pml.msec > 25)) { //do nothing above 250FPS or below 40FPS
+		}
+		else if (pm->pmove_float == 2) { //pmove_float 2: snaps vertical velocity only, so 125/142fps jumps are still the same height?
+			vec3_t oldVelocity = { 0 };
+			VectorCopy( pm->ps->velocity, oldVelocity );
+			trap_SnapVector( pm->ps->velocity );
+			pm->ps->velocity[2] = oldVelocity[2];
+		}
+		else if (!pm->pmove_float) {
+			trap_SnapVector( pm->ps->velocity );
+		}
+	}
 
 	if (gPMDoSlowFall)
 	{

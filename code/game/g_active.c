@@ -1309,6 +1309,7 @@ void ClientThink_real( gentity_t *ent ) {
 
 	pm.pmove_fixed = g_pmove_fixed.integer | client->pers.pmoveFixed;
 	pm.pmove_msec = g_pmove_msec.integer;
+	pm.pmove_float = g_pmove_float.integer;
 
 	pm.animations = bgGlobalAnimations;//NULL;
 
