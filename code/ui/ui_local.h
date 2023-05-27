@@ -119,6 +119,9 @@ extern vmCvar_t	ui_botfilter;
 extern vmCvar_t	ui_model;
 extern vmCvar_t	ui_team_model;
 
+extern vmCvar_t	ui_widescreen;
+extern vmCvar_t	ui_widescreenCursorScale;
+extern vmCvar_t	ui_sensitivity;
 
 //
 // ui_qmenu.c
@@ -356,8 +359,11 @@ const char *UI_GetModelWithSkin(const char *model);
 int UI_HeadIndexForModel(const char *model);
 qboolean UI_SetTeamColorFromModel(const char *model);
 const char *UI_GetModelWithTeamColor(const char *model);
+int UI_HeadCountByColor( void );
 
 void UI_FeederScrollTo(float feederId, int scrollTo);
+
+void UI_WideScreenMode(qboolean on);
 
 //
 // ui_menu.c
@@ -870,9 +876,16 @@ typedef struct {
 
 	qboolean inGameLoad;
 
-	float		screenWidth;
-	float		screenXFactor;
-	float		screenXFactorInv;
+	float		virtualScreenHeightOn;	// renderer virtual screen height when widescreen is on
+	float		virtualScreenHeightOff;	// renderer virtual screen height when widescreen is off
+	float		screenHeight;			// virtual screen heigth for the UI module
+	float		screenWidth;			// virtual screen width for the UI module
+	float		screenXFactor;			// SCREEN_WIDTH / screenWidth
+	float		screenXFactorInv;		// screenWidth / SCREEN_WIDTH
+	float		screenYFactor;			// SCREEN_HEIGHT / screenHeight
+	float		screenYFactorInv;		// screenHeight / SCREEN_HEIGHT
+	float		cursorXScale;			// scale cursor X sensitivity
+	float		cursorYScale;			// scale cursor Y sensitivity
 
 }	uiInfo_t;
 
@@ -1213,6 +1226,9 @@ int trap_MVAPI_GetVersion( void );                                   // Level: 1
 /* Level 3 */
 int trap_FS_FLock( fileHandle_t h, flockCmd_t cmd, qboolean nb );    // Level: 3
 void trap_MVAPI_SetVersion( mvversion_t version );                   // Level: 3
+
+/* Level 4 */
+void trap_MVAPI_Print( int flags, const char *string );              // Level: 4
 
 // JK2MV Syscalls [UI]
 /* Level 3 */

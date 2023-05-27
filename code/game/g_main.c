@@ -129,6 +129,9 @@ vmCvar_t	g_saberDebugPrint;
 
 vmCvar_t	g_austrian;
 
+vmCvar_t	g_gamename;
+vmCvar_t	g_gamedate;
+
 // Fixes and multiversion cvars
 vmCvar_t	g_mv_fixgalaking;
 vmCvar_t	g_mv_fixbrokenmodels;
@@ -141,6 +144,7 @@ vmCvar_t	g_mv_forcePowerDisableMode;
 
 // New cvars
 vmCvar_t	g_submodelWorkaround;
+vmCvar_t	g_botTeamAutoBalance;
 
 vmCvar_t	g_MVSDK;
 
@@ -153,8 +157,8 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &g_cheats, "sv_cheats", "", 0, 0, qfalse },
 
 	// noset vars
-	{ NULL, "gamename", GAMEVERSION , CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
-	{ NULL, "gamedate", __DATE__ , CVAR_ROM, 0, qfalse  },
+	{ &g_gamename, "gamename", GAMEVERSION , CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
+	{ &g_gamedate, "gamedate", __DATE__ , CVAR_ROM, 0, qfalse  },
 	{ &g_restarted, "g_restarted", "0", CVAR_ROM, 0, qfalse  },
 	{ NULL, "sv_mapname", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
 
@@ -309,12 +313,18 @@ static cvarTable_t		gameCvarTable[] = {
 	// This cvar only has an effect when the startversion is 1.02.
 	{ &g_mv_forcePowerDisableMode, "mv_forcePowerDisableMode", "1", CVAR_ARCHIVE, 0, qfalse },
 
-	// g_submodelWorkaround is technically just setting a flag for mvsdk clients to apply the clientside workaround
+	// g_submodelWorkaround was technically just setting a flag for mvsdk clients to apply the clientside workaround
 	// The cvar might seem more appropriate on cgame, but defaulting it to "0" on the client would make the workaround hardly usable
 	// and defaulting it to "1" on the the client might lead to mappers not realising they exceeded basejk limits when testing their maps.
 	// So we have a cvar in the game module to let servers enable the clientside workaround for bigger maps, defaulting to "0".
 	// Clients supporting the workaround are going to inform the server about it in their userinfo, no matter what this cvar is set to.
+	// By now g_submodelWorkaround also supports the value "2", which leads to the modelindex of submodel entities being copied to their
+	// time2 fields. This way we can use more than 8 bit for the modelindex. The time2 modelindex is only useful in combination with an
+	// engine that supports more than the default 256 submodels.
 	{ &g_submodelWorkaround, "g_submodelWorkaround", "0", CVAR_ARCHIVE, 0, qtrue },
+
+	// Bots reset their teams on map_restart and map change on basejk. This is often undesired, so let the host decide.
+	{ &g_botTeamAutoBalance, "g_botTeamAutoBalance", "1", CVAR_ARCHIVE, 0, qtrue },
 
 	{ &g_MVSDK, "g_MVSDK", MVSDK_VERSION, CVAR_ROM | CVAR_SERVERINFO, 0, qfalse },
 };
@@ -491,11 +501,17 @@ void MVAPI_AfterInit(void)
 		trap_MVAPI_DisableStructConversion( mvStructConversionDisabled );
 	}
 
+	// Let the engine know we support more than 256 submodels
+	if ( mvapi >= 4 ) trap_MVAPI_EnableSubmodelBypass( qtrue );
+
 	// Call G_InitGame now, because we delayed it earilier
 	G_InitGame( Init_levelTime, Init_randomSeed, Init_restart );
 
 	// Disable those JK2MV Engine fixes we can take care of in the VM
 	trap_MVAPI_ControlFixes( MVFIX_NAMECRASH | MVFIX_FORCECRASH | MVFIX_GALAKING | MVFIX_BROKENMODEL | MVFIX_TURRETCRASH | MVFIX_CHARGEJUMP | MVFIX_SPEEDHACK | MVFIX_SABERSTEALING | MVFIX_PLAYERGHOSTING );
+
+	// Inform JK2MV that we can handle level.time resetting on mapchanges
+	if ( mvapi >= 4 ) trap_MVAPI_ResetServerTime( qtrue );
 }
 
 /*
@@ -590,6 +606,16 @@ void G_RegisterCvars( void ) {
 		}
 	}
 
+	if ( strcmp(g_gamename.string, GAMEVERSION) || strcmp(g_gamedate.string, __DATE__) ) {
+		// Inform the host about the unexpected change
+		G_Printf( S_COLOR_YELLOW "WARNING: The gamename or gamedate changed after mapchange.\n"
+		          S_COLOR_YELLOW "         This could indiciate unexpected side-effects due to module updates at runtime.\n"
+		          S_COLOR_YELLOW "         You might want to restart the server.\n" );
+
+		trap_Cvar_Set( "gamename", GAMEVERSION );
+		trap_Cvar_Set( "gamedate", __DATE__ );
+	}
+
 	if (remapped) {
 		G_RemapTeamShaders();
 	}
@@ -672,8 +698,9 @@ void MV_UpdateSvFlags( void )
 	int intValue = 0;
 
 	// Check for the features and determine the flags
-	if ( level.bboxEncoding )           intValue |= MVSDK_SVFLAG_BBOX;
-	if ( g_submodelWorkaround.integer ) intValue |= MVSDK_SVFLAG_SUBMODEL_WORKAROUND;
+	if ( level.bboxEncoding )               intValue |= MVSDK_SVFLAG_BBOX;
+	if ( g_submodelWorkaround.integer & 1 ) intValue |= MVSDK_SVFLAG_SUBMODEL_WORKAROUND;
+	if ( level.modelindexTime2 )            intValue |= MVSDK_SVFLAG_SUBMODEL_TIME2;
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// !!! Forks of MVSDK should NOT modify the mvsdk_svFlags                              !!!
@@ -1004,7 +1031,7 @@ void AddTournamentPlayer( void ) {
 			continue;
 		}
 
-		if ( !nextInLine || client->sess.spectatorTime < nextInLine->sess.spectatorTime ) {
+		if ( !nextInLine || client->sess.spectatorOrder > nextInLine->sess.spectatorOrder ) {
 			nextInLine = client;
 		}
 	}
@@ -1219,10 +1246,10 @@ int QDECL SortRanks( const void *a, const void *b ) {
 
 	// then spectators
 	if ( ca->sess.sessionTeam == TEAM_SPECTATOR && cb->sess.sessionTeam == TEAM_SPECTATOR ) {
-		if ( ca->sess.spectatorTime < cb->sess.spectatorTime ) {
+		if ( ca->sess.spectatorOrder > cb->sess.spectatorOrder ) {
 			return -1;
 		}
-		if ( ca->sess.spectatorTime > cb->sess.spectatorTime ) {
+		if ( ca->sess.spectatorOrder < cb->sess.spectatorOrder ) {
 			return 1;
 		}
 		return 0;
@@ -1319,7 +1346,7 @@ void CalculateRanks( void ) {
 
 		if (currentWinner && currentWinner->client)
 		{
-			trap_SendServerCommand( -1, va("cp \"%s" S_COLOR_WHITE " %s %s\n\"",
+			G_CenterPrint( -1, 3, va("%s" S_COLOR_WHITE " %s %s\n",
 			currentWinner->client->pers.netname, G_GetStripEdString("SVINGAME", "VERSUS"), level.clients[nonSpecIndex].pers.netname));
 		}
 	}
@@ -2783,6 +2810,11 @@ int		myrand( void ) {
 	return myRandSeed & 0x7fff;
 }
 
+void G_StringAppendSubstring( char *dst, size_t dstSize, const char *src, size_t srcLen )
+{
+	Q_strcat( dst, strlen(dst)+srcLen+1 >= dstSize ? dstSize : strlen(dst)+srcLen+1, src );
+}
+
 /*
 ================
 MV_BBoxToTime2
@@ -2824,5 +2856,31 @@ void MV_BBoxToTime2( gentity_t *ent )
 
 	// Encode the values for prediction
 	ent->s.time2 = (mins1 << 16) | (mins0 << 8) | maxs1;
+}
+
+/*
+================
+MV_ModelindexToTime2
+
+This function uses an entity state's time2 value to transmit the modelindex to work around the 8 bit modelindex limit.
+This function is supposed to be called for all entities after assigning the brushmodel.
+================
+*/
+void MV_ModelindexToTime2( gentity_t *ent )
+{
+	// Don't do this if the server hasn't enabled it.
+	if ( !(g_submodelWorkaround.integer & 2) )
+		return;
+
+	if ( !level.modelindexTime2 )
+	{ // Let clients know that a modelindex can be found in the time2 value now.
+		level.modelindexTime2 = qtrue;
+		MV_UpdateSvFlags();
+	}
+
+	// The original idea was to only store modelindex >= 255 in time2 and signal this by setting modelindex to 255, however
+	// as the serverside engine still needs to know the correct modelindex we just copy the modelindex over to time2 and
+	// work with that.
+	ent->s.time2 = ent->s.modelindex;
 }
 

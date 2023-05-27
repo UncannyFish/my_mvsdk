@@ -103,8 +103,7 @@ void CG_DrawInformation( void ) {
 	const char	*info;
 	const char	*sysInfo;
 	const float	x = 0.5f * cgs.screenWidth;
-	const float xOffset = 0.5f * (cgs.screenWidth - SCREEN_WIDTH);
-	float		y;
+	int			y;
 	int			value, valueNOFP;
 	qhandle_t	levelshot;
 	char		buf[1024];
@@ -114,24 +113,12 @@ void CG_DrawInformation( void ) {
 	sysInfo = CG_ConfigString( CS_SYSTEMINFO );
 
 	s = Info_ValueForKey( info, "mapname" );
-
-	levelshot = trap_R_RegisterShaderNoMip(va("levelshots/%s", s));
-	trap_R_SetColor(NULL);
-
-	if (levelshot && cgs.screenXFactor < 1.0) {
-		CG_DrawPic(0, 0 - (SCREEN_HEIGHT*cgs.screenXFactorInv - SCREEN_HEIGHT) / 2, cgs.screenWidth, SCREEN_HEIGHT*cgs.screenXFactorInv, levelshot);
+	levelshot = trap_R_RegisterShaderNoMip( va( "levelshots/%s", s ) );
+	if ( !levelshot ) {
+		levelshot = trap_R_RegisterShaderNoMip( "menu/art/unknownmap" );
 	}
-	else {
-		if (!levelshot) {
-			levelshot = trap_R_RegisterShaderNoMip("menu/art/unknownmap");
-			CG_FillRect(0, 0, xOffset, SCREEN_HEIGHT, colorTable[CT_BLACK]);
-			CG_FillRect(xOffset + SCREEN_WIDTH, 0, xOffset, SCREEN_HEIGHT, colorTable[CT_BLACK]);
-			CG_DrawPic(xOffset, 0, SCREEN_WIDTH, SCREEN_HEIGHT, levelshot);
-		}
-		else {
-			CG_DrawPic(0, 0, cgs.screenWidth, SCREEN_HEIGHT, levelshot);
-		}
-	}
+	trap_R_SetColor( NULL );
+	CG_DrawPic(0, 0, cgs.screenWidth, cgs.screenHeight, levelshot);
 
 	CG_LoadBar();
 				   
@@ -142,17 +129,17 @@ void CG_DrawInformation( void ) {
 	// screen to write into
 	if ( cg.infoScreenText[0] ) {
 		const char *psLoading = CG_GetStripEdString("MENUS3", "LOADING_MAPNAME");
-		UI_DrawProportionalString( x, 128-32, va(/*"Loading... %s"*/ psLoading, cg.infoScreenText),
+		UI_DrawProportionalString( x, (cgs.screenHeight*0.27f)-2-32, va(/*"Loading... %s"*/ psLoading, cg.infoScreenText),
 			UI_CENTER|UI_INFOFONT|UI_DROPSHADOW, colorWhite );
 	} else {
 		const char *psAwaitingSnapshot = CG_GetStripEdString("MENUS3", "AWAITING_SNAPSHOT");
-		UI_DrawProportionalString( x, 128-32, /*"Awaiting snapshot..."*/psAwaitingSnapshot,
+		UI_DrawProportionalString( x, (cgs.screenHeight*0.27f)-2-32, /*"Awaiting snapshot..."*/psAwaitingSnapshot,
 			UI_CENTER|UI_INFOFONT|UI_DROPSHADOW, colorWhite );
 	}
 
 	// draw info string information
 
-	y = 180-32;
+	y = (cgs.screenHeight*0.375f)-32;
 
 	// don't print server lines if playing a local game
 	trap_Cvar_VariableStringBuffer( "sv_running", buf, sizeof( buf ) );
@@ -187,7 +174,7 @@ void CG_DrawInformation( void ) {
 
 			if (motdString[0])
 			{
-				UI_DrawProportionalString( x, 425, motdString,
+				UI_DrawProportionalString( x, cgs.screenHeight-55, motdString,
 					UI_CENTER|UI_INFOFONT|UI_DROPSHADOW, colorWhite );
 			}
 		}
@@ -426,7 +413,7 @@ void CG_LoadBar(void)
 	const int capwidth = 8;
 	const float barwidth = numticks*tickwidth+tickpadx*2+capwidth*2;
 	const float barleft = 0.5f * (cgs.screenWidth - barwidth);
-	const int barheight = tickheight + tickpady*2, bartop = 480-barheight;
+	const int barheight = tickheight + tickpady*2, bartop = cgs.screenHeight-barheight;
 	const float capleft = barleft+tickpadx;
 	const float tickleft = capleft+capwidth;
 	const float ticktop = bartop+tickpady;

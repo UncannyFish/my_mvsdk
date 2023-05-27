@@ -116,10 +116,6 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins, const
 		if ( ent->solid == SOLID_BMODEL ) {
 			// special value for bmodel
 
-			// modelindex is transfered as signed 8-bit integer (byte), making submodels > 127 appear as negative numbers on the client.
-			// As negative calls to trap_CM_InlineModel lead to errors let's try to compensate the modelindex here if the server tells us to.
-			if ( ent->modelindex < 0 && cgs.mvsdk_svFlags & MVSDK_SVFLAG_SUBMODEL_WORKAROUND ) ent->modelindex += 256;
-
 			cmodel = trap_CM_InlineModel( ent->modelindex );
 			VectorCopy( cent->lerpAngles, angles );
 			BG_EvaluateTrajectory( &cent->currentState.pos, cg.physicsTime, origin );
@@ -238,10 +234,6 @@ int		CG_PointContents( const vec3_t point, int passEntityNum ) {
 			continue;
 		}
 
-		// modelindex is transfered as signed 8-bit integer (byte), making submodels > 127 appear as negative numbers on the client.
-		// As negative calls to trap_CM_InlineModel lead to errors let's try to compensate the modelindex here if the server tells us to.
-		if ( ent->modelindex < 0 && cgs.mvsdk_svFlags & MVSDK_SVFLAG_SUBMODEL_WORKAROUND ) ent->modelindex += 256;
-
 		cmodel = trap_CM_InlineModel( ent->modelindex );
 		if ( !cmodel ) {
 			continue;
@@ -294,8 +286,6 @@ static void CG_InterpolatePlayerState( qboolean grabAngles ) {
 		return;
 	}
 
-	// fau - for player it would more correct to interpolate between
-	// commandTimes (but requires one more snaphost ahead)
 	f = cg.frameInterpolation;
 
 	i = next->ps.bobCycle;
@@ -477,10 +467,6 @@ static void CG_TouchTriggerPrediction( void ) {
 		if ( ent->solid != SOLID_BMODEL ) {
 			continue;
 		}
-
-		// modelindex is transfered as signed 8-bit integer (byte), making submodels > 127 appear as negative numbers on the client.
-		// As negative calls to trap_CM_InlineModel lead to errors let's try to compensate the modelindex here if the server tells us to.
-		if ( ent->modelindex < 0 && cgs.mvsdk_svFlags & MVSDK_SVFLAG_SUBMODEL_WORKAROUND ) ent->modelindex += 256;
 
 		cmodel = trap_CM_InlineModel( ent->modelindex );
 		if ( !cmodel ) {

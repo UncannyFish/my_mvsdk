@@ -300,7 +300,7 @@ typedef struct {
 // MUST be dealt with in G_InitSessionData() / G_ReadSessionData() / G_WriteSessionData()
 typedef struct {
 	team_t		sessionTeam;
-	int			spectatorTime;		// for determining next-in-line to play
+	int			spectatorOrder;		// for determining next-in-line to play
 	spectatorState_t	spectatorState;
 	int			spectatorClient;	// for chasecam and follow mode
 	int			wins, losses;		// tournament stats
@@ -337,6 +337,7 @@ typedef struct {
 	int			voteCount;			// to prevent people from constantly calling votes
 	int			teamVoteCount;		// to prevent people from constantly calling votes
 	qboolean	teamInfo;			// send team overlay updates?
+	qboolean	botDelayed;			// Is ClientBegin still outstanding for this bot, because it was delayed?
 } clientPersistant_t;
 
 
@@ -522,6 +523,7 @@ typedef struct {
 
 	// MVSDK
 	qboolean	bboxEncoding;
+	qboolean	modelindexTime2;
 } level_locals_t;
 
 
@@ -768,6 +770,8 @@ void AddScore( gentity_t *ent, vec3_t origin, int score );
 void CalculateRanks( void );
 qboolean SpotWouldTelefrag( gentity_t *spot );
 
+void G_CenterPrint( int targetNum, int autoLineWraps, const char *message );
+
 extern gentity_t *gJMSaberEnt;
 
 //
@@ -823,11 +827,14 @@ const char *G_GetStripEdString(char *refSection, char *refName);
 void MV_UpdateMvsdkConfigstring( char *key, char *value );
 void MV_UpdateSvFlags( void );
 
+void G_StringAppendSubstring( char *dst, size_t dstSize, const char *src, size_t srcLen );
+
 // On linux rand() behaves different than on Winodws or in a qvm, ...
 void mysrand( unsigned seed );
 int myrand( void );
 
 void MV_BBoxToTime2( gentity_t *ent );
+void MV_ModelindexToTime2( gentity_t *ent );
 
 //
 // g_client.c
@@ -1079,6 +1086,7 @@ extern	vmCvar_t	g_connectinglimit;
 extern	vmCvar_t	g_mv_forcePowerDisableMode;
 
 extern	vmCvar_t	g_submodelWorkaround;
+extern	vmCvar_t	g_botTeamAutoBalance;
 
 void	trap_Printf( const char *fmt );
 Q_NORETURN void	trap_Error( const char *fmt );
@@ -1321,6 +1329,9 @@ int trap_MVAPI_GetVersion( void );                                              
 int trap_FS_FLock( fileHandle_t h, flockCmd_t cmd, qboolean nb );                                                 // Level: 3
 void trap_MVAPI_SetVersion( mvversion_t version );                                                                // Level: 3
 
+/* Level 4 */
+void trap_MVAPI_Print( int flags, const char *string );                                                           // Level: 4
+
 // JK2MV Syscalls [Game]
 /* Level 1 */
 qboolean trap_MVAPI_SendConnectionlessPacket( const mvaddr_t *addr, const char *message );                        // Level: 1
@@ -1329,6 +1340,11 @@ qboolean trap_MVAPI_LocateGameData( mvsharedEntity_t *mvEnts, int numGEntities, 
 
 /* Level 2 */
 qboolean trap_MVAPI_DisableStructConversion( qboolean disable );                                                  // Level: 2
+
+/* Level 4 */
+qboolean trap_MVAPI_ResetServerTime( qboolean enable );                                                           // Level: 4
+qboolean trap_MVAPI_EnablePlayerSnapshots( qboolean enable );                                                     // Level: 4
+qboolean trap_MVAPI_EnableSubmodelBypass( qboolean enable );                                                      // Level: 4
 
 #include "../api/mvapi.h"
 #include "g_multiversion.h"
