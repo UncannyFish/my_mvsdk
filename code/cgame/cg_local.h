@@ -1773,6 +1773,8 @@ extern	vmCvar_t		cg_debugBB;
 Ghoul2 Insert End
 */
 
+extern	vmCvar_t		cg_drawKillMessage;
+
 //
 // cg_main.c
 //

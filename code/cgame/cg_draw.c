@@ -2847,12 +2847,17 @@ void CG_CenterPrintMultiKill(const char *str, int y, int charWidth) {
 	char    *s;
 	int        i = 0;
 
-	if (cg.lastKillTime + (cg_centertime.integer * 1000) > cg.time)
+	if (cg_drawKillMessage.integer < 1)
+	{
+		return;
+	}
+
+	if (cg_drawKillMessage.integer > 1 && (cg.lastKillTime + (cg_centertime.integer * 1000) > cg.time))
 	{
 		//we killed someone recently; append a line break and the new kill message
 		Com_sprintf(cg.centerPrint, sizeof(cg.centerPrint), "%s\n%s", cg.centerPrint, str);
 	}
-	else
+	else // cg_drawKillMessage.integer == 1
 	{
 		//normal behavior
 		Q_strncpyz(cg.centerPrint, str, sizeof(cg.centerPrint));
