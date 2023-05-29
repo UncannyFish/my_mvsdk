@@ -690,6 +690,7 @@ vmCvar_t	cg_MVSDK;
 vmCvar_t	mvsdk_cgFlags;
 
 vmCvar_t	cg_drawKillMessage;
+vmCvar_t	cg_showKills;
 
 typedef struct {
 	vmCvar_t	*vmCvar;
@@ -952,6 +953,7 @@ Ghoul2 Insert End
 */
 
 	{ &cg_drawKillMessage, "cg_drawKillMessage", "1", CVAR_ARCHIVE },
+	{ &cg_showKills, "cg_showKills", "0", CVAR_ARCHIVE },
 };
 
 static int  cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );

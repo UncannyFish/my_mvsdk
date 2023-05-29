@@ -1013,6 +1013,15 @@ void CG_NewClientInfo( int clientNum, qboolean entitiesInitialized ) {
 	configstring = CG_ConfigString( clientNum + CS_PLAYERS );
 	if ( !configstring[0] ) {
 		memset( ci, 0, sizeof( *ci ) );
+
+		for (i = 0; i < MAX_CLIENTS; i++)
+		{
+			cg.directKills[i][clientNum] = 0;
+		}
+
+		cg.totalKills[clientNum] = 0;
+		cg.totalDeaths[clientNum] = 0;
+
 		return;		// player just left
 	}
 

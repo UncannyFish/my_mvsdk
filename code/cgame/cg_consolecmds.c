@@ -1070,6 +1070,132 @@ void CG_LastWeapon_f(void) //loda fixme. japro
 		trap_S_MuteSound(cg.predictedPlayerState.clientNum, CHAN_WEAPON);
 }
 
+static void CG_PrintKillsForClient(int client)
+{
+	int i;
+	float ratio;
+	clientInfo_t *ci;
+
+	ci = &cgs.clientinfo[client];
+
+	if (cg.totalDeaths[client] != 0)
+	{
+		ratio = (float) cg.totalKills[client] / (float) cg.totalDeaths[client];
+	}
+	else
+	{
+		ratio = 0.0f;
+	}
+
+	CG_Printf(
+		"Total kills for %s\n" S_COLOR_WHITE
+		"Kills: " S_COLOR_GREEN "%d\n" S_COLOR_WHITE
+		"Deaths: " S_COLOR_RED "%d\n" S_COLOR_WHITE
+		"Ratio: " S_COLOR_YELLOW "%5.2f\n" S_COLOR_WHITE
+		"ID Kills Deaths Ratio Name\n",
+		ci->name,
+		cg.totalKills[client],
+		cg.totalDeaths[client],
+		ratio
+	);
+
+	for (i = 0; i < MAX_CLIENTS; i++)
+	{
+		ci = &cgs.clientinfo[i];
+
+		if (ci->infoValid == qfalse)
+		{
+			continue;
+		}
+
+		if (i == client)
+		{
+			continue;
+		}
+
+		if (cg.directKills[i][client] != 0)
+		{
+			ratio = (float) cg.directKills[client][i] / (float) cg.directKills[i][client];
+		}
+		else
+		{
+			ratio = 0.0f;
+		}
+
+		CG_Printf(
+			"%2d "
+			S_COLOR_GREEN "%5d "
+			S_COLOR_RED "%6d "
+			S_COLOR_YELLOW "%5.2f "
+			S_COLOR_WHITE "%s\n",
+			i,
+			cg.directKills[client][i],
+			cg.directKills[i][client],
+			ratio,
+			ci->name
+		);
+	}
+}
+
+static void CG_PrintKillsForAllClients(void)
+{
+	int i;
+	float ratio;
+	clientInfo_t *ci;
+
+	CG_Printf(
+		"Total kills\n"
+		"ID Kills Deaths Ratio Name\n"
+	);
+
+	for (i = 0; i < MAX_CLIENTS; i++)
+	{
+		ci = &cgs.clientinfo[i];
+
+		if (ci->infoValid == qfalse)
+		{
+			continue;
+		}
+
+		if (cg.totalDeaths[i] != 0)
+		{
+			ratio = (float) cg.totalKills[i] / (float) cg.totalDeaths[i];
+		}
+		else
+		{
+			ratio = 0.0f;
+		}
+
+		CG_Printf(
+			"%2d "
+			S_COLOR_GREEN "%5d "
+			S_COLOR_RED "%6d "
+			S_COLOR_YELLOW "%5.2f "
+			S_COLOR_WHITE "%s\n",
+			i,
+			cg.totalKills[i],
+			cg.totalDeaths[i],
+			ratio,
+			ci->name
+		);
+	}
+}
+
+static void CG_KillTracker_f(void)
+{
+	if (trap_Argc() > 1)
+	{
+		int client = CG_ClientNumberFromString(CG_Argv(1));
+		if (client >= 0)
+		{
+			CG_PrintKillsForClient(client);
+		}
+	}
+	else
+	{
+		CG_PrintKillsForAllClients();
+	}
+}
 
 typedef struct {
 	char	*cmd;
@@ -1156,7 +1282,9 @@ static consoleCommand_t	commands[] = {
 	{ "lowjump", CG_Lowjump_f },
 	{ "+duck", CG_NorollDown_f },
 	{ "-duck", CG_NorollUp_f },
-	{ "weaplast", CG_LastWeapon_f }
+	{ "weaplast", CG_LastWeapon_f },
+
+	{ "killTracker", CG_KillTracker_f },
 };
 
 

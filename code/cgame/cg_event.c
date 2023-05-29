@@ -210,6 +210,8 @@ static void CG_Obituary( entityState_t *ent ) {
 		}
 		message = (char *)CG_GetStripEdString("INGAMETEXT", message);
 
+		cg.totalDeaths[target]++;
+
 		CG_Printf( "%s %s\n", targetName, message);
 		return;
 	}
@@ -394,14 +396,29 @@ clientkilled:
 		if (message) {
 			message = (char *)CG_GetStripEdString("INGAMETEXT", message);
 
-			CG_Printf( "%s %s %s\n", 
-				targetName, message, attackerName);
+			cg.directKills[attacker][target]++;
+			cg.totalKills[attacker]++;
+			cg.totalDeaths[target]++;
+
+			if (cg_showKills.integer)
+			{
+				CG_Printf("%s (%d) %s %s (%d)\n",
+					targetName, cg.directKills[target][attacker], message, attackerName, cg.directKills[attacker][target]);
+			}
+			else
+			{
+				CG_Printf( "%s %s %s\n", 
+					targetName, message, attackerName);
+			}
+
 			return;
 		}
 	}
 
 	// we don't know what it was
 	CG_Printf( "%s %s\n", targetName, (char *)CG_GetStripEdString("INGAMETEXT", "DIED_GENERIC") );
+
+	cg.totalDeaths[target]++;
 }
 
 //==========================================================================

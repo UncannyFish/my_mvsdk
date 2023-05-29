@@ -922,6 +922,10 @@ Ghoul2 Insert End
 	short				numFKFrames;
 	short				numJumps;
 	int					lastAutoKillTime;
+
+	int					directKills[MAX_CLIENTS][MAX_CLIENTS];
+	int					totalKills[MAX_CLIENTS];
+	int					totalDeaths[MAX_CLIENTS];
 } cg_t;
 
 #define MAX_TICS	14
@@ -1774,6 +1778,7 @@ Ghoul2 Insert End
 */
 
 extern	vmCvar_t		cg_drawKillMessage;
+extern	vmCvar_t		cg_showKills;
 
 //
 // cg_main.c
