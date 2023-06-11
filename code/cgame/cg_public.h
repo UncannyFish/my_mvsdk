@@ -254,6 +254,7 @@ Ghoul2 Insert Start
 	CG_G2_SETNEWORIGIN,
 
 	CG_SET_SHARED_BUFFER,
+	CG_G2_SETSKIN,
 /*
 Ghoul2 Insert End
 */

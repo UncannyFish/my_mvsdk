@@ -2456,6 +2456,8 @@ qboolean	trap_G2API_SetSurfaceOnOff(void *ghoul2, const char *surfaceName, const
 qboolean	trap_G2API_SetNewOrigin(void *ghoul2, const int boltIndex);
 */
 
+qboolean	trap_G2API_SetSkin( void *ghoul2, int modelIndex, qhandle_t customSkin, qhandle_t renderSkin );
+
 void		CG_Init_CG(void);
 void		CG_Init_CGents(void);
 

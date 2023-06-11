@@ -873,6 +873,10 @@ void trap_CG_RegisterSharedMemory_1_02(char *memory)
 	syscall(CG_SET_SHARED_BUFFER_1_02, memory);
 }
 
+qboolean trap_G2API_SetSkin(void *ghoul2, int modelIndex, qhandle_t customSkin, qhandle_t renderSkin) {
+	return syscall(CG_G2_SETSKIN, ghoul2, modelIndex, customSkin, renderSkin);
+}
+
 /*
 Ghoul2 Insert End
 */
