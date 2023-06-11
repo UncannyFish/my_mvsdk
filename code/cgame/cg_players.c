@@ -250,6 +250,8 @@ static qboolean CG_RegisterClientModelname( clientInfo_t *ci, const char *modelN
 	qboolean retriedAlready = qfalse;
 	char	surfOff[MAX_SURF_LIST_SIZE];
 	char	surfOn[MAX_SURF_LIST_SIZE];
+	int		checkSkin;
+	char	*useSkinName;
 
 retryModel:
 	if (ci->ATST && clientNum == -1)
@@ -304,8 +306,30 @@ retryModel:
 	}
 	else
 	{
-		ci->torsoSkin = trap_R_RegisterSkin(va("models/players/%s/model_%s.skin", modelName, skinName));
 		ci->ATST = qfalse;
+		// fix for transparent custom skin parts
+		if (strchr(skinName, '|')
+			&& strstr(skinName,"head")
+			&& strstr(skinName,"torso")
+			&& strstr(skinName,"lower"))
+		{//three part skin
+			useSkinName = va("models/players/%s/|%s", modelName, skinName);
+		}
+		else
+		{
+			useSkinName = va("models/players/%s/model_%s.skin", modelName, skinName);
+		}
+
+		checkSkin = trap_R_RegisterSkin(useSkinName);
+
+		if (checkSkin)
+		{
+			ci->torsoSkin = checkSkin;
+		}
+		else
+		{ //fallback to the default skin
+			ci->torsoSkin = trap_R_RegisterSkin(va("models/players/%s/model_default.skin", modelName, skinName));
+		}
 		Com_sprintf( afilename, sizeof( afilename ), "models/players/%s/model.glm", modelName );
 		handle = trap_G2API_InitGhoul2Model(&ci->ghoul2Model, afilename, 0, ci->torsoSkin, 0, 0, 0);
 	}
