@@ -563,7 +563,25 @@ retryModel:
 
 	// Model icon for drawing the portrait on screen
 	ci->modelIcon = trap_R_RegisterShaderNoMip ( va ( "models/players/%s/icon_%s", modelName, skinName ) );
-
+	if (!ci->modelIcon)
+	{
+        int i = 0;
+		int j;
+		char iconName[1024];
+		strcpy(iconName, "icon_");
+		j = strlen(iconName);
+		while (skinName[i] && skinName[i] != '|' && j < 1024)
+		{
+            iconName[j] = skinName[i];
+			j++;
+			i++;
+		}
+		iconName[j] = 0;
+		if (skinName[i] == '|')
+		{ //looks like it actually may be a custom model skin, let's try getting the icon...
+			ci->modelIcon = trap_R_RegisterShaderNoMip ( va ( "models/players/%s/%s", modelName, iconName ) );
+		}
+	}
 	return qtrue;
 }
 
