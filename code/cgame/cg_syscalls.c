@@ -877,6 +877,10 @@ qboolean trap_G2API_SetSkin(void *ghoul2, int modelIndex, qhandle_t customSkin, 
 	return syscall(CG_G2_SETSKIN, ghoul2, modelIndex, customSkin, renderSkin);
 }
 
+int trap_G2API_GetSurfaceRenderStatus(void *ghoul2, const int modelIndex, const char *surfaceName) {
+	return syscall(CG_G2_GETSURFACERENDERSTATUS, ghoul2, modelIndex, surfaceName);
+}
+
 /*
 Ghoul2 Insert End
 */

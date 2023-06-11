@@ -255,6 +255,7 @@ Ghoul2 Insert Start
 
 	CG_SET_SHARED_BUFFER,
 	CG_G2_SETSKIN,
+	CG_G2_GETSURFACERENDERSTATUS,
 /*
 Ghoul2 Insert End
 */
