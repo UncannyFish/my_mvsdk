@@ -360,6 +360,8 @@ retryModel:
 
 	// The model is now loaded.
 
+	trap_G2API_SetSkin(ci->ghoul2Model, 0, ci->torsoSkin, ci->torsoSkin);
+
 	GLAName[0] = 0;
 
 	trap_G2API_GetGLAName( ci->ghoul2Model, 0, GLAName);
