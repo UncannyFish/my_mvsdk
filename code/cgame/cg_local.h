@@ -550,6 +550,7 @@ typedef struct {
 	int				torsoAnim;
 
 	mvversion_t		jk2gameplay;
+	float			colorOverride[3];
 } clientInfo_t;
 
 
@@ -1779,6 +1780,9 @@ Ghoul2 Insert End
 
 extern	vmCvar_t		cg_drawKillMessage;
 extern	vmCvar_t		cg_showKills;
+extern	vmCvar_t		cg_char_color_red;
+extern	vmCvar_t		cg_char_color_green;
+extern	vmCvar_t		cg_char_color_blue;
 
 //
 // cg_main.c

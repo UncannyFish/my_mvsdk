@@ -286,6 +286,22 @@ retryModel:
 
 	if ( cgs.gametype >= GT_TEAM && !cgs.jediVmerc )
 	{
+		if (strlen (modelName) > 5 && Q_stricmpn (modelName, "jedi_", 5) == 0)
+		{ //argh, it's a custom player skin!
+			if (ci->team == TEAM_RED && ci->colorOverride)
+			{
+				ci->colorOverride[0] = 1.0f;
+				ci->colorOverride[1] = 0.0f;
+				ci->colorOverride[2] = 0.0f;
+			}
+			else if (ci->team == TEAM_BLUE && ci->colorOverride)
+			{
+				ci->colorOverride[0] = 0.0f;
+				ci->colorOverride[1] = 0.0f;
+				ci->colorOverride[2] = 1.0f;
+			}
+		}
+	
 		if (ci->team == TEAM_RED)
 		{
 			Q_strncpyz(ci->skinName, "red", sizeof(ci->skinName));
@@ -296,6 +312,10 @@ retryModel:
 			Q_strncpyz(ci->skinName, "blue", sizeof(ci->skinName));
 			skinName = "blue";
 		}
+	}
+	else
+	{
+		ci->colorOverride[0] = ci->colorOverride[1] = ci->colorOverride[2] = 0.0f;
 	}
 
 	if (clientNum != -1 && cg_entities[clientNum].currentState.teamowner && !cg_entities[clientNum].isATST)
@@ -6384,6 +6404,23 @@ void CG_Player( centity_t *cent ) {
 	if (cent->isATST)
 	{
 		legs.radius = 400;
+	}
+
+	if (ci->colorOverride[0] != 0.0f ||
+		ci->colorOverride[1] != 0.0f ||
+		ci->colorOverride[2] != 0.0f)
+	{
+		legs.shaderRGBA[0] = ci->colorOverride[0]*255.0f;
+		legs.shaderRGBA[1] = ci->colorOverride[1]*255.0f;
+		legs.shaderRGBA[2] = ci->colorOverride[2]*255.0f;
+		legs.shaderRGBA[3] = 255;
+	}
+	else
+	{
+		legs.shaderRGBA[0] = cg_char_color_red.integer;
+		legs.shaderRGBA[1] = cg_char_color_green.integer;
+		legs.shaderRGBA[2] = cg_char_color_blue.integer;
+		legs.shaderRGBA[3] = 255;
 	}
 
 // minimal_add:

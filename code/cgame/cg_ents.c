@@ -504,6 +504,13 @@ static void CG_General( centity_t *cent ) {
 		return;
 	}
 
+	memset (&ent, 0, sizeof(ent));
+
+	ent.shaderRGBA[0] = cg_char_color_red.integer;
+	ent.shaderRGBA[1] = cg_char_color_green.integer;
+	ent.shaderRGBA[2] = cg_char_color_blue.integer;
+	ent.shaderRGBA[3] = 255;
+
 	if (cent->currentState.modelGhoul2 >= G2_MODELPART_HEAD &&
 		cent->currentState.modelGhoul2 <= G2_MODELPART_RLEG &&
 		cent->currentState.modelindex < MAX_CLIENTS &&
@@ -979,8 +986,6 @@ Ghoul2 Insert Start
 /*
 Ghoul2 Insert End
 */
-
-	memset (&ent, 0, sizeof(ent));
 
 	// set frame
 
