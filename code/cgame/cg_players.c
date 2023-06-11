@@ -170,6 +170,7 @@ qboolean CG_ParseSurfsFile( const char *modelName, const char *skinName, char *s
 	if ( len >= (int)sizeof( text ) - 1 ) 
 	{
 		Com_Printf( "File %s too long\n", sfilename );
+		trap_FS_FCloseFile( f );
 		return qfalse;
 	}
 
@@ -181,6 +182,8 @@ qboolean CG_ParseSurfsFile( const char *modelName, const char *skinName, char *s
 	text_p = text;
 
 	surfOff[0] = surfOn[0] = '\0';
+
+	COM_BeginParseSession ("CG_ParseSurfsFile");
 
 	// read information for surfOff and surfOn
 	while ( 1 ) 
@@ -198,7 +201,7 @@ qboolean CG_ParseSurfsFile( const char *modelName, const char *skinName, char *s
 			{
 				continue;
 			}
-			if ( surfOff[0] )
+			if ( surfOff && surfOff[0] )
 			{
 				Q_strcat( surfOff, MAX_SURF_LIST_SIZE, "," );
 				Q_strcat( surfOff, MAX_SURF_LIST_SIZE, value );
@@ -217,7 +220,7 @@ qboolean CG_ParseSurfsFile( const char *modelName, const char *skinName, char *s
 			{
 				continue;
 			}
-			if ( surfOn[0] )
+			if ( surfOn && surfOn[0] )
 			{
 				Q_strcat( surfOn, MAX_SURF_LIST_SIZE, ",");
 				Q_strcat( surfOn, MAX_SURF_LIST_SIZE, value );
@@ -395,6 +398,7 @@ retryModel:
 		if ( surfOff[0] )
 		{
 			p = surfOff;
+			COM_BeginParseSession ("CG_RegisterClientModelname: surfOff");
 			while ( 1 ) 
 			{
 				token = COM_ParseExt( &p, qtrue );
@@ -409,6 +413,7 @@ retryModel:
 		if ( surfOn[0] )
 		{
 			p = surfOn;
+			COM_BeginParseSession ("CG_RegisterClientModelname: surfOn");
 			while ( 1 )
 			{
 				token = COM_ParseExt( &p, qtrue );
