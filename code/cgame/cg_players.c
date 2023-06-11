@@ -750,6 +750,10 @@ void CG_LoadClientInfo( clientInfo_t *ci ) {
 
 			if (!ci->sounds[i])
 			{
+				ci->sounds[i] = trap_S_RegisterSound( va("sound/chars/%s/misc/%s", soundpath, soundName) );
+			}
+			if (!ci->sounds[i])
+			{
 				if (isFemale)
 				{
 					ci->sounds[i] = trap_S_RegisterSound( va("sound/%s/%s", DEFAULT_FEMALE_SOUNDPATH, soundName) );
