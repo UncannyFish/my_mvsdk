@@ -145,7 +145,19 @@ qboolean CG_ParseSurfsFile( const char *modelName, const char *skinName, char *s
 	char		text[20000];
 	char		sfilename[MAX_QPATH];
 	fileHandle_t	f;
-	
+	int			i = 0;
+
+	while (skinName && skinName[i])
+	{
+		if (skinName[i] == '|')
+		{ //this is a multi-part skin, said skins do not support .surf files
+			return qfalse;
+		}
+
+		i++;
+	}
+
+
 	// Load and parse .surf file
 	Com_sprintf( sfilename, sizeof( sfilename ), "models/players/%s/model_%s.surf", modelName, skinName );
 
