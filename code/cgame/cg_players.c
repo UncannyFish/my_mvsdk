@@ -6909,14 +6909,14 @@ doEssentialTwo:
 			//Render a scaled version of the model's hand with a n337 looking shader
 			{
 				const char *rotateBone;
-				char *limbName;
-				char *limbCapName;
+				char limbName[MAX_QPATH];
+				char limbCapName[MAX_QPATH];
 				vec3_t armAng;
 				float wv = sin( cg.time * 0.003f ) * 0.08f + 0.1f;
 
 				rotateBone = "lradius";
-				limbName = "l_arm";
-				limbCapName = "l_arm_cap_torso_off";
+				CG_GetRootSurfNameWithVariant( cent->ghoul2, "l_arm", limbName, sizeof(limbName) );
+				Com_sprintf( limbCapName, sizeof( limbCapName ), "%s_cap_torso_off", limbName );
 
 				if (cent->grip_arm.ghoul2 && trap_G2_HaveWeGhoul2Models(cent->grip_arm.ghoul2))
 				{
