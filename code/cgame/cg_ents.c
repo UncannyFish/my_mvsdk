@@ -545,9 +545,10 @@ static void CG_General( centity_t *cent ) {
 		{
 			// const char *limbBone;
 			const char *rotateBone;
-			char *limbName;
-			char *limbCapName;
-			char *stubCapName;
+			char	limbName[MAX_QPATH];
+			char	stubName[MAX_QPATH];
+			char	limbCapName[MAX_QPATH];
+			char	stubCapName[MAX_QPATH];
 			char *limbTagName;
 			char *stubTagName;
 			int limb_anim;
@@ -571,9 +572,9 @@ static void CG_General( centity_t *cent ) {
 			{
 				// limbBone = "cervical";
 				rotateBone = "cranium";
-				limbName = "head";
-				limbCapName = "head_cap_torso_off";
-				stubCapName = "torso_cap_head_off";
+				Q_strncpyz( limbName , "head", sizeof( limbName  ) );
+				Q_strncpyz( limbCapName, "head_cap_torso_off", sizeof( limbCapName ) );
+				Q_strncpyz( stubCapName, "torso_cap_head_off", sizeof( stubCapName ) );
 				limbTagName = "*head_cap_torso";
 				stubTagName = "*torso_cap_head";
 				limb_anim = BOTH_DISMEMBER_HEAD1;
@@ -582,9 +583,9 @@ static void CG_General( centity_t *cent ) {
 			{
 				// limbBone = "pelvis";
 				rotateBone = "thoracic";
-				limbName = "torso";
-				limbCapName = "torso_cap_hips_off";
-				stubCapName = "hips_cap_torso_off";
+				Q_strncpyz( limbName, "torso", sizeof( limbName ) );
+				Q_strncpyz( limbCapName, "torso_cap_hips_off", sizeof( limbCapName ) );
+				Q_strncpyz( stubCapName, "hips_cap_torso_off", sizeof( stubCapName ) );
 				limbTagName = "*torso_cap_hips";
 				stubTagName = "*hips_cap_torso";
 				limb_anim = BOTH_DISMEMBER_TORSO1;
@@ -593,9 +594,10 @@ static void CG_General( centity_t *cent ) {
 			{
 				// limbBone = "lhumerus";
 				rotateBone = "lradius";
-				limbName = "l_arm";
-				limbCapName = "l_arm_cap_torso_off";
-				stubCapName = "torso_cap_l_arm_off";
+				CG_GetRootSurfNameWithVariant( clEnt->ghoul2, "l_arm", limbName, sizeof(limbName) );
+				CG_GetRootSurfNameWithVariant( clEnt->ghoul2, "torso", stubName, sizeof(stubName) );
+				Com_sprintf( limbCapName, sizeof( limbCapName ), "%s_cap_torso_off", limbName );
+				Com_sprintf( stubCapName, sizeof( stubCapName), "%s_cap_l_arm_off", stubName );
 				limbTagName = "*l_arm_cap_torso";
 				stubTagName = "*torso_cap_l_arm";
 				limb_anim = BOTH_DISMEMBER_LARM;
@@ -604,9 +606,10 @@ static void CG_General( centity_t *cent ) {
 			{
 				// limbBone = "rhumerus";
 				rotateBone = "rradius";
-				limbName = "r_arm";
-				limbCapName = "r_arm_cap_torso_off";
-				stubCapName = "torso_cap_r_arm_off";
+				CG_GetRootSurfNameWithVariant( clEnt->ghoul2, "r_arm", limbName, sizeof(limbName) );
+				CG_GetRootSurfNameWithVariant( clEnt->ghoul2, "torso", stubName, sizeof(stubName) );
+				Com_sprintf( limbCapName, sizeof( limbCapName ), "%s_cap_torso_off", limbName );
+				Com_sprintf( stubCapName, sizeof( stubCapName), "%s_cap_r_arm_off", stubName );
 				limbTagName = "*r_arm_cap_torso";
 				stubTagName = "*torso_cap_r_arm";
 				limb_anim = BOTH_DISMEMBER_RARM;
@@ -615,9 +618,10 @@ static void CG_General( centity_t *cent ) {
 			{
 				// limbBone = "rradiusX";
 				rotateBone = "rhand";
-				limbName = "r_hand";
-				limbCapName = "r_hand_cap_r_arm_off";
-				stubCapName = "r_arm_cap_r_hand_off";
+				CG_GetRootSurfNameWithVariant( clEnt->ghoul2, "r_hand", limbName, sizeof(limbName) );
+				CG_GetRootSurfNameWithVariant( clEnt->ghoul2, "r_arm", stubName, sizeof(stubName) );
+				Com_sprintf( limbCapName, sizeof( limbCapName ), "%s_cap_r_arm_off", limbName );
+				Com_sprintf( stubCapName, sizeof( stubCapName), "%s_cap_r_hand_off", stubName );
 				limbTagName = "*r_hand_cap_r_arm";
 				stubTagName = "*r_arm_cap_r_hand";
 				limb_anim = BOTH_DISMEMBER_RARM;
@@ -626,9 +630,10 @@ static void CG_General( centity_t *cent ) {
 			{
 				// limbBone = "lfemurYZ";
 				rotateBone = "ltibia";
-				limbName = "l_leg";
-				limbCapName = "l_leg_cap_hips_off";
-				stubCapName = "hips_cap_l_leg_off";
+				CG_GetRootSurfNameWithVariant( clEnt->ghoul2, "l_leg", limbName, sizeof(limbName) );
+				CG_GetRootSurfNameWithVariant( clEnt->ghoul2, "hips", stubName, sizeof(stubName) );
+				Com_sprintf( limbCapName, sizeof( limbCapName ), "%s_cap_hips_off", limbName );
+				Com_sprintf( stubCapName, sizeof( stubCapName), "%s_cap_l_leg_off", stubName );
 				limbTagName = "*l_leg_cap_hips";
 				stubTagName = "*hips_cap_l_leg";
 				limb_anim = BOTH_DISMEMBER_LLEG;
@@ -637,9 +642,10 @@ static void CG_General( centity_t *cent ) {
 			{
 				// limbBone = "rfemurYZ";
 				rotateBone = "rtibia";
-				limbName = "r_leg";
-				limbCapName = "r_leg_cap_hips_off";
-				stubCapName = "hips_cap_r_leg_off";
+				CG_GetRootSurfNameWithVariant( clEnt->ghoul2, "r_leg", limbName, sizeof(limbName) );
+				CG_GetRootSurfNameWithVariant( clEnt->ghoul2, "hips", stubName, sizeof(stubName) );
+				Com_sprintf( limbCapName, sizeof( limbCapName ), "%s_cap_hips_off", limbName );
+				Com_sprintf( stubCapName, sizeof( stubCapName), "%s_cap_r_leg_off", stubName );
 				limbTagName = "*r_leg_cap_hips";
 				stubTagName = "*hips_cap_r_leg";
 				limb_anim = BOTH_DISMEMBER_RLEG;
@@ -648,9 +654,10 @@ static void CG_General( centity_t *cent ) {
 			{
 				// limbBone = "rfemurYZ";
 				rotateBone = "rtibia";
-				limbName = "r_leg";
-				limbCapName = "r_leg_cap_hips_off";
-				stubCapName = "hips_cap_r_leg_off";
+				CG_GetRootSurfNameWithVariant( clEnt->ghoul2, "r_leg", limbName, sizeof(limbName) );
+				CG_GetRootSurfNameWithVariant( clEnt->ghoul2, "hips", stubName, sizeof(stubName) );
+				Com_sprintf( limbCapName, sizeof( limbCapName ), "%s_cap_hips_off", limbName );
+				Com_sprintf( stubCapName, sizeof( stubCapName), "%s_cap_r_leg_off", stubName );
 				limbTagName = "*r_leg_cap_hips";
 				stubTagName = "*hips_cap_r_leg";
 				limb_anim = BOTH_DISMEMBER_RLEG;
