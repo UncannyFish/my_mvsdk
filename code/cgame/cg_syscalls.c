@@ -881,6 +881,10 @@ int trap_G2API_GetSurfaceRenderStatus(void *ghoul2, const int modelIndex, const 
 	return syscall(CG_G2_GETSURFACERENDERSTATUS, ghoul2, modelIndex, surfaceName);
 }
 
+qboolean trap_G2API_SkinlessModel(void *ghlInfo, int modelIndex) {
+	return syscall(CG_G2_SKINLESSMODEL, ghlInfo, modelIndex);
+}
+
 /*
 Ghoul2 Insert End
 */

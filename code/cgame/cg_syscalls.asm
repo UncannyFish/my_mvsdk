@@ -180,6 +180,7 @@ equ trap_CG_RegisterSharedMemory_1_02			-301	; CG_SET_SHARED_BUFFER
 
 equ trap_G2API_SetSkin							-304	; CG_G2_SETSKIN 
 equ trap_G2API_GetSurfaceRenderStatus			-305	; CG_G2_GETSURFACERENDERSTATUS 
+equ trap_G2API_SkinlessModel					-306	; CG_G2_SKINLESSMODEL 
 
 ; hardcoded functions
 equ memset										-101	; CGAME_MEMSET 
