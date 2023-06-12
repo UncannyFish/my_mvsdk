@@ -649,47 +649,16 @@ void CG_PainEvent( centity_t *cent, int health ) {
 
 void CG_ReattachLimb(centity_t *source)
 {
-	char *limbName;
-	char *stubCapName;
+	clientInfo_t *ci = NULL;
 
-	switch (source->torsoBolt)
-	{
-	case G2_MODELPART_HEAD:
-		limbName = "head";
-		stubCapName = "torso_cap_head_off";
-		break;
-	case G2_MODELPART_WAIST:
-		limbName = "torso";
-		stubCapName = "hips_cap_torso_off";
-		break;
-	case G2_MODELPART_LARM:
-		limbName = "l_arm";
-		stubCapName = "torso_cap_l_arm_off";
-		break;
-	case G2_MODELPART_RARM:
-		limbName = "r_arm";
-		stubCapName = "torso_cap_r_arm_off";
-		break;
-	case G2_MODELPART_RHAND:
-		limbName = "r_hand";
-		stubCapName = "r_arm_cap_r_hand_off";
-		break;
-	case G2_MODELPART_LLEG:
-		limbName = "l_leg";
-		stubCapName = "hips_cap_l_leg_off";
-		break;
-	case G2_MODELPART_RLEG:
-		limbName = "r_leg";
-		stubCapName = "hips_cap_r_leg_off";
-		break;
-	default:
-		source->torsoBolt = 0;
-		source->ghoul2weapon = NULL;
-		return;
+	ci = &cgs.clientinfo[source->currentState.number];
+	if ( ci )
+	{//re-apply the skin
+		if ( ci->torsoSkin > 0 )
+		{
+			trap_G2API_SetSkin(source->ghoul2,0,ci->torsoSkin,ci->torsoSkin);
+		}
 	}
-
-	trap_G2API_SetSurfaceOnOff(source->ghoul2, limbName, 0);
-	trap_G2API_SetSurfaceOnOff(source->ghoul2, stubCapName, 0x00000100);
 
 	source->torsoBolt = 0;
 
