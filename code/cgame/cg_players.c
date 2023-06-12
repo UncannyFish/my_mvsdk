@@ -6052,6 +6052,30 @@ void CG_ForceFPLSPlayerModel(centity_t *cent, clientInfo_t *ci)
 	cg_entities[clientNum].ghoul2 = cent->ghoul2;
 }
 
+qboolean CG_GetRootSurfNameWithVariant( void *ghoul2, const char *rootSurfName, char *returnSurfName, int returnSize )
+{
+	if ( !ghoul2 || !trap_G2API_GetSurfaceRenderStatus( ghoul2, 0, rootSurfName ) )
+	{//see if the basic name without variants is on
+		Q_strncpyz( returnSurfName, rootSurfName, returnSize );
+		return qtrue;
+	}
+	else
+	{//check variants
+		int i;
+		const int MAX_VARIANTS = 8;
+		for ( i = 0; i < MAX_VARIANTS; i++ )
+		{
+			Com_sprintf( returnSurfName, returnSize, "%s%c", rootSurfName, 'a'+i );
+			if ( !trap_G2API_GetSurfaceRenderStatus( ghoul2, 0, returnSurfName ) )
+			{
+				return qtrue;
+			}
+		}
+	}
+	Q_strncpyz( returnSurfName, rootSurfName, returnSize );
+	return qfalse;
+}
+
 /*
 ===============
 CG_Player
