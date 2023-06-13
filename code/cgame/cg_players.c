@@ -1101,6 +1101,7 @@ void CG_NewClientInfo( int clientNum, qboolean entitiesInitialized ) {
 		for (i = 0; i < MAX_CLIENTS; i++)
 		{
 			cg.directKills[i][clientNum] = 0;
+			cg.directKills[clientNum][i] = 0;
 		}
 
 		cg.totalKills[clientNum] = 0;
