@@ -957,9 +957,9 @@ Ghoul2 Insert End
 
 	{ &cg_drawKillMessage, "cg_drawKillMessage", "1", CVAR_ARCHIVE },
 	{ &cg_showKills, "cg_showKills", "0", CVAR_ARCHIVE },
-	{ &cg_char_color_red, "char_color_red", "255", CVAR_ARCHIVE | CVAR_USERINFO },
-	{ &cg_char_color_green, "char_color_green", "255", CVAR_ARCHIVE | CVAR_USERINFO },
-	{ &cg_char_color_blue, "char_color_blue", "255", CVAR_ARCHIVE | CVAR_USERINFO },
+	{ &cg_char_color_red, "char_color_red", "255", CVAR_ARCHIVE },
+	{ &cg_char_color_green, "char_color_green", "255", CVAR_ARCHIVE },
+	{ &cg_char_color_blue, "char_color_blue", "255", CVAR_ARCHIVE },
 };
 
 static int  cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
