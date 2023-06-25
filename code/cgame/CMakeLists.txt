@@ -113,6 +113,26 @@ set_property(TARGET ${MVCGAME} APPEND PROPERTY COMPILE_DEFINITIONS
   $<$<CONFIG:RelWithDebInfo>:${GlobalDefines} ${MVCGAMEDefines} ${ReleaseDefines}>
 )
 
+if(MSVC)
+	if(ARCH_X86_32)
+		# Workaround for error LNK2001: unresolved external symbol _trap_PC_ReadToken
+		set_property(TARGET ${MVCGAME} APPEND_STRING PROPERTY LINK_FLAGS_RELEASE " /INCLUDE:\"_trap_PC_ReadToken\"")
+		set_property(TARGET ${MVCGAME} APPEND_STRING PROPERTY LINK_FLAGS_RELWITHDEBINFO " /INCLUDE:\"_trap_PC_ReadToken\"")
+
+		# Workaround for error LNK2001: unresolved external symbol _trap_PC_SourceFileAndLine
+		set_property(TARGET ${MVCGAME} APPEND_STRING PROPERTY LINK_FLAGS_RELEASE " /INCLUDE:\"_trap_PC_SourceFileAndLine\"")
+		set_property(TARGET ${MVCGAME} APPEND_STRING PROPERTY LINK_FLAGS_RELWITHDEBINFO " /INCLUDE:\"_trap_PC_SourceFileAndLine\"")
+	else()
+		# Workaround for error LNK2001: unresolved external symbol trap_PC_ReadToken
+		set_property(TARGET ${MVCGAME} APPEND_STRING PROPERTY LINK_FLAGS_RELEASE " /INCLUDE:\"trap_PC_ReadToken\"")
+		set_property(TARGET ${MVCGAME} APPEND_STRING PROPERTY LINK_FLAGS_RELWITHDEBINFO " /INCLUDE:\"trap_PC_ReadToken\"")
+
+		# Workaround for error LNK2001: unresolved external symbol trap_PC_SourceFileAndLine
+		set_property(TARGET ${MVCGAME} APPEND_STRING PROPERTY LINK_FLAGS_RELEASE " /INCLUDE:\"trap_PC_SourceFileAndLine\"")
+		set_property(TARGET ${MVCGAME} APPEND_STRING PROPERTY LINK_FLAGS_RELWITHDEBINFO " /INCLUDE:\"trap_PC_SourceFileAndLine\"")
+	endif()
+endif()
+
 set_target_properties(${MVCGAME} PROPERTIES INCLUDE_DIRECTORIES "${MVCGAMEIncludeDirs}")
 set_target_properties(${MVCGAME} PROPERTIES PROJECT_LABEL "CGame Module")
 if(InMV)
