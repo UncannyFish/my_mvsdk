@@ -1783,6 +1783,12 @@ extern	vmCvar_t		cg_showKills;
 extern	vmCvar_t		cg_char_color_red;
 extern	vmCvar_t		cg_char_color_green;
 extern	vmCvar_t		cg_char_color_blue;
+extern	vmCvar_t		cg_drawLocalTime;
+extern	vmCvar_t		cg_drawLocalTimeX;
+extern	vmCvar_t		cg_drawLocalTimeY;
+extern	vmCvar_t		cg_drawLocalTimeScale;
+extern	vmCvar_t		cg_drawLocalTime12h;
+extern	vmCvar_t		cg_drawLocalTimeSeconds;
 
 //
 // cg_main.c
@@ -2181,6 +2187,7 @@ void		trap_S_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], i
 sfxHandle_t	trap_S_RegisterSound( const char *sample);		// returns buzz if not found
 void		trap_S_StartBackgroundTrack( const char *intro, const char *loop, qboolean bReturnWithoutStarting);	// empty name stops music
 void	trap_S_StopBackgroundTrack( void );
+int		trap_RealTime(qtime_t *qtime);
 
 
 void		trap_R_LoadWorldMap( const char *mapname );

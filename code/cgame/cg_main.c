@@ -694,6 +694,12 @@ vmCvar_t	cg_showKills;
 vmCvar_t	cg_char_color_red;
 vmCvar_t	cg_char_color_green;
 vmCvar_t	cg_char_color_blue;
+vmCvar_t	cg_drawLocalTime;
+vmCvar_t	cg_drawLocalTimeX;
+vmCvar_t	cg_drawLocalTimeY;
+vmCvar_t	cg_drawLocalTimeScale;
+vmCvar_t	cg_drawLocalTime12h;
+vmCvar_t	cg_drawLocalTimeSeconds;
 
 typedef struct {
 	vmCvar_t	*vmCvar;
@@ -960,6 +966,12 @@ Ghoul2 Insert End
 	{ &cg_char_color_red, "char_color_red", "255", CVAR_ARCHIVE },
 	{ &cg_char_color_green, "char_color_green", "255", CVAR_ARCHIVE },
 	{ &cg_char_color_blue, "char_color_blue", "255", CVAR_ARCHIVE },
+	{ &cg_drawLocalTime, "cg_drawLocalTime", "0", CVAR_ARCHIVE },
+	{ &cg_drawLocalTimeX, "cg_drawLocalTimeX", "400", CVAR_ARCHIVE },
+	{ &cg_drawLocalTimeY, "cg_drawLocalTimeY", "460", CVAR_ARCHIVE },
+	{ &cg_drawLocalTimeScale, "cg_drawLocalTimeScale", "0.7", CVAR_ARCHIVE },
+	{ &cg_drawLocalTime12h, "cg_drawLocalTime12h", "0", CVAR_ARCHIVE },
+	{ &cg_drawLocalTimeSeconds, "cg_drawLocalTimeSeconds", "0", CVAR_ARCHIVE },
 };
 
 static int  cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );

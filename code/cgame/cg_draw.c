@@ -4995,6 +4995,52 @@ ID_INLINE void CG_ChatBox_DrawStrings(void) //o, ID_INLINE is static Q_INLINE
 	}
 }
 
+void CG_DrawLocalTime(void)
+{
+	float x = cg_drawLocalTimeX.value;
+	float y = cg_drawLocalTimeY.value;
+	float scale = cg_drawLocalTimeScale.value;
+	qtime_t time;
+	char clock[] = "12:00:00 AM";
+	const char *am_pm = "";
+
+	if (!cg_drawLocalTime.integer)
+		return;
+
+	trap_RealTime(&time);
+
+	if (cg_drawLocalTime12h.integer)
+	{
+		if (time.tm_hour >= 12)
+		{
+			am_pm = " PM";
+		}
+		else
+		{
+			am_pm = " AM";
+		}
+		if (time.tm_hour > 12)
+		{
+			time.tm_hour -= 12;
+		}
+		if (time.tm_hour == 0)
+		{
+			time.tm_hour = 12;
+		}
+	}
+
+	if (cg_drawLocalTimeSeconds.integer)
+	{
+		Com_sprintf(clock, sizeof(clock), "%02d:%02d:%02d%s", time.tm_hour, time.tm_min, time.tm_sec, am_pm);
+	}
+	else
+	{
+		Com_sprintf(clock, sizeof(clock), "%02d:%02d%s", time.tm_hour, time.tm_min, am_pm);
+	}
+
+	CG_Text_Paint(x, y, scale, colorTable[CT_WHITE], clock, 0.0f, 0, ITEM_TEXTSTYLE_SHADOWED, FONT_SMALL);
+}
+
 static void CG_Draw2D( void ) {
 	float			inTime = cg.invenSelectTime+WEAPON_SELECT_TIME;
 	float			wpTime = cg.weaponSelectTime+WEAPON_SELECT_TIME;
@@ -5568,6 +5614,8 @@ static void CG_Draw2D( void ) {
 		CG_DrawUpperRight();
 		CG_DrawShowPos();
 	}
+
+	CG_DrawLocalTime();
 
 	if ( !CG_DrawFollow() ) {
 		CG_DrawWarmup();
