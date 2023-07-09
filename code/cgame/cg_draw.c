@@ -5034,6 +5034,10 @@ static void CG_Draw2D( void ) {
 		cgYsalFadeVal = 0;
 	}
 
+	if ( cg_draw2D.integer == 0 ) {
+		return;
+	}
+
 	chatBoxYPos = cg_chatBoxHeight.value;
 	if ( cg.snap->ps.pm_type == PM_INTERMISSION ) {
 		CG_DrawIntermission();
