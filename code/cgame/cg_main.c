@@ -700,6 +700,7 @@ vmCvar_t	cg_drawLocalTimeY;
 vmCvar_t	cg_drawLocalTimeScale;
 vmCvar_t	cg_drawLocalTime12h;
 vmCvar_t	cg_drawLocalTimeSeconds;
+vmCvar_t	cg_cropLevelShot;
 
 typedef struct {
 	vmCvar_t	*vmCvar;
@@ -972,6 +973,7 @@ Ghoul2 Insert End
 	{ &cg_drawLocalTimeScale, "cg_drawLocalTimeScale", "0.7", CVAR_ARCHIVE },
 	{ &cg_drawLocalTime12h, "cg_drawLocalTime12h", "0", CVAR_ARCHIVE },
 	{ &cg_drawLocalTimeSeconds, "cg_drawLocalTimeSeconds", "0", CVAR_ARCHIVE },
+	{ &cg_cropLevelShot, "cg_cropLevelShot", "0", CVAR_ARCHIVE },
 };
 
 static int  cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );
