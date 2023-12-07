@@ -1540,4 +1540,13 @@ int sscanf( const char *buffer, const char *fmt, ... ) {
 	return count;
 }
 
+float roundf( float x ) {
+	if (x >= 0.0f)
+		x += 0.5f;
+	else
+		x -= 0.5f;
+
+	return (int) x;
+}
+
 #endif
