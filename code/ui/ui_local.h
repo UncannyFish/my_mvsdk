@@ -112,6 +112,7 @@ extern vmCvar_t	ui_scoreTime;
 extern vmCvar_t	ui_smallFont;
 extern vmCvar_t	ui_bigFont;
 extern vmCvar_t ui_serverStatusTimeOut;
+extern vmCvar_t ui_bypassMainMenuLoad;
 
 // botfilter
 extern vmCvar_t	ui_botfilter;
@@ -344,7 +345,7 @@ extern sfxHandle_t	MenuField_Key( menufield_s* m, int* key );
 //
 // ui_main.c
 //
-qboolean UI_FeederSelection(float feederID, int index);
+qboolean UI_FeederSelection( float feederID, int index, itemDef_t *item );
 void UI_Report();
 void UI_Load();
 void UI_LoadMenus(const char *menuFile, qboolean reset);
@@ -637,7 +638,8 @@ typedef struct {
 #define MAX_DOWNLOADS 512
 #define MAX_DEMOS 256
 #define MAX_MOVIES 256
-//#define MAX_PLAYERMODELS 256
+#define MAX_Q3PLAYERMODELS 256
+#define MAX_PLAYERMODELS 32
 
 #define MAX_SCROLLTEXT_SIZE		4096
 #define MAX_SCROLLTEXT_LINES		64
@@ -764,6 +766,19 @@ typedef struct {
 	const char *modDescr;
 } modInfo_t;
 
+typedef struct {
+	char		Name[64];
+	int			SkinHeadCount;
+	char		SkinHeadNames[MAX_PLAYERMODELS][16];
+	int			SkinTorsoCount;
+	char		SkinTorsoNames[MAX_PLAYERMODELS][16];
+	int			SkinLegCount;
+	char		SkinLegNames[MAX_PLAYERMODELS][16];
+	char		ColorShader[MAX_PLAYERMODELS][64];
+	int			ColorCount;
+	char		ColorActionText[MAX_PLAYERMODELS][128];
+} playerSpeciesInfo_t;
+
 typedef struct q3Head_s q3Head_t;
 struct q3Head_s {
 	const char *name;
@@ -876,6 +891,17 @@ typedef struct {
 
 	qboolean inGameLoad;
 
+	int					playerSpeciesCount;
+	playerSpeciesInfo_t	playerSpecies[MAX_PLAYERMODELS];
+	int					playerSpeciesIndex;
+
+	short		movesTitleIndex;
+	char		*movesBaseAnim;
+	int			moveAnimTime;
+
+	int			languageCount;
+	int			languageCountIndex;
+
 	float		virtualScreenHeightOn;	// renderer virtual screen height when widescreen is on
 	float		virtualScreenHeightOff;	// renderer virtual screen height when widescreen is off
 	float		screenHeight;			// virtual screen heigth for the UI module
@@ -981,6 +1007,7 @@ int				trap_FS_GetFileList(  const char *path, const char *extension, char *list
 qhandle_t		trap_R_RegisterModel( const char *name );
 qhandle_t		trap_R_RegisterSkin( const char *name );
 qhandle_t		trap_R_RegisterShaderNoMip( const char *name );
+void			trap_R_ShaderNameFromIndex(char *name, int index);
 void			trap_R_ClearScene( void );
 void			trap_R_AddRefEntityToScene( const refEntity_t *re );
 void			trap_R_AddPolyToScene( qhandle_t hShader , int numVerts, const polyVert_t *verts );
@@ -1060,12 +1087,67 @@ int				trap_RealTime(qtime_t *qtime);
 void			trap_R_RemapShader( const char *oldShader, const char *newShader, const char *timeOffset );
 */
 
+int trap_SP_GetNumLanguages( void );
+void trap_GetLanguageName( const int languageIndex, char *buffer );
+
 /*
 Ghoul2 Insert Start
 */
-qboolean trap_G2API_SetBoneAngles(void *ghoul2, int modelIndex, const char *boneName, const vec3_t angles, const int flags,
+void		trap_G2API_CollisionDetect		( CollisionRecord_t *collRecMap, void* ghoul2, const vec3_t angles, const vec3_t position,int frameNumber, int entNum, const vec3_t rayStart, const vec3_t rayEnd, const vec3_t scale, int traceFlags, int useLod, float fRadius );
+void		trap_G2API_CollisionDetectCache		( CollisionRecord_t *collRecMap, void* ghoul2, const vec3_t angles, const vec3_t position,int frameNumber, int entNum, const vec3_t rayStart, const vec3_t rayEnd, const vec3_t scale, int traceFlags, int useLod, float fRadius );
+
+
+void		trap_G2_ListModelSurfaces(void *ghlInfo);
+void		trap_G2_ListModelBones(void *ghlInfo, int frame);
+void		trap_G2_SetGhoul2ModelIndexes(void *ghoul2, qhandle_t *modelList, qhandle_t *skinList);
+qboolean	trap_G2_HaveWeGhoul2Models(void *ghoul2);
+void		trap_G2API_GiveMeVectorFromMatrix(mdxaBone_t *boltMatrix, int flags, vec3_t vec);
+qboolean	trap_G2API_GetBoltMatrix(void *ghoul2, const int modelIndex, const int boltIndex, mdxaBone_t *matrix,
+								const vec3_t angles, const vec3_t position, const int frameNum, qhandle_t *modelList, vec3_t scale);
+qboolean	trap_G2API_GetBoltMatrix_NoReconstruct(void *ghoul2, const int modelIndex, const int boltIndex, mdxaBone_t *matrix,
+								const vec3_t angles, const vec3_t position, const int frameNum, qhandle_t *modelList, vec3_t scale);
+qboolean	trap_G2API_GetBoltMatrix_NoRecNoRot(void *ghoul2, const int modelIndex, const int boltIndex, mdxaBone_t *matrix,
+								const vec3_t angles, const vec3_t position, const int frameNum, qhandle_t *modelList, vec3_t scale);
+int			trap_G2API_InitGhoul2Model(void **ghoul2Ptr, const char *fileName, int modelIndex, qhandle_t customSkin,
+						  qhandle_t customShader, int modelFlags, int lodBias);
+qboolean	trap_G2API_SetSkin(void *ghoul2, int modelIndex, qhandle_t customSkin, qhandle_t renderSkin);
+qboolean	trap_G2API_AttachG2Model(void *ghoul2From, int modelIndexFrom, void *ghoul2To, int toBoltIndex, int toModel);
+
+
+int			trap_G2API_CopyGhoul2Instance(void *g2From, void *g2To, int modelIndex);
+void		trap_G2API_CopySpecificGhoul2Model(void *g2From, int modelFrom, void *g2To, int modelTo);
+void		trap_G2API_DuplicateGhoul2Instance(void *g2From, void **g2To);
+qboolean	trap_G2API_HasGhoul2ModelOnIndex(void *ghlInfo, int modelIndex);
+qboolean	trap_G2API_RemoveGhoul2Model(void *ghlInfo, int modelIndex);
+
+int			trap_G2API_AddBolt(void *ghoul2, int modelIndex, const char *boneName);
+//qboolean	trap_G2API_RemoveBolt(void *ghoul2, int index);
+void		trap_G2API_SetBoltInfo(void *ghoul2, int modelIndex, int boltInfo);
+void		trap_G2API_CleanGhoul2Models(void **ghoul2Ptr);
+qboolean	trap_G2API_SetBoneAngles(void *ghoul2, int modelIndex, const char *boneName, const vec3_t angles, const int flags,
 								const int up, const int right, const int forward, qhandle_t *modelList,
 								int blendTime , int currentTime );
+void		trap_G2API_GetGLAName(void *ghoul2, int modelIndex, char *fillBuf);
+qboolean	trap_G2API_SetBoneAnim(void *ghoul2, const int modelIndex, const char *boneName, const int startFrame, const int endFrame,
+							  const int flags, const float animSpeed, const int currentTime, const float setFrame , const int blendTime );
+qboolean	trap_G2API_GetBoneAnim(void *ghoul2, const char *boneName, const int currentTime, float *currentFrame, int *startFrame,
+								int *endFrame, int *flags, float *animSpeed, int *modelList, const int modelIndex);
+qboolean	trap_G2API_GetBoneFrame(void *ghoul2, const char *boneName, const int currentTime, float *currentFrame, int *modelList, const int modelIndex);
+
+qboolean	trap_G2API_SetRootSurface(void *ghoul2, const int modelIndex, const char *surfaceName);
+qboolean	trap_G2API_SetSurfaceOnOff(void *ghoul2, const char *surfaceName, const int flags);
+qboolean	trap_G2API_SetNewOrigin(void *ghoul2, const int boltIndex);
+
+int			trap_G2API_GetTime(void);
+void		trap_G2API_SetTime(int time, int clock);
+
+void		trap_G2API_SetRagDoll(void *ghoul2, sharedRagDollParams_t *params);
+void		trap_G2API_AnimateG2Models(void *ghoul2, int time, sharedRagDollUpdateParams_t *params);
+
+qboolean	trap_G2API_SetBoneIKState(void *ghoul2, int time, const char *boneName, int ikState, sharedSetBoneIKStateParams_t *params);
+qboolean	trap_G2API_IKMove(void *ghoul2, int time, sharedIKMoveParams_t *params);
+
+void		trap_G2API_GetSurfaceName(void *ghoul2, int surfNumber, int modelIndex, char *fillBuf);
 /*
 Ghoul2 Insert End
 */

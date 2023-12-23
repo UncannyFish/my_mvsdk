@@ -7,6 +7,7 @@ set(MVCGAMEHEADERS
 	"${SRCDir}/api/mvapi.h"
 
 	"${SRCDir}/cgame/animtable.h"
+	"${SRCDir}/cgame/holocronicons.h"
 	"${SRCDir}/cgame/cg_lights.h"
 	"${SRCDir}/cgame/cg_local.h"
 	"${SRCDir}/cgame/cg_media.h"

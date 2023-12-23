@@ -15,6 +15,8 @@ set(MVUIHEADERS
 	"${SRCDir}/ui/ui_multiversion.h"
 	"${SRCDir}/ui/ui_multiversion_syscalls.h"
 	
+	"${SRCDir}/cgame/holocronicons.h"
+
 	"${SRCDir}/game/bg_weapons.h"
 	"${SRCDir}/game/q_shared.h"
 	"${SRCDir}/game/bg_multiversion.h"
@@ -25,6 +27,7 @@ set(MVUISOURCES
 	"${SRCDir}/ui/ui_atoms.c"
 	"${SRCDir}/ui/ui_force.c"
 	"${SRCDir}/ui/ui_gameinfo.c"
+	"${SRCDir}/ui/ui_saber.c"
 	"${SRCDir}/ui/ui_shared.c"
 	"${SRCDir}/ui/ui_multiversion.c"
 
