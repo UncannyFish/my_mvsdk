@@ -17,6 +17,12 @@
 	#endif
 #endif
 
+#ifdef UI_ALLOW_DYNAMIC_MEMORY
+	#define DYNAMIC_PLAYER_SPECIES
+	#define DYNAMIC_FILE_LIST
+	#define DYNAMIC_SABER_HILTS
+#endif
+
 #define MAX_MENUNAME				32
 #define MAX_ITEMTEXT				64
 #define MAX_ITEMACTION				64
@@ -192,12 +198,21 @@ typedef struct editFieldDef_s {
 	int paintOffset;							 // 
 } editFieldDef_t;
 
+#ifndef DYNAMIC_PLAYER_SPECIES
 #define MAX_MULTI_CVARS 32
+#endif
 
 typedef struct multiDef_s {
+#ifdef DYNAMIC_PLAYER_SPECIES
+	char **cvarList;
+	char **cvarStr;
+	float *cvarValue;
+	int countMax;
+#else
 	const char *cvarList[MAX_MULTI_CVARS];
 	const char *cvarStr[MAX_MULTI_CVARS];
 	float cvarValue[MAX_MULTI_CVARS];
+#endif
 	int count;
 	qboolean strDef;
 } multiDef_t;
@@ -371,6 +386,7 @@ typedef struct {
     qhandle_t forceRestrict;
     qhandle_t saberOnly;
     qhandle_t trueJedi;
+    qhandle_t deferShader;
 
 	sfxHandle_t moveRollSound;
 	sfxHandle_t moveJumpSound;

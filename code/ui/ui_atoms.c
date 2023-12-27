@@ -169,15 +169,13 @@ void UI_ClearScores() {
 
 }
 
-
-extern q3Head_t *UI_GetHeadByIndex( int index );
 static void	UI_Cache_f() {
 	int i;
 	Display_CacheAll();
 	if (trap_Argc() == 2) {
 		for (i = 0; i < uiInfo.q3HeadCount; i++)
 		{
-			q3Head_t *head = UI_GetHeadByIndex(i);
+			q3Head_t *head = &uiInfo.q3Heads[i];
 			if ( head && head->name ) trap_Print( va("model %s\n", head->name) );
 		}
 	}

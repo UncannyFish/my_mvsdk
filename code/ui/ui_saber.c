@@ -13,13 +13,14 @@ USER INTERFACE SABER LOADING & DISPLAY CODE
 #include "ui_local.h"
 #include "ui_shared.h"
 
-//#define MAX_SABER_DATA_SIZE 0x8000
-#define MAX_SABER_DATA_SIZE 0x80000
-
-// On Xbox, static linking lets us steal the buffer from wp_saberLoad
-// Just make sure that the saber data size is the same
-// Damn. OK. Gotta fix this again. Later.
-static char	SaberParms[MAX_SABER_DATA_SIZE];
+#ifdef DYNAMIC_SABER_HILTS
+	static char **SaberParms;
+#else
+	#define MAX_SABER_DATA_SIZE 8192
+	#define MAX_SABER_FILES 32
+	static char SaberParms[MAX_SABER_FILES][MAX_SABER_DATA_SIZE];
+#endif
+size_t SaberParmsCount = 0;
 qboolean	ui_saber_parms_parsed = qfalse;
 
 static qhandle_t redSaberGlowShader;
@@ -34,6 +35,8 @@ static qhandle_t blueSaberGlowShader;
 static qhandle_t blueSaberCoreShader;
 static qhandle_t purpleSaberGlowShader;
 static qhandle_t purpleSaberCoreShader;
+
+void UI_SaberGetHiltInfo(void);
 
 void UI_CacheSaberGlowGraphics( void )
 {//FIXME: these get fucked by vid_restarts
@@ -93,7 +96,9 @@ qboolean UI_SaberParseParm( const char *saberName, const char *parmname, char *s
 {
 	const char	*token;
 	const char	*value;
-	const char	*p;
+	const char	*p = NULL;
+	size_t i;
+	qboolean saberFound = qfalse;
 
 	if ( !saberName || !saberName[0] ) 
 	{
@@ -101,27 +106,42 @@ qboolean UI_SaberParseParm( const char *saberName, const char *parmname, char *s
 	}
 
 	//try to parse it out
-	p = SaberParms;
-	// A bogus name is passed in
 	COM_BeginParseSession("saberinfo");
 
 	// look for the right saber
-	while ( p )
+	for (i = 0; i < SaberParmsCount; i++)
 	{
-		token = COM_ParseExt( &p, qtrue );
-		if ( token[0] == 0 )
-		{
-			return qfalse;
-		}
-
-		if ( !Q_stricmp( token, saberName ) ) 
+		if (saberFound)
 		{
 			break;
 		}
 
-		SkipBracedSection( &p );
+		p = SaberParms[i];
+
+		if (p == NULL)
+		{
+			continue;
+		}
+
+		while ( p )
+		{
+			token = COM_ParseExt( &p, qtrue );
+			if ( token[0] == '\0' )
+			{
+				break;
+			}
+
+			if ( !Q_stricmp( token, saberName ) ) 
+			{
+				saberFound = qtrue;
+				break;
+			}
+
+			SkipBracedSection( &p );
+		}
 	}
-	if ( !p ) 
+
+	if (!saberFound || !p)
 	{
 		return qfalse;
 	}
@@ -343,29 +363,50 @@ qboolean UI_SaberValidForPlayerInMP( const char *saberName )
 
 void UI_SaberLoadParms( void ) 
 {
-	int			len, totallen, saberExtFNLen, fileCnt, i;
-	char		*holdChar, *marker;
+	int			len, saberExtFNLen, fileCnt, i;
+	char		*holdChar;
 	static char		saberExtensionListBuf[2048];			//	The list of file names read in
 	fileHandle_t f;
+	char *sabersDirectory;
+	size_t sabersDirectoryBufferSize = sizeof(saberExtensionListBuf);
+#ifdef DYNAMIC_SABER_HILTS
+	char *buffer;
+#else
 	static char buffer[MAX_MENUFILE];
+#endif
 
 	//ui.Printf( "UI Parsing *.sab saber definitions\n" );
 	
 	ui_saber_parms_parsed = qtrue;
 	UI_CacheSaberGlowGraphics();
 
-	//set where to store the first one
-	totallen = 0;
-	marker = SaberParms;
-	marker[0] = '\0';
-
 	//now load in the extra .npc extensions
-	fileCnt = trap_FS_GetFileList("ext_data/sabers", ".sab", saberExtensionListBuf, sizeof(saberExtensionListBuf) );
+	fileCnt = UI_GetFileList("ext_data/sabers", ".sab", saberExtensionListBuf, sizeof(saberExtensionListBuf), &sabersDirectory, &sabersDirectoryBufferSize);
 
-	holdChar = saberExtensionListBuf;
+#ifdef DYNAMIC_SABER_HILTS
+	SaberParms = (char **) trap_Z_Malloc(fileCnt * sizeof(char *), TAG_UI, qtrue);
+#else
+	if (fileCnt > MAX_SABER_FILES)
+	{
+		Com_Printf(S_COLOR_YELLOW "WARNING: UI_SaberLoadParms: can't load %d saber files (ext_data/sabers/*.sab), maximum is %d\n", fileCnt, MAX_SABER_FILES);
+		fileCnt = MAX_SABER_FILES;
+	}
+#endif
+	SaberParmsCount = fileCnt;
+	holdChar = sabersDirectory;
 	for ( i = 0; i < fileCnt; i++, holdChar += saberExtFNLen + 1 ) 
 	{
 		saberExtFNLen = strlen( holdChar );
+
+		if (saberExtFNLen == 0)
+		{
+			continue;
+		}
+
+		if (!strcmp(holdChar, ".") || !strcmp(holdChar, ".."))
+		{
+			continue;
+		}
 
 		len = trap_FS_FOpenFile( va( "ext_data/sabers/%s", holdChar), &f, FS_READ );
 
@@ -374,36 +415,57 @@ void UI_SaberLoadParms( void )
 			continue;
 		}
 
-		if ( len == -1 ) 
+		if ( len == -1 || len == 0 ) 
 		{
 			Com_Printf( "UI_SaberLoadParms: error reading %s\n", holdChar );
 		}
 		else
 		{
+#ifdef DYNAMIC_SABER_HILTS
+			buffer = (char *) trap_Z_Malloc((len + 1) * sizeof(char), TAG_UI, qfalse);
+#else
 			if (len > sizeof(buffer) )
 			{
 				Com_Error( ERR_FATAL, "UI_SaberLoadParms: file %s too large to read (max=%d)", holdChar, sizeof(buffer) );
 			}
+#endif
 			trap_FS_Read( buffer, len, f );
 			trap_FS_FCloseFile( f );
-			buffer[len] = 0;
-
-			if ( totallen && *(marker-1) == '}' )
-			{//don't let it end on a } because that should be a stand-alone token
-				strcat( marker, " " );
-				totallen++;
-				marker++; 
-			}
+			buffer[len] = '\0';
 			len = COM_Compress( buffer );
-
-			if ( totallen + len >= MAX_SABER_DATA_SIZE ) {
-				Com_Error( ERR_FATAL, "UI_SaberLoadParms: ran out of space before reading %s\n(you must make the .sab files smaller)", holdChar );
+#ifdef DYNAMIC_SABER_HILTS
+			SaberParms[i] = buffer;
+#else
+			if (len >= MAX_SABER_DATA_SIZE)
+			{
+				Com_Printf(S_COLOR_YELLOW "WARNING: UI_SaberLoadParms: file %s too large to read (max=%d)\n", holdChar, MAX_SABER_DATA_SIZE);
 			}
-			strcat( marker, buffer );
-
-			totallen += len;
-			marker += len;
+			else
+			{
+				Q_strncpyz(SaberParms[i], buffer, MAX_SABER_DATA_SIZE);
+			}
+#endif
 		}
+	}
+#ifdef DYNAMIC_FILE_LIST
+	if (sabersDirectoryBufferSize)
+	{
+		trap_Z_Free(sabersDirectory);
+	}
+#else
+	if (sabersDirectoryBufferSize)
+	{
+		BG_TempFree(sabersDirectoryBufferSize);
+	}
+#endif
+	UI_SaberGetHiltInfo();
+
+	if (uiInfo.numSingleHilts > 0)
+	{
+		trap_Cvar_Set("saber1", uiInfo.saberSingleHiltInfo[0]);
+		trap_Cvar_Set("saber2", uiInfo.saberSingleHiltInfo[0]);
+		trap_Cvar_Set("ui_saber", uiInfo.saberSingleHiltInfo[0]);
+		trap_Cvar_Set("ui_saber2", uiInfo.saberSingleHiltInfo[0]);
 	}
 }
 
@@ -1082,70 +1144,119 @@ void UI_SaberAttachToChar( itemDef_t *item )
 	}
 }
 
-#define MAX_SABER_HILTS	64
-
 // Fill in with saber hilts
-void UI_SaberGetHiltInfo( const char *singleHilts[MAX_SABER_HILTS], const char *staffHilts[MAX_SABER_HILTS] )
+void UI_SaberGetHiltInfo(void)
 {
-	int	numSingleHilts = 0, numStaffHilts = 0;
-	const char	*saberName;
+	char		saberName[MAX_TOKEN_CHARS];
 	const char	*token;
-	const char	*p;
+	const char	*p = NULL;
+	size_t i;
+
+#ifdef DYNAMIC_SABER_HILTS
+	size_t length;
+#endif
+
+	uiInfo.numSingleHilts = 0;
+	uiInfo.numStaffHilts = 0;
+
+#ifdef DYNAMIC_SABER_HILTS
+	uiInfo.singleHiltsMax = 64;
+	uiInfo.staffHiltsMax = 64;
+
+	uiInfo.saberSingleHiltInfo = (char **) trap_Z_Malloc(uiInfo.singleHiltsMax * sizeof(char *), TAG_UI, qfalse);
+	uiInfo.saberStaffHiltInfo = (char **) trap_Z_Malloc(uiInfo.staffHiltsMax * sizeof(char *), TAG_UI, qfalse);
+#else
+	for (i = 0; i < MAX_SABER_HILTS; i++)
+	{
+		uiInfo.saberSingleHiltInfo[i] = NULL;
+		uiInfo.saberStaffHiltInfo[i] = NULL;
+	}
+#endif
 
 	//go through all the loaded sabers and put the valid ones in the proper list
-	p = SaberParms;
 	COM_BeginParseSession("saberlist");
 
 	// look for a saber
-	while ( p )
+	for (i = 0; i < SaberParmsCount; i++)
 	{
-		token = COM_ParseExt( &p, qtrue );
-		if ( token[0] == 0 )
-		{//invalid name
-			continue;
-		}
-		saberName = String_Alloc( token );
-		//see if there's a "{" on the next line
-		SkipRestOfLine( &p );
-
-		if ( UI_ParseLiteralSilent( &p, "{" ) ) 
-		{//nope, not a name, keep looking
-			continue;
-		}
-
-		//this is a saber name
-		if ( !UI_SaberValidForPlayerInMP( saberName ) )
+		p = SaberParms[i];
+		while ( p )
 		{
+			token = COM_ParseExt( &p, qtrue );
+			if ( token[0] == 0 )
+			{//invalid name
+				continue;
+			}
+
+			Q_strncpyz(saberName, token, sizeof(saberName));
+
+			//see if there's a "{" on the next line
+			SkipRestOfLine( &p );
+
+			if ( UI_ParseLiteralSilent( &p, "{" ) ) 
+			{//nope, not a name, keep looking
+				continue;
+			}
+
+			//this is a saber name
+			if ( !UI_SaberValidForPlayerInMP( saberName ) )
+			{
+				SkipBracedSection( &p );
+				continue;
+			}
+
+			if ( UI_IsSaberTwoHanded( saberName ) )
+			{
+#ifdef DYNAMIC_SABER_HILTS
+				if (uiInfo.numStaffHilts >= uiInfo.staffHiltsMax)
+				{
+					uiInfo.staffHiltsMax *= 2;
+					uiInfo.saberStaffHiltInfo = (char **) trap_Z_Realloc(uiInfo.saberStaffHiltInfo, uiInfo.staffHiltsMax * sizeof(char *), qfalse);
+				}
+
+				length = strlen(saberName) + 1;
+				uiInfo.saberStaffHiltInfo[uiInfo.numStaffHilts] = (char *) trap_Z_Malloc(length * sizeof(char), TAG_UI, qfalse);
+				Q_strncpyz(uiInfo.saberStaffHiltInfo[uiInfo.numStaffHilts], saberName, length);
+				uiInfo.numStaffHilts++;
+#else
+				if (uiInfo.numStaffHilts >= MAX_SABER_HILTS)
+				{
+					Com_Printf(S_COLOR_YELLOW "WARNING: too many two-handed sabers, ignoring saber \'%s\'\n", saberName);
+				}
+				else
+				{
+					uiInfo.saberStaffHiltInfo[uiInfo.numStaffHilts] = String_Alloc(saberName);
+					uiInfo.numStaffHilts++;
+				}
+#endif
+			}
+			else
+			{
+#ifdef DYNAMIC_SABER_HILTS
+				if (uiInfo.numSingleHilts >= uiInfo.singleHiltsMax)
+				{
+					uiInfo.singleHiltsMax *= 2;
+					uiInfo.saberSingleHiltInfo = (char **) trap_Z_Realloc(uiInfo.saberSingleHiltInfo, uiInfo.singleHiltsMax * sizeof(char *), qfalse);
+				}
+
+				length = strlen(saberName) + 1;
+				uiInfo.saberSingleHiltInfo[uiInfo.numSingleHilts] = (char *) trap_Z_Malloc(length * sizeof(char), TAG_UI, qfalse);
+				Q_strncpyz(uiInfo.saberSingleHiltInfo[uiInfo.numSingleHilts], saberName, length);
+				uiInfo.numSingleHilts++;
+#else
+				if (uiInfo.numSingleHilts >= MAX_SABER_HILTS)
+				{
+					Com_Printf(S_COLOR_YELLOW "WARNING: too many one-handed sabers, ignoring saber \'%s\'\n", saberName);
+				}
+				else
+				{
+					uiInfo.saberSingleHiltInfo[uiInfo.numSingleHilts] = String_Alloc(saberName);
+					uiInfo.numSingleHilts++;
+				}
+#endif
+			}
+			//skip the whole braced section and move on to the next entry
 			SkipBracedSection( &p );
-			continue;
 		}
-
-		if ( UI_IsSaberTwoHanded( saberName ) )
-		{
-			if ( numStaffHilts < MAX_SABER_HILTS-1 )//-1 because we have to NULL terminate the list
-			{
-				staffHilts[numStaffHilts++] = saberName;
-			}
-			else
-			{
-				Com_Printf( "WARNING: too many two-handed sabers, ignoring saber '%s'\n", saberName );
-			}
-		}
-		else
-		{
-			if ( numSingleHilts < MAX_SABER_HILTS-1 )//-1 because we have to NULL terminate the list
-			{
-				singleHilts[numSingleHilts++] = saberName;
-			}
-			else
-			{
-				Com_Printf( "WARNING: too many one-handed sabers, ignoring saber '%s'\n", saberName );
-			}
-		}
-		//skip the whole braced section and move on to the next entry
-		SkipBracedSection( &p );
 	}
-	//null terminate the list so the UI code knows where to stop listing them
-	singleHilts[numSingleHilts] = NULL;
-	staffHilts[numStaffHilts] = NULL;
 }

@@ -7006,7 +7006,11 @@ void Item_ValidateTypeData(itemDef_t *item)
 	} 
 	else if (item->type == ITEM_TYPE_MULTI) 
 	{
+#ifdef DYNAMIC_PLAYER_SPECIES
+		item->typeData = (void *) trap_Z_Malloc(sizeof(multiDef_t), TAG_UI, qfalse);
+#else
 		item->typeData = UI_Alloc(sizeof(multiDef_t));
+#endif
 	} 
 	else if (item->type == ITEM_TYPE_MODEL) 
 	{
@@ -8316,6 +8320,12 @@ qboolean ItemParse_cvarStrList( itemDef_t *item, int handle ) {
 	multiPtr = (multiDef_t*)item->typeData;
 	multiPtr->count = 0;
 	multiPtr->strDef = qtrue;
+#ifdef DYNAMIC_PLAYER_SPECIES
+	multiPtr->countMax = 32;
+	multiPtr->cvarList = (char **) trap_Z_Malloc(sizeof(char *) * multiPtr->countMax, TAG_UI, qfalse);
+	multiPtr->cvarStr = (char **) trap_Z_Malloc(sizeof(char *) * multiPtr->countMax, TAG_UI, qfalse);
+	multiPtr->cvarValue = (float *) trap_Z_Malloc(sizeof(float) * multiPtr->countMax, TAG_UI, qfalse);
+#endif
 
 	if (!trap_PC_ReadToken(handle, &token))
 	{
@@ -8327,6 +8337,17 @@ qboolean ItemParse_cvarStrList( itemDef_t *item, int handle ) {
 #ifndef JK2_CGAME
 		char buffer[2];
 		char name[MAX_QPATH];
+		const char *pName;
+#ifdef DYNAMIC_PLAYER_SPECIES
+		size_t length;
+		if (multiPtr->countMax < uiInfo.playerSpeciesMax)
+		{
+			multiPtr->countMax = uiInfo.playerSpeciesMax;
+			multiPtr->cvarList = (char **) trap_Z_Realloc(multiPtr->cvarList, sizeof(char *) * multiPtr->countMax, qfalse);
+			multiPtr->cvarStr = (char **) trap_Z_Realloc(multiPtr->cvarStr, sizeof(char *) * multiPtr->countMax, qfalse);
+			multiPtr->cvarValue = (float *) trap_Z_Realloc(multiPtr->cvarValue, sizeof(float) * multiPtr->countMax, qfalse);
+		}
+#endif
 		for (; multiPtr->count < uiInfo.playerSpeciesCount; multiPtr->count++)
 		{
 			Com_sprintf(name, sizeof(name), "@MENUS_JKA_%s", uiInfo.playerSpecies[multiPtr->count].Name);
@@ -8335,14 +8356,26 @@ qboolean ItemParse_cvarStrList( itemDef_t *item, int handle ) {
 
 			if (buffer[0] != '\0')
 			{
-				multiPtr->cvarList[multiPtr->count] = String_Alloc(name);
+				pName = name;
 			}
 			else
 			{
-				multiPtr->cvarList[multiPtr->count] = String_Alloc(&name[11]);
+				// @MENUS_JKA_JEDI_TF
+				//            ^
+				pName = &name[11];
 			}
 
-			multiPtr->cvarStr[multiPtr->count] = uiInfo.playerSpecies[multiPtr->count].Name;
+#ifdef DYNAMIC_PLAYER_SPECIES
+			length = strlen(pName) + 1;
+			multiPtr->cvarList[multiPtr->count] = (char *) trap_Z_Malloc(length * sizeof(char), TAG_UI, qfalse);
+			Q_strncpyz(multiPtr->cvarList[multiPtr->count], pName, length);
+			length = strlen(uiInfo.playerSpecies[multiPtr->count].Name) + 1;
+			multiPtr->cvarStr[multiPtr->count] = (char *) trap_Z_Malloc(length * sizeof(char), TAG_UI, qfalse);
+			Q_strncpyz(multiPtr->cvarStr[multiPtr->count], uiInfo.playerSpecies[multiPtr->count].Name, length);
+#else
+			multiPtr->cvarList[multiPtr->count] = String_Alloc(pName);
+			multiPtr->cvarStr[multiPtr->count] = String_Alloc(uiInfo.playerSpecies[multiPtr->count].Name);
+#endif
 		}
 #endif
 		return qtrue;
@@ -8351,14 +8384,36 @@ qboolean ItemParse_cvarStrList( itemDef_t *item, int handle ) {
 	if (!Q_stricmp(token.string,"feeder") && item->special == FEEDER_LANGUAGES) 
 	{
 #ifndef JK2_CGAME
+#ifdef DYNAMIC_PLAYER_SPECIES
+		size_t length;
+		if (multiPtr->countMax < uiInfo.languageCount)
+		{
+			multiPtr->countMax = uiInfo.languageCount;
+			multiPtr->cvarList = (char **) trap_Z_Realloc(multiPtr->cvarList, sizeof(char *) * multiPtr->countMax, qfalse);
+			multiPtr->cvarStr = (char **) trap_Z_Realloc(multiPtr->cvarStr, sizeof(char *) * multiPtr->countMax, qfalse);
+			multiPtr->cvarValue = (float *) trap_Z_Realloc(multiPtr->cvarValue, sizeof(float) * multiPtr->countMax, qfalse);
+		}
+#endif
 		for (; multiPtr->count < uiInfo.languageCount; multiPtr->count++)
 		{
 			// The displayed text
 			trap_GetLanguageName( (const int) multiPtr->count,(char *) currLanguage[multiPtr->count]  );	// eg "English"
+#ifdef DYNAMIC_PLAYER_SPECIES
+			length = strlen(languageString) + 1;
+			multiPtr->cvarList[multiPtr->count] = (char *) trap_Z_Malloc(length * sizeof(char), TAG_UI, qfalse);
+			Q_strncpyz(multiPtr->cvarList[multiPtr->count], languageString, length);
+#else
 			multiPtr->cvarList[multiPtr->count] = languageString;
+#endif
 			// The cvar value that goes into s_language
 			trap_GetLanguageName( (const int) multiPtr->count,(char *) currLanguage[multiPtr->count] );
+#ifdef DYNAMIC_PLAYER_SPECIES
+			length = strlen(currLanguage[multiPtr->count]) + 1;
+			multiPtr->cvarStr[multiPtr->count] = (char *) trap_Z_Malloc(length * sizeof(char), TAG_UI, qfalse);
+			Q_strncpyz(multiPtr->cvarStr[multiPtr->count], currLanguage[multiPtr->count], length);
+#else
 			multiPtr->cvarStr[multiPtr->count] = currLanguage[multiPtr->count];
+#endif
 		}
 #endif
 		return qtrue;
@@ -8371,6 +8426,9 @@ qboolean ItemParse_cvarStrList( itemDef_t *item, int handle ) {
 	pass = 0;
 	while ( 1 ) {
 		const char* psString;
+#ifdef DYNAMIC_PLAYER_SPECIES
+		size_t length;
+#endif
 
 //		if (!trap_PC_ReadToken(handle, &token)) {
 //			PC_SourceError(handle, "end of file inside menu item\n");
@@ -8393,16 +8451,39 @@ qboolean ItemParse_cvarStrList( itemDef_t *item, int handle ) {
 			}
 		}
 
+#ifdef DYNAMIC_PLAYER_SPECIES
+		length = strlen(psString) + 1;
+#endif
+
 		if (pass == 0) {
+#ifdef DYNAMIC_PLAYER_SPECIES
+			multiPtr->cvarList[multiPtr->count] = (char *) trap_Z_Malloc(length * sizeof(char), TAG_UI, qfalse);
+			Q_strncpyz(multiPtr->cvarList[multiPtr->count], psString, length);
+#else
 			multiPtr->cvarList[multiPtr->count] = psString;
+#endif
 			pass = 1;
 		} else {
+#ifdef DYNAMIC_PLAYER_SPECIES
+			multiPtr->cvarStr[multiPtr->count] = (char *) trap_Z_Malloc(length * sizeof(char), TAG_UI, qfalse);
+			Q_strncpyz(multiPtr->cvarStr[multiPtr->count], psString, length);
+#else
 			multiPtr->cvarStr[multiPtr->count] = psString;
+#endif
 			pass = 0;
 			multiPtr->count++;
+#ifdef DYNAMIC_PLAYER_SPECIES
+			if (multiPtr->count >= multiPtr->countMax) {
+				multiPtr->countMax *= 2;
+				multiPtr->cvarList = (char **) trap_Z_Realloc(multiPtr->cvarList, sizeof(char *) * multiPtr->countMax, qfalse);
+				multiPtr->cvarStr = (char **) trap_Z_Realloc(multiPtr->cvarStr, sizeof(char *) * multiPtr->countMax, qfalse);
+				multiPtr->cvarValue = (float *) trap_Z_Realloc(multiPtr->cvarValue, sizeof(float) * multiPtr->countMax, qfalse);
+			}
+#else
 			if (multiPtr->count >= MAX_MULTI_CVARS) {
 				return qfalse;
 			}
+#endif
 		}
 
 	}
@@ -8413,6 +8494,9 @@ qboolean ItemParse_cvarFloatList( itemDef_t *item, int handle )
 {
 	pc_token_t token;
 	multiDef_t *multiPtr;
+#ifdef DYNAMIC_PLAYER_SPECIES
+	size_t length;
+#endif
 	
 	Item_ValidateTypeData(item);
 	if (!item->typeData)
@@ -8423,6 +8507,12 @@ qboolean ItemParse_cvarFloatList( itemDef_t *item, int handle )
 	multiPtr = (multiDef_t*)item->typeData;
 	multiPtr->count = 0;
 	multiPtr->strDef = qfalse;
+#ifdef DYNAMIC_PLAYER_SPECIES
+	multiPtr->countMax = 32;
+	multiPtr->cvarList = (char **) trap_Z_Malloc(sizeof(char *) * multiPtr->countMax, TAG_UI, qfalse);
+	multiPtr->cvarStr = (char **) trap_Z_Malloc(sizeof(char *) * multiPtr->countMax, TAG_UI, qfalse);
+	multiPtr->cvarValue = (float *) trap_Z_Malloc(sizeof(float) * multiPtr->countMax, TAG_UI, qfalse);
+#endif
 
 	if (!trap_PC_ReadToken(handle, &token))
 	{
@@ -8458,18 +8548,33 @@ qboolean ItemParse_cvarFloatList( itemDef_t *item, int handle )
 			}
 		}
 
+#ifdef DYNAMIC_PLAYER_SPECIES
+		length = strlen(string) + 1;
+		multiPtr->cvarList[multiPtr->count] = (char *) trap_Z_Malloc(length * sizeof(char), TAG_UI, qfalse);
+		Q_strncpyz(multiPtr->cvarList[multiPtr->count], string, length);
+#else
 		multiPtr->cvarList[multiPtr->count] = string;
+#endif
 		if (!PC_Float_Parse(handle, &multiPtr->cvarValue[multiPtr->count])) 
 		{
 			return qfalse;
 		}
 
 		multiPtr->count++;
+#ifdef DYNAMIC_PLAYER_SPECIES
+		if (multiPtr->count >= multiPtr->countMax)
+		{
+			multiPtr->countMax *= 2;
+			multiPtr->cvarList = (char **) trap_Z_Realloc(multiPtr->cvarList, sizeof(char *) * multiPtr->countMax, qfalse);
+			multiPtr->cvarStr = (char **) trap_Z_Realloc(multiPtr->cvarStr, sizeof(char *) * multiPtr->countMax, qfalse);
+			multiPtr->cvarValue = (float *) trap_Z_Realloc(multiPtr->cvarValue, sizeof(float) * multiPtr->countMax, qfalse);
+		}
+#else
 		if (multiPtr->count >= MAX_MULTI_CVARS) 
 		{
 			return qfalse;
 		}
-
+#endif
 	}
 	return qfalse; 	// bk001205 - LCC missing return value
 }

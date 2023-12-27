@@ -114,6 +114,7 @@ extern vmCvar_t	ui_smallFont;
 extern vmCvar_t	ui_bigFont;
 extern vmCvar_t ui_serverStatusTimeOut;
 extern vmCvar_t ui_bypassMainMenuLoad;
+extern vmCvar_t ui_loadSkinsWithoutIcons;
 
 // botfilter
 extern vmCvar_t	ui_botfilter;
@@ -366,6 +367,7 @@ int UI_HeadCountByColor( void );
 void UI_FeederScrollTo(float feederId, int scrollTo);
 
 void UI_WideScreenMode(qboolean on);
+int UI_GetFileList( const char *path, const char *extension, char *listbuf, int bufsize, char **listptr, size_t *memSize );
 
 //
 // ui_menu.c
@@ -639,8 +641,19 @@ typedef struct {
 #define MAX_DOWNLOADS 512
 #define MAX_DEMOS 256
 #define MAX_MOVIES 256
-#define MAX_Q3PLAYERMODELS 256
-#define MAX_PLAYERMODELS 32
+
+#ifndef DYNAMIC_PLAYER_SPECIES
+	#define MAX_Q3PLAYERMODELS 256
+	#define MAX_PLAYERMODELS 32
+
+	#if MAX_PLAYERMODELS != MAX_MULTI_CVARS
+		#error MAX_PLAYERMODELS != MAX_MULTI_CVARS
+	#endif
+#endif
+
+#ifndef DYNAMIC_SABER_HILTS
+#define MAX_SABER_HILTS 64
+#endif
 
 #define MAX_SCROLLTEXT_SIZE		4096
 #define MAX_SCROLLTEXT_LINES		64
@@ -767,26 +780,45 @@ typedef struct {
 	const char *modDescr;
 } modInfo_t;
 
+#define SKIN_LENGTH			16
+#define ACTION_BUFFER_SIZE	128
+
 typedef struct {
-	char		Name[64];
-	int			SkinHeadCount;
-	char		SkinHeadNames[MAX_PLAYERMODELS][16];
-	int			SkinTorsoCount;
-	char		SkinTorsoNames[MAX_PLAYERMODELS][16];
-	int			SkinLegCount;
-	char		SkinLegNames[MAX_PLAYERMODELS][16];
-	char		ColorShader[MAX_PLAYERMODELS][64];
-	int			ColorCount;
-	char		ColorActionText[MAX_PLAYERMODELS][128];
+	char name[SKIN_LENGTH];
+} skinName_t;
+
+typedef struct {
+	char shader[MAX_QPATH];
+	char actionText[ACTION_BUFFER_SIZE];
+} playerColor_t;
+
+typedef struct playerSpeciesInfo_s {
+	char			Name[MAX_QPATH];
+	int				SkinHeadCount;
+	int				SkinTorsoCount;
+	int				SkinLegCount;
+	int				ColorCount;
+#ifdef DYNAMIC_PLAYER_SPECIES
+	int				SkinHeadMax;
+	int				SkinTorsoMax;
+	int				SkinLegMax;
+	int				ColorMax;
+	skinName_t		*SkinHead;
+	skinName_t		*SkinTorso;
+	skinName_t		*SkinLeg;
+	playerColor_t	*Color;
+#else
+	skinName_t		SkinHead[MAX_PLAYERMODELS];
+	skinName_t		SkinTorso[MAX_PLAYERMODELS];
+	skinName_t		SkinLeg[MAX_PLAYERMODELS];
+	playerColor_t	Color[MAX_PLAYERMODELS];
+#endif
 } playerSpeciesInfo_t;
 
-typedef struct q3Head_s q3Head_t;
-struct q3Head_s {
-	const char *name;
+typedef struct q3Head_s {
+	char name[MAX_QPATH];
 	qhandle_t  icon;
-
-	q3Head_t *next;
-};
+} q3Head_t;
 
 typedef struct {
 	displayContextDef_t uiDC;
@@ -877,9 +909,26 @@ typedef struct {
 	int startPostGameTime;
 	sfxHandle_t newHighScoreSound;
 
+	int numSingleHilts;
+	int numStaffHilts;
+#ifdef DYNAMIC_SABER_HILTS
+	int singleHiltsMax;
+	int staffHiltsMax;
+	char **saberSingleHiltInfo;
+	char **saberStaffHiltInfo;
+#else
+	const char *saberSingleHiltInfo[MAX_SABER_HILTS];
+	const char *saberStaffHiltInfo[MAX_SABER_HILTS];
+#endif
+
 	int				q3HeadCount;
-	q3Head_t		*q3Heads;
 	int				q3SelectedHead;
+#ifdef DYNAMIC_PLAYER_SPECIES
+	int				q3HeadsMax;
+	q3Head_t		*q3Heads;
+#else
+	q3Head_t		q3Heads[MAX_Q3PLAYERMODELS];
+#endif
 
 	int				forceConfigCount;
 	int				forceConfigSelected;
@@ -892,9 +941,15 @@ typedef struct {
 
 	qboolean inGameLoad;
 
-	int					playerSpeciesCount;
-	playerSpeciesInfo_t	playerSpecies[MAX_PLAYERMODELS];
-	int					playerSpeciesIndex;
+#ifdef DYNAMIC_PLAYER_SPECIES
+	int						playerSpeciesMax;
+	playerSpeciesInfo_t		*playerSpecies;
+#else
+	playerSpeciesInfo_t		playerSpecies[MAX_PLAYERMODELS];
+#endif
+
+	int						playerSpeciesCount;
+	int						playerSpeciesIndex;
 
 	short		movesTitleIndex;
 	char		*movesBaseAnim;
