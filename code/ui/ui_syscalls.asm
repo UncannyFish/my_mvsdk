@@ -197,6 +197,12 @@ equ trap_G2API_IKMove						-238	; UI_G2_IKMOVE
 equ trap_G2API_GetSurfaceName				-239	; UI_G2_GETSURFACENAME 
 equ trap_G2API_SetSkin						-240	; UI_G2_SETSKIN 
 equ trap_G2API_AttachG2Model				-241	; UI_G2_ATTACHG2MODEL 
+equ trap_Z_Malloc							-242	; UI_Z_MALLOC 
+equ trap_Z_MemSize							-243	; UI_Z_MEMSIZE 
+equ trap_Z_TagFree							-244	; UI_Z_TAGFREE 
+equ trap_Z_Free								-245	; UI_Z_FREE 
+equ trap_Z_Size								-246	; UI_Z_SIZE 
+equ trap_Z_Realloc							-247	; UI_Z_REALLOC 
 
 ; hardcoded functions
 equ memset									-101	; UI_MEMSET 

@@ -10,6 +10,7 @@
 #include "../game/bg_public.h"
 #include "ui_shared.h"
 #include "../api/mvmenu.h"
+#include "../api/mvapi.h"
 
 // global display context
 
@@ -1151,6 +1152,13 @@ void		trap_G2API_GetSurfaceName(void *ghoul2, int surfNumber, int modelIndex, ch
 /*
 Ghoul2 Insert End
 */
+
+void *trap_Z_Malloc(int iSize, memtag_t eTag, qboolean bZeroit);
+int trap_Z_MemSize(memtag_t eTag);
+void trap_Z_TagFree(memtag_t eTag);
+void trap_Z_Free(void *ptr);
+int trap_Z_Size(void *pvAddress);
+void *trap_Z_Realloc(void *pvAddress, int iNewSize, qboolean bZeroit);
 
 void trap_CL_ContinueCurrentDownload(dldecision_t decision);
 

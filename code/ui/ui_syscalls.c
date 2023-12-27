@@ -5,9 +5,9 @@
 // this file is only included when building a dll
 // syscalls.asm is included instead when building a qvm
 
-static int (QDECL *syscall)( int arg, ... ) = (int (QDECL *)( int, ...))-1;
+static intptr_t (QDECL *syscall)( intptr_t arg, ... ) = (intptr_t (QDECL *)( intptr_t, ...))-1;
 
-LIBEXPORT void dllEntry( int (QDECL *syscallptr)( int arg,... ) ) {
+LIBEXPORT void dllEntry( intptr_t (QDECL *syscallptr)( intptr_t arg,... ) ) {
 	syscall = syscallptr;
 }
 
@@ -827,6 +827,37 @@ qboolean trap_G2API_AttachG2Model(void *ghoul2From, int modelIndexFrom, void *gh
 /*
 Ghoul2 Insert End
 */
+
+
+void *trap_Z_Malloc(int iSize, memtag_t eTag, qboolean bZeroit)
+{
+	return (void *) syscall(UI_Z_MALLOC, iSize, eTag, bZeroit);
+}
+
+int trap_Z_MemSize(memtag_t eTag)
+{
+	return syscall(UI_Z_MEMSIZE, eTag);
+}
+
+void trap_Z_TagFree(memtag_t eTag)
+{
+	syscall(UI_Z_TAGFREE, eTag);
+}
+
+void trap_Z_Free(void *ptr)
+{
+	syscall(UI_Z_FREE, ptr);
+}
+
+int trap_Z_Size(void *pvAddress)
+{
+	return syscall(UI_Z_SIZE, pvAddress);
+}
+
+void *trap_Z_Realloc(void *pvAddress, int iNewSize, qboolean bZeroit)
+{
+	return (void *) syscall(UI_Z_REALLOC, pvAddress, iNewSize, bZeroit);
+}
 
 /* JK2MV Syscalls */
 qboolean trap_MVAPI_ControlFixes( int fixes )

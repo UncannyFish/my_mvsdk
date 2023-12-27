@@ -10,6 +10,13 @@
 
 #include "../api/mvapi.h"
 
+#if defined(JK2MV_MENU) || defined(JK2_UI)
+	#ifndef Q3_VM
+		// allow use of malloc, realloc, free
+		#define UI_ALLOW_DYNAMIC_MEMORY
+	#endif
+#endif
+
 #define MAX_MENUNAME				32
 #define MAX_ITEMTEXT				64
 #define MAX_ITEMACTION				64
