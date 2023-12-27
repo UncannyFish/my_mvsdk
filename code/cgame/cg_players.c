@@ -252,6 +252,8 @@ static qboolean CG_RegisterClientModelname( clientInfo_t *ci, const char *modelN
 	char	surfOn[MAX_SURF_LIST_SIZE];
 	int		checkSkin;
 	char	*useSkinName;
+	char	iconName[MAX_QPATH * 2];
+	const char *iconStart;
 
 retryModel:
 	if (ci->ATST && clientNum == -1)
@@ -584,25 +586,34 @@ retryModel:
 	Q_strncpyz (ci->teamName, teamName, sizeof(ci->teamName));
 
 	// Model icon for drawing the portrait on screen
-	ci->modelIcon = trap_R_RegisterShaderNoMip ( va ( "models/players/%s/icon_%s", modelName, skinName ) );
-	if (!ci->modelIcon)
+	if (skinName[0] == '|')
 	{
-        int i = 0;
-		int j;
-		char iconName[1024];
-		strcpy(iconName, "icon_");
-		j = strlen(iconName);
-		while (skinName[i] && skinName[i] != '|' && j < 1024)
-		{
-            iconName[j] = skinName[i];
-			j++;
-			i++;
-		}
-		iconName[j] = 0;
-		if (skinName[i] == '|')
-		{ //looks like it actually may be a custom model skin, let's try getting the icon...
-			ci->modelIcon = trap_R_RegisterShaderNoMip ( va ( "models/players/%s/%s", modelName, iconName ) );
-		}
+		iconStart = &skinName[1];
+	}
+	else
+	{
+		iconStart = &skinName[0];
+	}
+
+	Com_sprintf(iconName, sizeof(iconName), "models/players/%s/icon_%s", modelName, iconStart);
+
+	if (strchr(iconName, '|') != NULL)
+	{
+		char *p = strchr(iconName, '|');
+		*p = '\0';
+	}
+
+	ci->modelIcon = trap_R_RegisterShaderNoMip(iconName);
+
+	if (ci->modelIcon == 0)
+	{
+		Com_sprintf(iconName, sizeof(iconName), "models/players/%s/icon_siege", modelName);
+		ci->modelIcon = trap_R_RegisterShaderNoMip(iconName);
+	}
+
+	if (ci->modelIcon == 0)
+	{
+		ci->modelIcon = cgs.media.deferShader;
 	}
 	return qtrue;
 }
