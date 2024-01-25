@@ -260,6 +260,7 @@ Ghoul2 Insert Start
 /*
 Ghoul2 Insert End
 */
+	CG_GET_TEMPORARY_USER_COMMAND,
 } cgameImport_t;
 
 

@@ -455,6 +455,8 @@ vmCvar_t	cg_debugPosition;
 vmCvar_t	cg_debugEvents;
 vmCvar_t	cg_errorDecay;
 vmCvar_t	cg_nopredict;
+vmCvar_t	cg_specialPredictPhysicsFps;
+vmCvar_t	cg_specialPredictPhysicsFpsAngleCmdTime;
 vmCvar_t	cg_noPlayerAnims;
 vmCvar_t	cg_showmiss;
 vmCvar_t	cg_footsteps;
@@ -521,6 +523,7 @@ vmCvar_t	cg_strafeHelperInactiveAlpha;
 
 vmCvar_t	cg_strafeHelperOffset;
 vmCvar_t	cg_strafeHelper_FPS;
+vmCvar_t	cg_strafeHelper_RealPhysicsLines;
 
 vmCvar_t	cg_crosshairSizeScale;
 vmCvar_t	cg_crosshairSaberStyleColor;
@@ -660,6 +663,7 @@ vmCvar_t	cg_recordSPDemoName;
 
 vmCvar_t	cg_ui_myteam;
 vmCvar_t	cg_com_maxfps;
+vmCvar_t	cg_com_physicsFps;
 
 vmCvar_t	cg_mv_fixbrokenmodelsclient;
 vmCvar_t	cg_drawPlayerSprites;
@@ -749,6 +753,8 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_debugEvents, "cg_debugevents", "0", CVAR_CHEAT },
 	{ &cg_errorDecay, "cg_errordecay", "100", 0 },
 	{ &cg_nopredict, "cg_nopredict", "0", 0 },
+	{ &cg_specialPredictPhysicsFps, "cg_specialPredictPhysicsFps", "3", CVAR_ARCHIVE },
+	{ &cg_specialPredictPhysicsFpsAngleCmdTime, "cg_specialPredictPhysicsFpsAngleCmdTime", "0", CVAR_ARCHIVE },
 	{ &cg_noPlayerAnims, "cg_noplayeranims", "0", CVAR_CHEAT },
 	{ &cg_showmiss, "cg_showmiss", "0", 0 },
 	{ &cg_footsteps, "cg_footsteps", "1", CVAR_CHEAT },
@@ -815,6 +821,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 
 	{ &cg_strafeHelperOffset, "cg_strafeHelperOffset", "75", CVAR_ARCHIVE },
 	{ &cg_strafeHelper_FPS, "cg_strafeHelper_FPS", "0", 0 },
+	{ &cg_strafeHelper_RealPhysicsLines, "cg_strafeHelper_RealPhysicsLines", "1", CVAR_ARCHIVE },
 
 	{ &cg_crosshairSizeScale, "cg_crosshairSizeScale", "1", CVAR_ARCHIVE },
 	{ &cg_crosshairSaberStyleColor, "cg_crosshairSaberStyleColor", "0", CVAR_ARCHIVE },
@@ -949,6 +956,7 @@ static cvarTable_t cvarTable[] = { // bk001129
 
 	{ &cg_ui_myteam, "ui_myteam", "0", CVAR_ROM|CVAR_INTERNAL},
 	{ &cg_com_maxfps, "com_maxfps", "", 0},
+	{ &cg_com_physicsFps, "com_physicsFps", "", 0},
 
 	{ &cg_developer, "cg_developer", "0", CVAR_TEMP},
 	{ &cg_mv_fixbrokenmodelsclient, "mv_fixbrokenmodelsclient", "2", CVAR_ARCHIVE },

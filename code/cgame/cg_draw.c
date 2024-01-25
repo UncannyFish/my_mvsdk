@@ -6409,14 +6409,33 @@ static void CG_StrafeHelper(centity_t *cent)
 	float pmAccel = 10.0f, pmAirAccel = 1.0f, pmFriction = 6.0f, frametime, optimalDeltaAngle, baseSpeed = cg.predictedPlayerState.speed;
 	const int moveStyle = PM_GetMovePhysics();
 	int moveDir;
+	int currentCmdNumber;
+	int referenceFrameTime;
+	static int referenceFrameTimeOld;
 	qboolean onGround;
 	usercmd_t cmd = { 0 };
+	usercmd_t oldcmd = { 0 };
 
 	if (moveStyle == MV_SIEGE)
 		return; //no strafe in siege
 
+
+	referenceFrameTime = cg.frametime;
+
 	if (cg.clientNum == cg.predictedPlayerState.clientNum && !cg.demoPlayback) {
-		trap_GetUserCmd(trap_GetCurrentCmdNumber(), &cmd);
+		currentCmdNumber = trap_GetCurrentCmdNumber();
+		trap_GetUserCmd(currentCmdNumber, &cmd);
+		if((cg_strafeHelper_RealPhysicsLines.integer || cg_com_physicsFps.integer) && currentCmdNumber > 1){
+
+			trap_GetUserCmd(currentCmdNumber-1, &oldcmd);
+			if (cmd.serverTime != oldcmd.serverTime) {
+				referenceFrameTime = cmd.serverTime - oldcmd.serverTime;
+				referenceFrameTimeOld = referenceFrameTime;
+			}
+			else {
+				referenceFrameTime = referenceFrameTimeOld;
+			}
+		}
 	}
 	else if (cg.snap) {
 		moveDir = cg.snap->ps.movementDir;
@@ -6499,7 +6518,7 @@ static void CG_StrafeHelper(centity_t *cent)
 	}
 
 	if (cg_strafeHelper_FPS.value < 1)
-		frametime = ((float)cg.frametime * 0.001f);
+		frametime = ((float)referenceFrameTime * 0.001f);
 	else if (cg_strafeHelper_FPS.value > 1000) // invalid
 		frametime = 1;
 	else frametime = 1 / cg_strafeHelper_FPS.value;
@@ -6665,7 +6684,7 @@ void CG_DrawSnapHud(void)
 		return;
 
 	speed = cg_snapHudSpeed.integer ? (float)cg_snapHudSpeed.integer : cg.predictedPlayerState.speed; //250 is base speed
-	fps = cg_snapHudFps.integer ? cg_snapHudFps.integer : cg_com_maxfps.integer; //uses your maxfps setting by default
+	fps = cg_snapHudFps.integer ? cg_snapHudFps.integer : (cg_com_physicsFps.integer ? cg_com_physicsFps.integer : cg_com_maxfps.integer); //uses your maxfps setting by default
 
 	if (speed != snappinghud.speed || fps != snappinghud.fps) {//set these if not set, update if changed
 		CG_UpdateSnapHudSettings(speed, fps);

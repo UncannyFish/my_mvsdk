@@ -1548,6 +1548,8 @@ extern	vmCvar_t		cg_debugPosition;
 extern	vmCvar_t		cg_debugEvents;
 extern	vmCvar_t		cg_errorDecay;
 extern	vmCvar_t		cg_nopredict;
+extern	vmCvar_t		cg_specialPredictPhysicsFps;
+extern	vmCvar_t		cg_specialPredictPhysicsFpsAngleCmdTime;
 extern	vmCvar_t		cg_noPlayerAnims;
 extern	vmCvar_t		cg_showmiss;
 extern	vmCvar_t		cg_footsteps;
@@ -1612,6 +1614,7 @@ extern	vmCvar_t		cg_strafeHelperInactiveAlpha;
 
 extern	vmCvar_t		cg_strafeHelperOffset;
 extern	vmCvar_t		cg_strafeHelper_FPS;
+extern	vmCvar_t		cg_strafeHelper_RealPhysicsLines;
 
 extern	vmCvar_t		cg_crosshairSizeScale;
 extern	vmCvar_t		cg_crosshairSaberStyleColor;
@@ -1743,6 +1746,7 @@ extern  vmCvar_t		cg_recordSPDemoName;
 
 extern	vmCvar_t		cg_ui_myteam;
 extern	vmCvar_t		cg_com_maxfps;
+extern	vmCvar_t		cg_com_physicsFps;
 
 extern	vmCvar_t		cg_mv_fixbrokenmodelsclient;
 extern	vmCvar_t		cg_drawPlayerSprites;
@@ -2479,6 +2483,8 @@ extern void *g2WeaponInstances[MAX_WEAPONS];
 /*
 Ghoul2 Insert End
 */
+
+void trap_GetTemporaryUserCommand(usercmd_t *ucmd);
 
 extern int mvapi;
 

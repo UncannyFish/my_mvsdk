@@ -889,6 +889,10 @@ qboolean trap_G2API_SkinlessModel(void *ghlInfo, int modelIndex) {
 Ghoul2 Insert End
 */
 
+void trap_GetTemporaryUserCommand(usercmd_t *ucmd) {
+	syscall(CG_GET_TEMPORARY_USER_COMMAND, ucmd);
+}
+
 /* JK2MV Syscalls */
 qboolean trap_MVAPI_ControlFixes( int fixes )
 {
