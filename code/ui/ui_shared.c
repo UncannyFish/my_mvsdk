@@ -5723,10 +5723,6 @@ void Item_ListBox_Paint(itemDef_t *item) {
 	// default is vertical if horizontal flag is not here
 	if (item->window.flags & WINDOW_HORIZONTAL) 
 	{
-#ifdef	_DEBUG
-		const char *text;
-#endif
-
 		if (!listPtr->scrollhidden)
 		{
 		// draw scrollbar in bottom of the window
@@ -5760,6 +5756,7 @@ void Item_ListBox_Paint(itemDef_t *item) {
 		// size contains max available space
 		if (listPtr->elementStyle == LISTBOX_IMAGE) 
 		{
+			const char *text;
 			// fit = 0;
 			x = item->window.rect.x + 1;
 			y = item->window.rect.y + 1;
@@ -5805,21 +5802,13 @@ void Item_ListBox_Paint(itemDef_t *item) {
 				listPtr->endPos++;
 				// fit++;
 			}
-		} 
-		else 
-		{
-			//
+			// Show pic name
+			text = DC->feederItemText(item->special, item->cursorPos, 0, &optionalImage1, &optionalImage2, &optionalImage3, &optionalImage4, NULL, NULL);
+			if (text) 
+			{
+				DC->drawText(item->window.rect.x + item->textalignx, item->window.rect.y + item->window.rect.h + item->textaligny, item->textscale, item->window.foreColor, text, 0, 0, item->textStyle, item->iMenuFont);
+			}
 		}
-
-#ifdef	_DEBUG
-		// Show pic name
-		text = DC->feederItemText(item->special, item->cursorPos, 0, &optionalImage1, &optionalImage2, &optionalImage3, &optionalImage4, NULL, NULL);
-		if (text) 
-		{
-			DC->drawText(item->window.rect.x, item->window.rect.y+item->window.rect.h, item->textscale, item->window.foreColor, text, 0, 0, item->textStyle, item->iMenuFont);
-		}
-#endif
-
 	} 
 	// A vertical list box
 	else 
@@ -5853,6 +5842,8 @@ void Item_ListBox_Paint(itemDef_t *item) {
 
 		if (listPtr->elementStyle == LISTBOX_IMAGE) 
 		{
+			const char *text;
+
 			// Multiple rows and columns (since it's more than twice as wide as an element)
 			if ( item->window.rect.w > (listPtr->elementWidth*2) )
 			{
@@ -5956,6 +5947,12 @@ void Item_ListBox_Paint(itemDef_t *item) {
 					y += listPtr->elementHeight;
 					// fit++;
 				}
+			}
+			// Show pic name
+			text = DC->feederItemText(item->special, item->cursorPos, 0, &optionalImage1, &optionalImage2, &optionalImage3, &optionalImage4, NULL, NULL);
+			if (text) 
+			{
+				DC->drawText(item->window.rect.x + item->textalignx, item->window.rect.y + item->window.rect.h + item->textaligny, item->textscale, item->window.foreColor, text, 0, 0, item->textStyle, item->iMenuFont);
 			}
 		} 
 		else 
