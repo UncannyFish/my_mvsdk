@@ -502,8 +502,6 @@ vmCvar_t	cg_animBlend;
 vmCvar_t	cg_dismember;
 
 //jk2pro Client Cvars - start
-vmCvar_t	cjp_client;
-
 vmCvar_t	cg_raceTimer;
 vmCvar_t	cg_raceTimerSize;
 vmCvar_t	cg_raceTimerX;
@@ -800,7 +798,6 @@ static cvarTable_t cvarTable[] = { // bk001129
 	{ &cg_dismember, "cg_dismember", "0", CVAR_ARCHIVE },
 
 	//jk2pro Client Cvars start
-	{ &cjp_client, "cjp_client", "1.4JAPRO", CVAR_USERINFO|CVAR_ROM },
 	{ &cg_raceTimer, "cg_raceTimer", "3", 0 },
 	{ &cg_raceTimerSize, "cg_raceTimerSize", "0.75", 0 },
 	{ &cg_raceTimerX, "cg_raceTimerX", "5", 0 },

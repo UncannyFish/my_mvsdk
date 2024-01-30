@@ -808,7 +808,6 @@ static void CG_ModVersion_f(void)
 	//trap_SendConsoleCommand("ui_modversion\n");
 	if (cgs.isJK2Pro) {
 		trap_SendClientCommand( "modversion" );
-		trap_Cvar_Set("cjp_client", "1.4JAPRO"); //Do this manually here i guess, just incase it does not do it when game is created due to ja+ or something
 	}
 }
 

@@ -168,7 +168,6 @@ static void CG_ParseServerinfo( const char *info ) {
 			if (v && !(cgs.jcinfo & JK2PRO_CINFO_HIGHFPSFIX)) {
 				cgs.jcinfo |= JK2PRO_CINFO_HIGHFPSFIX;
 			}
-			trap_Cvar_Set("cjp_client", "1.4JAPRO");
 		}
 		else if (!Q_stricmpn(v, "< VvV >", 7) || !Q_stricmpn(v, "CPT ][ Mod", 10)) {
 			cgs.isCTFMod = qtrue;
@@ -178,7 +177,6 @@ static void CG_ParseServerinfo( const char *info ) {
 			if (cgs.jcinfo && cgs.jcinfo != 3) {
 				cgs.jcinfo = JK2PRO_CINFO_HIGHFPSFIX;
 			}
-			trap_Cvar_Set("cjp_client", "1.4JAPRO");
 		}
 		else if (!Q_stricmpn(v, "Ca Mod", 6))
 		{
