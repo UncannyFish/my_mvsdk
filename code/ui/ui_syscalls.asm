@@ -203,6 +203,9 @@ equ trap_Z_TagFree							-244	; UI_Z_TAGFREE
 equ trap_Z_Free								-245	; UI_Z_FREE 
 equ trap_Z_Size								-246	; UI_Z_SIZE 
 equ trap_Z_Realloc							-247	; UI_Z_REALLOC 
+equ trap_FS_CreateFileList					-248	; UI_FS_CREATE_FILE_LIST 
+equ trap_FS_CloseFileList					-249	; UI_FS_CLOSE_FILE_LIST 
+equ trap_FS_GetNextFile						-250	; UI_FS_GET_NEXT_FILE 
 
 ; hardcoded functions
 equ memset									-101	; UI_MEMSET 

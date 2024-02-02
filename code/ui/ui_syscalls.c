@@ -859,6 +859,21 @@ void *trap_Z_Realloc(void *pvAddress, int iNewSize, qboolean bZeroit)
 	return (void *) syscall(UI_Z_REALLOC, pvAddress, iNewSize, bZeroit);
 }
 
+int trap_FS_CreateFileList(const char *path, const char *extension)
+{
+	return syscall(UI_FS_CREATE_FILE_LIST, path, extension);
+}
+
+void trap_FS_CloseFileList(void)
+{
+	syscall(UI_FS_CLOSE_FILE_LIST);
+}
+
+void trap_FS_GetNextFile(char *path, int count)
+{
+	syscall(UI_FS_GET_NEXT_FILE, path, count);
+}
+
 /* JK2MV Syscalls */
 qboolean trap_MVAPI_ControlFixes( int fixes )
 {

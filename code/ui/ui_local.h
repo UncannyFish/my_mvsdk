@@ -1214,6 +1214,9 @@ void trap_Z_TagFree(memtag_t eTag);
 void trap_Z_Free(void *ptr);
 int trap_Z_Size(void *pvAddress);
 void *trap_Z_Realloc(void *pvAddress, int iNewSize, qboolean bZeroit);
+int trap_FS_CreateFileList(const char *path, const char *extension);
+void trap_FS_CloseFileList(void);
+void trap_FS_GetNextFile(char *path, int count);
 
 void trap_CL_ContinueCurrentDownload(dldecision_t decision);
 

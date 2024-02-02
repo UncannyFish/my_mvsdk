@@ -173,7 +173,10 @@ typedef enum {
 	UI_Z_TAGFREE,
 	UI_Z_FREE,
 	UI_Z_SIZE,
-	UI_Z_REALLOC
+	UI_Z_REALLOC,
+	UI_FS_CREATE_FILE_LIST,
+	UI_FS_CLOSE_FILE_LIST,
+	UI_FS_GET_NEXT_FILE
 } uiImport_t;
 
 typedef enum {
