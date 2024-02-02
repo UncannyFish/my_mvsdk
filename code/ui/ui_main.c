@@ -1728,9 +1728,6 @@ qboolean Load_Menu(int handle) {
 void UI_LoadMenus(const char *menuFile, qboolean reset) {
 	pc_token_t token;
 	int handle;
-	int start;
-
-	start = trap_Milliseconds();
 
 	trap_PC_LoadGlobalDefines ( "ui/jk2mp/menudef.h" );
 
@@ -1772,8 +1769,6 @@ void UI_LoadMenus(const char *menuFile, qboolean reset) {
 		UI_ParseMenu("ui/jk2mv/download_popup.menu");
 		UI_ParseMenu("ui/jk2mv/download_info.menu");
 	}
-
-	Com_Printf("UI menu load time = %d milli seconds\n", trap_Milliseconds() - start);
 
 	trap_PC_FreeSource( handle );
 
@@ -10049,6 +10044,7 @@ void _UI_Init( qboolean inGameLoad ) {
 	int i;
 	const char *menuSet;
 	uiClientState_t cstate;
+	int start = trap_Milliseconds();
 
 	// Get the list of possible languages
 	uiInfo.languageCount = trap_SP_GetNumLanguages();	// this does a dir scan, so use carefully
@@ -10234,6 +10230,8 @@ void _UI_Init( qboolean inGameLoad ) {
 
 	// botfilter
 	trap_Cvar_Register(&ui_botfilter, "ui_botfilter", "0", CVAR_ARCHIVE | CVAR_GLOBAL);
+
+	Com_Printf("UI load time = %d milli seconds\n", trap_Milliseconds() - start);
 }
 
 
