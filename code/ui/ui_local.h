@@ -125,6 +125,7 @@ extern vmCvar_t	ui_team_model;
 extern vmCvar_t	ui_widescreen;
 extern vmCvar_t	ui_widescreenCursorScale;
 extern vmCvar_t	ui_sensitivity;
+extern vmCvar_t	ui_PrecacheModels;
 
 //
 // ui_qmenu.c
@@ -785,6 +786,7 @@ typedef struct {
 
 typedef struct {
 	char name[SKIN_LENGTH];
+	qhandle_t icon;
 } skinName_t;
 
 typedef struct {
