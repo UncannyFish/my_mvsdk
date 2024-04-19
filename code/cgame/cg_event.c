@@ -1863,6 +1863,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	//
 	case EV_PLAYER_TELEPORT_IN:
 		DEBUGNAME("EV_PLAYER_TELEPORT_IN");
+		if (cg_teleportEvents.integer)
 		{
 			trace_t tr;
 			vec3_t playerMins = {-15, -15, DEFAULT_MINS_2+8};
@@ -1890,6 +1891,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 
 	case EV_PLAYER_TELEPORT_OUT:
 		DEBUGNAME("EV_PLAYER_TELEPORT_OUT");
+		if (cg_teleportEvents.integer)
 		{
 			trace_t tr;
 			vec3_t playerMins = {-15, -15, DEFAULT_MINS_2+8};
