@@ -157,11 +157,17 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 	}
 	else {
 		if (largeFormat) {
-			CG_DrawPic(SB_NAME_X-5, y+2, 25, 25, ci->modelIcon);
+			if (ci->modelIcon)
+			{
+				CG_DrawPic(SB_NAME_X-5, y+2, 25, 25, ci->modelIcon);
+			}
 			CG_Text_Paint(SB_NAME_X+24, y, 0.9f * scale, colorWhite, ci->name, 0, 0, ITEM_TEXTSTYLE_OUTLINED, FONT_MEDIUM);
 		}
 		else {
-			CG_DrawPic(SB_NAME_X-5, y+2, 15, 15, ci->modelIcon);
+			if (ci->modelIcon)
+			{
+				CG_DrawPic(SB_NAME_X-5, y+2, 15, 15, ci->modelIcon);
+			}
 			CG_Text_Paint(SB_NAME_X+12, y, 0.9f * scale, colorWhite, ci->name, 0, 0, ITEM_TEXTSTYLE_OUTLINED, FONT_MEDIUM);
 		}
 	}
