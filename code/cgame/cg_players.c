@@ -613,7 +613,7 @@ retryModel:
 
 	if (ci->modelIcon == 0)
 	{
-		ci->modelIcon = cgs.media.deferShader;
+		ci->modelIcon = cgs.media.unknownModelIcon;
 	}
 	return qtrue;
 }

@@ -187,7 +187,7 @@ void UI_LoadSkinHead(const char *model, const char *skin)
 		{
 			return;
 		}
-		icon = uiInfo.uiDC.Assets.deferShader;
+		icon = uiInfo.uiDC.Assets.unknownModelIcon;
 	}
 	Q_strncpyz(species->SkinHead[species->SkinHeadCount].name, skin, SKIN_LENGTH);
 	species->SkinHead[species->SkinHeadCount].icon = icon;
@@ -225,7 +225,7 @@ void UI_LoadSkinTorso(const char *model, const char *skin)
 		{
 			return;
 		}
-		icon = uiInfo.uiDC.Assets.deferShader;
+		icon = uiInfo.uiDC.Assets.unknownModelIcon;
 	}
 	Q_strncpyz(species->SkinTorso[species->SkinTorsoCount].name, skin, SKIN_LENGTH);
 	species->SkinTorso[species->SkinTorsoCount].icon = icon;
@@ -263,7 +263,7 @@ void UI_LoadSkinLower(const char *model, const char *skin)
 		{
 			return;
 		}
-		icon = uiInfo.uiDC.Assets.deferShader;
+		icon = uiInfo.uiDC.Assets.unknownModelIcon;
 	}
 	Q_strncpyz(species->SkinLeg[species->SkinLegCount].name, skin, SKIN_LENGTH);
 	species->SkinLeg[species->SkinLegCount].icon = icon;
@@ -310,7 +310,7 @@ void UI_LoadSkinDefault(const char *model, const char *skin)
 		{
 			return;
 		}
-		newHead->icon = uiInfo.uiDC.Assets.deferShader;
+		newHead->icon = uiInfo.uiDC.Assets.unknownModelIcon;
 	}
 	uiInfo.q3HeadCount++;
 }

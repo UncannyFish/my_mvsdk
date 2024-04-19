@@ -1766,6 +1766,7 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.viewBloodShader = trap_R_RegisterShader( "viewBloodBlend" );
 
 	cgs.media.deferShader = trap_R_RegisterShaderNoMip( "gfx/2d/defer.tga" );
+	cgs.media.unknownModelIcon = trap_R_RegisterShaderNoMip("gfx/2d/unknown_model_icon");
 
 	cgs.media.smokePuffShader = trap_R_RegisterShader( "smokePuff" );
 	cgs.media.bloodTrailShader = trap_R_RegisterShader( "bloodTrail" );

@@ -984,6 +984,7 @@ typedef struct {
 	qhandle_t	teamStatusBar;
 
 	qhandle_t	deferShader;
+	qhandle_t	unknownModelIcon;
 
 //JAPRO - Clientside - Movement keys - Start
 	qhandle_t	keyCrouchOffShader;

@@ -387,6 +387,7 @@ typedef struct {
     qhandle_t saberOnly;
     qhandle_t trueJedi;
     qhandle_t deferShader;
+    qhandle_t unknownModelIcon;
 
 	sfxHandle_t moveRollSound;
 	sfxHandle_t moveJumpSound;

@@ -923,6 +923,7 @@ void AssetCache() {
 	uiInfo.uiDC.Assets.trueJedi = trap_R_RegisterShaderNoMip( "gfx/menus/truejedi" );
 
 	uiInfo.uiDC.Assets.deferShader = trap_R_RegisterShaderNoMip("gfx/2d/defer");
+	uiInfo.uiDC.Assets.unknownModelIcon = trap_R_RegisterShaderNoMip("gfx/2d/unknown_model_icon");
 							
 	for( n = 0; n < NUM_CROSSHAIRS; n++ ) {
 		uiInfo.uiDC.Assets.crosshairShader[n] = trap_R_RegisterShaderNoMip( va("gfx/2d/crosshair%c", 'a' + n ) );
