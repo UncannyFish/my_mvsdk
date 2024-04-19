@@ -156,8 +156,8 @@ if (NOT InMV)
 		# 4305 = 'identifier' : truncation from 'type1' to 'type2'
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4018 /wd4244 /wd4996 /wd4267 /wd4305")
 
-		# Multithreaded
-		set(CMAKE_C_FLAGS_RELEASE "/MT")
+		# Runtime Library: Multi-threaded DLL
+		set(CMAKE_C_FLAGS_RELEASE "/MD")
 
 		# Platform
 		set(GlobalDefines ${GlobalDefines} "UNICODE" "_UNICODE")
