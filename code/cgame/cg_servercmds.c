@@ -132,6 +132,7 @@ and whenever the server updates any serverinfo flagged cvars
 static void CG_ParseServerinfo( const char *info ) {
 	char	*mapname;
 	char	*v = NULL;
+	char gamename[16];
 
 	v = Info_ValueForKey( info, "g_gametype" );
 	cgs.gametype = atoi( v );
@@ -156,38 +157,36 @@ static void CG_ParseServerinfo( const char *info ) {
 	cgs.isCaMod = qfalse;
 	cgs.jcinfo = 0;
 	v = Info_ValueForKey(info, "gamename");
-	if (v)
+	Q_strncpyz(gamename, v, sizeof(gamename));
+	Q_CleanStr(gamename, qtrue);
+	if (!Q_stricmpn(gamename, "jk2pro", 5)) {
+		cgs.isJK2Pro = qtrue;
+		cgs.isolateDuels = qtrue;
+		v = Info_ValueForKey(info, "jcinfo");
+		cgs.jcinfo = atoi(v);//[JAPRO - Clientside - All - Add gamename variable to get jcinfo from japro servers]
+		v = Info_ValueForKey(info, "g_fixHighFPSAbuse");
+		if (*v != '\0' && !(cgs.jcinfo & JK2PRO_CINFO_HIGHFPSFIX)) {
+			cgs.jcinfo |= JK2PRO_CINFO_HIGHFPSFIX;
+		}
+	}
+	else if (!Q_stricmpn(gamename, "< VvV >", 7) || !Q_stricmpn(gamename, "CPT ][ Mod", 10)) {
+		cgs.isCTFMod = qtrue;
+		cgs.CTF3ModeActive = (qboolean)(atoi(Info_ValueForKey(info, "g_allowFreeTeam")));
+		v = Info_ValueForKey(info, "g_block333");
+		cgs.jcinfo = atoi(v);
+		if (cgs.jcinfo && cgs.jcinfo != 3) {
+			cgs.jcinfo = JK2PRO_CINFO_HIGHFPSFIX;
+		}
+	}
+	else if (!Q_stricmpn(gamename, "Ca Mod", 6))
 	{
-		Q_CleanStr(v, qtrue);
-		if (!Q_stricmpn(v, "jk2pro", 5)) {
-			cgs.isJK2Pro = qtrue;
-			cgs.isolateDuels = qtrue;
-			v = Info_ValueForKey(info, "jcinfo");
-			cgs.jcinfo = atoi(v);//[JAPRO - Clientside - All - Add gamename variable to get jcinfo from japro servers]
-			v = Info_ValueForKey(info, "g_fixHighFPSAbuse");
-			if (v && !(cgs.jcinfo & JK2PRO_CINFO_HIGHFPSFIX)) {
-				cgs.jcinfo |= JK2PRO_CINFO_HIGHFPSFIX;
-			}
-		}
-		else if (!Q_stricmpn(v, "< VvV >", 7) || !Q_stricmpn(v, "CPT ][ Mod", 10)) {
-			cgs.isCTFMod = qtrue;
-			cgs.CTF3ModeActive = (qboolean)(atoi(Info_ValueForKey(info, "g_allowFreeTeam")));
-			v = Info_ValueForKey(info, "g_block333");
-			if (v) cgs.jcinfo = atoi(v);
-			if (cgs.jcinfo && cgs.jcinfo != 3) {
-				cgs.jcinfo = JK2PRO_CINFO_HIGHFPSFIX;
-			}
-		}
-		else if (!Q_stricmpn(v, "Ca Mod", 6))
-		{
-			cgs.isolateDuels = qtrue;
-			cgs.isCaMod = qtrue;
-		}
-		else if (!Q_stricmpn(v, "fgcMod", 6))
-		{
-			cgs.isolateDuels = qtrue;
-			cgs.isCaMod = qfalse;
-		}
+		cgs.isolateDuels = qtrue;
+		cgs.isCaMod = qtrue;
+	}
+	else if (!Q_stricmpn(gamename, "fgcMod", 6))
+	{
+		cgs.isolateDuels = qtrue;
+		cgs.isCaMod = qfalse;
 	}
 
 	mapname = Info_ValueForKey( info, "mapname" );
