@@ -705,26 +705,22 @@ void SkipBracedSection (const char **program) {
 	} while( depth && *program );
 }
 
-/*
-=================
-SkipRestOfLine
-=================
-*/
-void SkipRestOfLine ( const char **data ) {
-	const char	*p;
-	int		c;
-
+void SkipRestOfLine(const char **data)
+{
+	const char *p;
 	p = *data;
-	while ( (c = *p++) != 0 ) {
-		if ( c == '\n' ) {
+	while (p != NULL && *p != '\0')
+	{
+		if (*p == '\n')
+		{
 			com_lines++;
+			p++;
 			break;
 		}
+		p++;
 	}
-
 	*data = p;
 }
-
 
 void Parse1DMatrix (const char **buf_p, int x, float *m) {
 	char	*token;
