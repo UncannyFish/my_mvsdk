@@ -183,6 +183,11 @@ void UI_LoadSkinHead(const char *model, const char *skin)
 	icon = trap_R_RegisterShaderNoMip(modelAbsolutePath);
 	if (icon == 0)
 	{
+		Com_sprintf(modelAbsolutePath, sizeof(modelAbsolutePath), "models/players/%s/mb2_icon_%s", model, skin);
+		icon = trap_R_RegisterShaderNoMip(modelAbsolutePath);
+	}
+	if (icon == 0)
+	{
 		if (ui_loadSkinsWithoutIcons.integer == 0)
 		{
 			return;
@@ -221,6 +226,11 @@ void UI_LoadSkinTorso(const char *model, const char *skin)
 	icon = trap_R_RegisterShaderNoMip(modelAbsolutePath);
 	if (icon == 0)
 	{
+		Com_sprintf(modelAbsolutePath, sizeof(modelAbsolutePath), "models/players/%s/mb2_icon_%s", model, skin);
+		icon = trap_R_RegisterShaderNoMip(modelAbsolutePath);
+	}
+	if (icon == 0)
+	{
 		if (ui_loadSkinsWithoutIcons.integer == 0)
 		{
 			return;
@@ -257,6 +267,11 @@ void UI_LoadSkinLower(const char *model, const char *skin)
 #endif
 	Com_sprintf(modelAbsolutePath, sizeof(modelAbsolutePath), "models/players/%s/icon_%s", model, skin);
 	icon = trap_R_RegisterShaderNoMip(modelAbsolutePath);
+	if (icon == 0)
+	{
+		Com_sprintf(modelAbsolutePath, sizeof(modelAbsolutePath), "models/players/%s/mb2_icon_%s", model, skin);
+		icon = trap_R_RegisterShaderNoMip(modelAbsolutePath);
+	}
 	if (icon == 0)
 	{
 		if (ui_loadSkinsWithoutIcons.integer == 0)
@@ -304,6 +319,16 @@ void UI_LoadSkinDefault(const char *model, const char *skin)
 		*p2 = '\0';
 	}
 	newHead->icon = trap_R_RegisterShaderNoMip(name);
+	if (newHead->icon == 0)
+	{
+		Com_sprintf(name, sizeof(name), "models/players/%s/mb2_icon_%s", model, p);
+		p2 = strchr(name, '|');
+		if (p2 != NULL)
+		{
+			*p2 = '\0';
+		}
+		newHead->icon = trap_R_RegisterShaderNoMip(name);
+	}
 	if (newHead->icon == 0)
 	{
 		if (ui_loadSkinsWithoutIcons.integer == 0)

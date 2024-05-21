@@ -607,6 +607,17 @@ retryModel:
 
 	if (ci->modelIcon == 0)
 	{
+		Com_sprintf(iconName, sizeof(iconName), "models/players/%s/mb2_icon_%s", modelName, iconStart);
+		if (strchr(iconName, '|') != NULL)
+		{
+			char *p = strchr(iconName, '|');
+			*p = '\0';
+		}
+		ci->modelIcon = trap_R_RegisterShaderNoMip(iconName);
+	}
+
+	if (ci->modelIcon == 0)
+	{
 		Com_sprintf(iconName, sizeof(iconName), "models/players/%s/icon_siege", modelName);
 		ci->modelIcon = trap_R_RegisterShaderNoMip(iconName);
 	}
