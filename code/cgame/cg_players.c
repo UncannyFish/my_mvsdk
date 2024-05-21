@@ -657,6 +657,104 @@ static void CG_ColorFromString( const char *v, vec3_t color ) {
 	}
 }
 
+/*
+===================
+MB2_LoadPlayerSounds
+
+Load Movie Battles 2 player sounds from "models/players/x/modeldata.cfg"
+===================
+*/
+static void MB2_LoadPlayerSounds(clientInfo_t *ci, char *soundPath, int soundPathSize)
+{
+	char buffer[4096];
+	char path[MAX_QPATH];
+	char soundSet[2][MAX_QPATH + 8];
+	int length = 0;
+	char *token = NULL;
+	const char *bufferPointer = NULL;
+	fileHandle_t handle = 0;
+	int soundSetIndex = 0;
+	qboolean soundSetIsValid = qfalse;
+	Com_sprintf(path, sizeof(path), "models/players/%s/modeldata.cfg", ci->modelName);
+	length = trap_FS_FOpenFile(path, &handle, FS_READ);
+	if (handle == 0)
+	{
+		//CG_Printf(S_COLOR_YELLOW "WARNING: CG_LoadMovieBattles2Sounds: can't open file \"%s\"\n", path);
+		return;
+	}
+	if (length <= 0)
+	{
+		CG_Printf(S_COLOR_YELLOW "WARNING: CG_LoadMovieBattles2Sounds: empty file \"%s\"\n", path);
+		trap_FS_FCloseFile(handle);
+		return;
+	}
+	if (length >= (int)(sizeof(buffer) - 1))
+	{
+		CG_Printf(S_COLOR_YELLOW "WARNING: CG_LoadMovieBattles2Sounds: file \"%s\" is too big (%d bytes), maximum is %d bytes\n", path, length, (int)(sizeof(buffer) - 1));
+		trap_FS_FCloseFile(handle);
+		return;
+	}
+	trap_FS_Read(buffer, length, handle);
+	buffer[length] = '\0';
+	trap_FS_FCloseFile(handle);
+	Com_sprintf(soundSet[0], sizeof(soundSet[0]), "sounds_%s", ci->skinName);
+	Com_sprintf(soundSet[1], sizeof(soundSet[1]), "sounds_%s", "default");
+	for (soundSetIndex = 0; soundSetIndex <= 1; soundSetIndex++)
+	{
+		if (soundSetIsValid)
+		{
+			break;
+		}
+		bufferPointer = buffer;
+		COM_BeginParseSession(path);
+		while (1)
+		{
+			token = COM_Parse(&bufferPointer);
+			if (token == NULL || token[0] == '\0')
+			{
+				break;
+			}
+			if (Q_stricmp(token, soundSet[soundSetIndex]) == 0)
+			{
+				token = COM_Parse(&bufferPointer);
+				if (token == NULL || token[0] == '\0')
+				{
+					COM_ParseWarning("no sound path specified for \"%s\"", soundSet[soundSetIndex]);
+					break;
+				}
+				Q_strncpyz(soundPath, token, soundPathSize);
+				token = COM_Parse(&bufferPointer);
+				if (token == NULL || token[0] == '\0')
+				{
+					COM_ParseWarning("no gender specified for \"%s\"", soundSet[soundSetIndex]);
+					break;
+				}
+				if (token[0] == 'f')
+				{
+					ci->gender = GENDER_FEMALE;
+					soundSetIsValid = qtrue;
+					break;
+				}
+				else if (token[0] == 'm')
+				{
+					ci->gender = GENDER_MALE;
+					soundSetIsValid = qtrue;
+					break;
+				}
+				else
+				{
+					COM_ParseWarning("invalid gender \"%s\" specified for \"%s\"", token, soundSet[soundSetIndex]);
+					break;
+				}
+			}
+			else
+			{
+				SkipRestOfLine(&bufferPointer);
+			}
+		}
+	}
+}
+
 #define DEFAULT_FEMALE_SOUNDPATH "chars/mp_generic_female/misc"//"chars/tavion/misc"
 #define DEFAULT_MALE_SOUNDPATH "chars/mp_generic_male/misc"//"chars/kyle/misc"
 /*
@@ -828,6 +926,10 @@ void CG_LoadClientInfo( clientInfo_t *ci ) {
 		soundpath[i] = '\0';
 
 		trap_FS_FCloseFile(f);
+	}
+	else
+	{
+		MB2_LoadPlayerSounds(ci, soundpath, sizeof(soundpath));
 	}
 
 	if (isFemale)
