@@ -1790,6 +1790,7 @@ extern	vmCvar_t		cg_drawLocalTime12h;
 extern	vmCvar_t		cg_drawLocalTimeSeconds;
 extern	vmCvar_t		cg_cropLevelShot;
 extern	vmCvar_t		cg_teleportEvents;
+extern	vmCvar_t		cg_randomTaunts;
 
 //
 // cg_main.c

@@ -685,6 +685,7 @@ vmCvar_t	cg_drawLocalTime12h;
 vmCvar_t	cg_drawLocalTimeSeconds;
 vmCvar_t	cg_cropLevelShot;
 vmCvar_t	cg_teleportEvents;
+vmCvar_t	cg_randomTaunts;
 
 //snaphud start
 vmCvar_t cg_snapHud;
@@ -986,6 +987,7 @@ Ghoul2 Insert End
 	{ &cg_drawLocalTimeSeconds, "cg_drawLocalTimeSeconds", "0", CVAR_ARCHIVE },
 	{ &cg_cropLevelShot, "cg_cropLevelShot", "0", CVAR_ARCHIVE },
 	{ &cg_teleportEvents, "cg_teleportEvents", "1", CVAR_ARCHIVE },
+	{ &cg_randomTaunts, "cg_randomTaunts", "1", CVAR_ARCHIVE },
 };
 
 static int  cvarTableSize = sizeof( cvarTable ) / sizeof( cvarTable[0] );

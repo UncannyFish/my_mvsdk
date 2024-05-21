@@ -22,6 +22,11 @@ char	*cg_customSoundNames[MAX_CUSTOM_SOUNDS] = {
 	"*gasp.wav",
 	"*land1.wav",
 	"*taunt.wav",
+	"*taunt1.wav",
+	"*taunt2.wav",
+	"*taunt3.wav",
+	"*taunt4.wav",
+	"*taunt5.wav",
 	"*roll1.wav"
 };
 
@@ -755,6 +760,38 @@ static void MB2_LoadPlayerSounds(clientInfo_t *ci, char *soundPath, int soundPat
 	}
 }
 
+static sfxHandle_t CG_LoadPlayerSound(const char *soundPath, const char *soundName)
+{
+	sfxHandle_t sound = 0;
+	sound = trap_S_RegisterSound(va("sound/%s/%s", soundPath, soundName));
+	if (sound == 0)
+	{
+		sound = trap_S_RegisterSound(va("sound/chars/%s/misc/%s", soundPath, soundName));
+	}
+	return sound;
+}
+
+static sfxHandle_t CG_RemapPlayerSound(const char *soundPath, const char *soundName, clientInfo_t *ci)
+{
+	int i = 0;
+	if (Q_stricmp(soundName, "taunt") == 0)
+	{
+		return CG_LoadPlayerSound(soundPath, "taunt1");
+	}
+	for (i = 1; i <= 5; i++)
+	{
+		if (Q_stricmp(soundName, va("taunt%d", i)) == 0)
+		{
+			return ci->sounds[14]; // "*taunt.wav"
+		}
+	}
+	if (Q_stricmp(soundName, "roll1") == 0)
+	{
+		return ci->sounds[3]; // "*jump1.wav"
+	}
+	return 0;
+}
+
 #define DEFAULT_FEMALE_SOUNDPATH "chars/mp_generic_female/misc"//"chars/tavion/misc"
 #define DEFAULT_MALE_SOUNDPATH "chars/mp_generic_male/misc"//"chars/kyle/misc"
 /*
@@ -773,7 +810,7 @@ void CG_LoadClientInfo( clientInfo_t *ci ) {
 	char		teamname[MAX_QPATH];
 	int			fLen = 0;
 	char		soundpath[MAX_QPATH];
-	char		soundName[1024];
+	char		soundName[MAX_QPATH];
 	const char	*defaultModel;
 	qboolean	isDefaultModel = qfalse;
 	qboolean	isFemale = qfalse;
@@ -950,11 +987,10 @@ void CG_LoadClientInfo( clientInfo_t *ci ) {
 		// if the model didn't load use the sounds of the default model
 		if (soundpath[0])
 		{
-			ci->sounds[i] = trap_S_RegisterSound( va("sound/%s/%s", soundpath, soundName) );
-
+			ci->sounds[i] = CG_LoadPlayerSound(soundpath, soundName);
 			if (!ci->sounds[i])
 			{
-				ci->sounds[i] = trap_S_RegisterSound( va("sound/chars/%s/misc/%s", soundpath, soundName) );
+				ci->sounds[i] = CG_RemapPlayerSound(soundpath, soundName, ci);
 			}
 			if (!ci->sounds[i])
 			{
@@ -974,15 +1010,15 @@ void CG_LoadClientInfo( clientInfo_t *ci ) {
 			{
 				ci->sounds[i] = trap_S_RegisterSound( va("sound/chars/%s/misc/%s", dir, soundName) );
 			}
-
+			if (!ci->sounds[i])
+			{
+				ci->sounds[i] = CG_RemapPlayerSound(fallback, soundName, ci);
+			}
 			if ( !ci->sounds[i] )
 			{
 				ci->sounds[i] = trap_S_RegisterSound( va("sound/%s/%s", fallback, soundName) );
 			}
 		}
-
-		if (!ci->sounds[i] && i == 15) //"*roll1"
-			ci->sounds[i] = ci->sounds[3]; //fallback to jumpsound if model doesn't have a custom roll sound
 	}
 
 	ci->deferred = qfalse;
