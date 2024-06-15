@@ -537,8 +537,7 @@ int MVAPI_Init(int apilevel, int inGameLoad)
 	menuInJK2MV = qtrue;
 	mvapi = apilevel;
 
-	// always using the newest api internally.
-	return MV_APILEVEL;
+	return mvapi;
 #else
 	char version[128];
 	char jk2mv[64];
@@ -570,7 +569,6 @@ int MVAPI_Init(int apilevel, int inGameLoad)
 	}
 
 	mvapi = apilevel;
-	if ( mvapi > MV_APILEVEL ) mvapi = MV_APILEVEL;
 
 	Com_Printf("UI: Using MVAPI level %i (%i supported).\n", mvapi, apilevel);
 	return mvapi;

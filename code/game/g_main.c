@@ -474,7 +474,6 @@ int MVAPI_Init(int apilevel)
 	}
 
 	mvapi = apilevel;
-	if ( mvapi > MV_APILEVEL ) mvapi = MV_APILEVEL;
 
 	G_Printf("Game: Using MVAPI level %i (%i supported).\n", mvapi, apilevel);
 	return mvapi;
