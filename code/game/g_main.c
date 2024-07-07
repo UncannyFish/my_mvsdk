@@ -120,6 +120,10 @@ vmCvar_t	g_enableBreath;
 vmCvar_t	g_dismember;
 vmCvar_t	g_forceDodge;
 vmCvar_t	g_timeouttospec;
+vmCvar_t	g_propHunt;
+vmCvar_t	g_propHuntRounds;
+vmCvar_t	g_propHuntMaxPlacedModels;
+vmCvar_t	g_propHuntModels;
 
 vmCvar_t	g_saberDmgVelocityScale;
 vmCvar_t	g_saberDmgDelay_Idle;
@@ -287,6 +291,10 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &g_forceDodge, "g_forceDodge", "1", 0, 0, qtrue  },
 
 	{ &g_timeouttospec, "g_timeouttospec", "70", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_propHunt, "g_propHunt", "0", CVAR_ARCHIVE, 0, qtrue },
+	{ &g_propHuntRounds, "g_propHuntRounds", "3", CVAR_ARCHIVE, 0, qtrue },
+	{ &g_propHuntMaxPlacedModels, "g_propHuntMaxPlacedModels", "3", CVAR_ARCHIVE, 0, qtrue },
+	{ &g_propHuntModels, "g_propHuntModels", "models.cfg", CVAR_ARCHIVE, 0, qtrue },
 
 	{ &g_saberDmgVelocityScale, "g_saberDmgVelocityScale", "0", CVAR_ARCHIVE, 0, qtrue  },
 	{ &g_saberDmgDelay_Idle, "g_saberDmgDelay_Idle", "350", CVAR_ARCHIVE, 0, qtrue  },
@@ -903,6 +911,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	{
 		G_LogPrintf("Duel Tournament Begun: kill limit %d, win limit: %d\n", g_fraglimit.integer, g_duel_fraglimit.integer );
 	}
+
+	PropHuntInit();
 }
 
 
@@ -2771,6 +2781,8 @@ end = trap_Milliseconds();
 			gQueueScoreMessage = 0;
 		}
 	}
+
+	PropHuntFrame();
 
 	g_LastFrameTime = level.time;
 

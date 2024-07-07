@@ -433,6 +433,16 @@ qboolean	ConsoleCommand( void ) {
 		return qtrue;
 	}
 
+	if (Q_stricmp(cmd, "propAdd") == 0) {
+		Svcmd_PropAdd_f();
+		return qtrue;
+	}
+
+	if (Q_stricmp(cmd, "propDelete") == 0) {
+		Svcmd_PropDelete_f();
+		return qtrue;
+	}
+
 	if (Q_stricmp (cmd, "listip") == 0) {
 		trap_SendConsoleCommand( EXEC_NOW, "g_banIPs\n" );
 		return qtrue;

@@ -69,6 +69,7 @@ set(MVGAMESOURCES
 	"${SRCDir}/game/g_missile.c"
 	"${SRCDir}/game/g_mover.c"
 	"${SRCDir}/game/g_object.c"
+	"${SRCDir}/game/g_prophunt.c"
 	"${SRCDir}/game/g_saga.c"
 	"${SRCDir}/game/g_session.c"
 	"${SRCDir}/game/g_spawn.c"

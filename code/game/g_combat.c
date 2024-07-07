@@ -2209,6 +2209,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		i = ( i + 1 ) % 3;
 	}
 
+	if (propHuntEnabled)
+	{
+		self->client->pers.isSurvivor = qfalse;
+	}
+
 	trap_LinkEntity (self);
 
 }

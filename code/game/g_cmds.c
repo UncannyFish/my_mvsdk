@@ -728,6 +728,22 @@ void SetTeam( gentity_t *ent, char *s ) {
 		return;
 	}
 
+	if (propHuntEnabled)
+	{
+		if (team == TEAM_BLUE && !ent->client->pers.isSurvivor)
+		{
+			G_ClientPrint(ent->client->ps.clientNum, "Hunters can't join blue team\n");
+			return;
+		}
+
+		PropResetInfo(ent);
+
+		if (team == TEAM_BLUE)
+		{
+			ent->client->pers.isSurvivor = qtrue;
+		}
+	}
+
 	//
 	// execute the team change
 	//
@@ -2634,6 +2650,42 @@ void ClientCommand( int clientNum ) {
 		{
 			giveError = qtrue;
 		}
+		else if (!Q_stricmp(cmd, "propNext"))
+		{
+			giveError = qtrue;
+		}
+		else if (!Q_stricmp(cmd, "propNext"))
+		{
+			giveError = qtrue;
+		}
+		else if (!Q_stricmp(cmd, "propNext"))
+		{
+			giveError = qtrue;
+		}
+		else if (!Q_stricmp(cmd, "propPrevious"))
+		{
+			giveError = qtrue;
+		}
+		else if (!Q_stricmp(cmd, "propLast"))
+		{
+			giveError = qtrue;
+		}
+		else if (!Q_stricmp(cmd, "propSelect"))
+		{
+			giveError = qtrue;
+		}
+		else if (!Q_stricmp(cmd, "propDeselect"))
+		{
+			giveError = qtrue;
+		}
+		else if (!Q_stricmp(cmd, "propPlace"))
+		{
+			giveError = qtrue;
+		}
+		else if (!Q_stricmp(cmd, "propHelp") || !Q_stricmp(cmd, "help") || !Q_stricmp(cmd, "info") || !Q_stricmp(cmd, "amhelp") || !Q_stricmp(cmd, "aminfo"))
+		{
+			giveError = qtrue;
+		}
 
 		if (giveError)
 		{
@@ -2688,6 +2740,21 @@ void ClientCommand( int clientNum ) {
 		Cmd_SetViewpos_f( ent );
 	else if (Q_stricmp (cmd, "stats") == 0)
 		Cmd_Stats_f( ent );
+	else if (Q_stricmp(cmd, "propNext") == 0)
+		Cmd_PropNext_f(ent);
+	else if (Q_stricmp(cmd, "propPrevious") == 0)
+		Cmd_PropPrevious_f(ent);
+	else if (Q_stricmp(cmd, "propLast") == 0)
+		Cmd_PropLast_f(ent);
+	else if (Q_stricmp(cmd, "propSelect") == 0)
+		Cmd_PropSelect_f(ent);
+	else if (Q_stricmp(cmd, "propDeselect") == 0)
+		Cmd_PropDeselect_f(ent);
+	else if (Q_stricmp(cmd, "propPlace") == 0)
+		Cmd_PropPlace_f(ent);
+	else if (!Q_stricmp(cmd, "propHelp") || !Q_stricmp(cmd, "help") || !Q_stricmp(cmd, "info") || !Q_stricmp(cmd, "amhelp") || !Q_stricmp(cmd, "aminfo"))
+		Cmd_PropHelp_f(ent);
+
 	/*
 	else if (Q_stricmp(cmd, "#mm") == 0 && CheatsOk( ent ))
 	{

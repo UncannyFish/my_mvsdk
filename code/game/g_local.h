@@ -338,8 +338,22 @@ typedef struct {
 	int			teamVoteCount;		// to prevent people from constantly calling votes
 	qboolean	teamInfo;			// send team overlay updates?
 	qboolean	botDelayed;			// Is ClientBegin still outstanding for this bot, because it was delayed?
+	qboolean	isSurvivor;
 } clientPersistant_t;
 
+struct propHuntClientData_s
+{
+	int selectedModel;
+	int placedModelsCount;
+	int attachedModelEntityNumber;
+	int hidingModelEntityNumber;
+	int lastPlacedModel;
+	vec3_t originBeforeHiding;
+	qboolean isModelAttached;
+	qboolean isHidingInModel;
+};
+
+typedef struct propHuntClientData_s propHuntClientData_t;
 
 // this structure is cleared on each ClientSpawn(),
 // except for 'client->pers' and 'client->sess'
@@ -429,6 +443,7 @@ struct gclient_s {
 	int			forcePowerSoundDebounce; //if > level.time, don't do certain sound events again (drain sound, absorb sound, etc)
 
 	qboolean	fjDidJump;
+	propHuntClientData_t propHunt;
 };
 
 
@@ -755,7 +770,7 @@ qboolean CheckGauntletAttack( gentity_t *ent );
 //
 // g_client.c
 //
-team_t TeamCount( int ignoreClientNum, team_t team );
+int TeamCount( int ignoreClientNum, team_t team );
 int TeamLeader( team_t team );
 team_t PickTeam( int ignoreClientNum );
 void SetClientViewAngle( gentity_t *ent, vec3_t angle );
@@ -955,6 +970,48 @@ int		InFieldOfVision	( vec3_t viewangles, float fov, vec3_t angles);
 void B_InitAlloc(void);
 void B_CleanupAlloc(void);
 
+// g_prophunt.c
+#define PROPHUNT_MAX_MODELS 256
+#define PROPHUNT_BOUNDS_MINS 0
+#define PROPHUNT_BOUNDS_MAXS 1
+
+void Cmd_PropNext_f(gentity_t *playerEntity);
+void Cmd_PropPrevious_f(gentity_t *playerEntity);
+void Cmd_PropLast_f(gentity_t *playerEntity);
+void Cmd_PropSelect_f(gentity_t *playerEntity);
+void Cmd_PropDeselect_f(gentity_t *playerEntity);
+void Cmd_PropPlace_f(gentity_t *playerEntity);
+void Cmd_PropHelp_f(gentity_t *playerEntity);
+
+void Svcmd_PropAdd_f(void);
+void Svcmd_PropDelete_f(void);
+
+void PropTouch(gentity_t *ent, gentity_t *other, trace_t *trace);
+void PropUse(gentity_t *self, gentity_t *other, gentity_t *activator);
+void PropThink(gentity_t *ent);
+void PropDie(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod);
+qboolean PropSpawnable(gentity_t *playerEntity);
+void PropSpawn(gentity_t *playerEntity);
+qboolean PropSelect(gentity_t *playerEntity, int model, qboolean checkBounds);
+qboolean PropDeselect(gentity_t *playerEntity);
+qboolean PropPlace(gentity_t *playerEntity);
+void PropResetInfo(gentity_t *playerEntity);
+
+void PropHuntInit(void);
+void PropHuntShutdown(void);
+void PropHuntFrame(void);
+
+void QDECL G_ClientPrint(int clientNumber, const char *fmt, ...);
+void QDECL G_Warning(const char *fmt, ...);
+
+extern char propHuntModels[PROPHUNT_MAX_MODELS][MAX_QPATH];
+extern float propHuntModelsBounds[PROPHUNT_MAX_MODELS][2][3];
+extern int propHuntModelsSize;
+extern qboolean propHuntEnabled;
+extern qboolean propHuntCountdown;
+extern int propHuntRoundStartTime;
+extern int propHuntLastHunter;
+
 //bot settings
 typedef struct bot_settings_s
 {
@@ -1067,6 +1124,10 @@ extern	vmCvar_t	g_singlePlayer;
 extern	vmCvar_t	g_dismember;
 extern	vmCvar_t	g_forceDodge;
 extern	vmCvar_t	g_timeouttospec;
+extern	vmCvar_t	g_propHunt;
+extern	vmCvar_t	g_propHuntRounds;
+extern	vmCvar_t	g_propHuntMaxPlacedModels;
+extern	vmCvar_t	g_propHuntModels;
 
 extern	vmCvar_t	g_saberDmgVelocityScale;
 extern	vmCvar_t	g_saberDmgDelay_Idle;
