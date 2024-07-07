@@ -256,6 +256,26 @@ void Svcmd_RemoveIP_f (void)
 	G_Printf ( "Didn't find %s.\n", str );
 }
 
+void Svcmd_MB_Mode_f(void)
+{
+	char gametype[MAX_TOKEN_CHARS];
+	char mapname[MAX_TOKEN_CHARS];
+	char command[MAX_TOKEN_CHARS];
+	if (trap_Argc() != 3)
+	{
+		trap_Printf(
+			"Usage: mbmode <game type> <map name>\n"
+			"Example: mbmode 0 ffa_bespin\n"
+		);
+		return;
+	}
+	trap_Argv(1, gametype, sizeof(gametype));
+	trap_Argv(2, mapname, sizeof(mapname));
+	trap_Cvar_Set("g_gametype", gametype);
+	Com_sprintf(command, sizeof(command), "map \"%s\"\n", mapname);
+	trap_SendConsoleCommand(EXEC_APPEND, command);
+}
+
 /*
 ===================
 Svcmd_EntityList_f
@@ -448,6 +468,11 @@ qboolean	ConsoleCommand( void ) {
 		return qtrue;
 	}
 
+	if (Q_stricmp (cmd, "mbmode") == 0) {
+		Svcmd_MB_Mode_f();
+		return qtrue;
+	}
+
 #if _DEBUG // Only in debug builds
 	if ( !Q_stricmp(cmd, "jk2gameplay") )
 	{
@@ -477,12 +502,11 @@ qboolean	ConsoleCommand( void ) {
 
 	if (g_dedicated.integer) {
 		if (Q_stricmp (cmd, "say") == 0) {
-			trap_SendServerCommand( -1, va("print \"server: %s\n\"", ConcatArgs(1) ) );
+			trap_SendServerCommand( -1, va("print \"Server: %s\n\"", ConcatArgs(1) ) );
 			return qtrue;
 		}
-		// everything else will also be printed as a say command
-		trap_SendServerCommand( -1, va("print \"server: %s\n\"", ConcatArgs(0) ) );
-		return qtrue;
+
+		G_Printf("Unknown command \"%s\"\n", cmd);
 	}
 
 	return qfalse;

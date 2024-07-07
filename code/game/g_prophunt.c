@@ -88,6 +88,17 @@ void Cmd_PropPlace_f(gentity_t *playerEntity)
 	PropPlace(playerEntity);
 }
 
+void Cmd_PropClear_f(gentity_t *playerEntity)
+{
+	if (trap_Argc() != 1)
+	{
+		G_ClientPrint(playerEntity->client->ps.clientNum, "Usage: propClear\n");
+		return;
+	}
+
+	PropClear(playerEntity);
+}
+
 void Cmd_PropHelp_f(gentity_t *playerEntity)
 {
 	if (trap_Argc() != 1)
@@ -105,6 +116,7 @@ void Cmd_PropHelp_f(gentity_t *playerEntity)
 		"propSelect X - attach prop X to player from model list\n"
 		"propDeselect - remove prop attachments from player\n"
 		"propPlace - place attached prop\n"
+		"propClear - clear all props\n"
 		"propHelp - print PropHunt help\n\n"
 
 		"press +use on placed prop to hide in it\n"
@@ -255,6 +267,7 @@ void PropThink(gentity_t *ent)
 			fwdorg[i] = ent->parent->client->ps.origin[i] + fwd[i] * 64;
 		}
 		G_SetOrigin(ent, fwdorg);
+		G_SetAngles(ent, yawonly);
 	}
 	ent->nextthink = level.time + 100;
 }
@@ -283,7 +296,7 @@ void PropDie(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int dam
 	G_FreeEntity(self);
 }
 
-qboolean PropSpawnable(gentity_t *playerEntity)
+qboolean PropPlaceable(gentity_t *playerEntity)
 {
 	vec3_t fwd, fwdorg;
 	vec3_t yawonly;
@@ -292,12 +305,6 @@ qboolean PropSpawnable(gentity_t *playerEntity)
 	trace_t tr;
 	int i;
 	int model;
-	//if (playerEntity->client->ps.fd.sentryDeployed)
-	if (0)
-	{
-		G_AddEvent(&g_entities[playerEntity->client->ps.clientNum], EV_ITEMUSEFAIL, SENTRY_ALREADYPLACED);
-		return qfalse;
-	}
 	yawonly[ROLL] = 0;
 	yawonly[PITCH] = 0;
 	yawonly[YAW] = playerEntity->client->ps.viewangles[YAW];
@@ -313,7 +320,6 @@ qboolean PropSpawnable(gentity_t *playerEntity)
 	trap_Trace(&tr, playerEntity->client->ps.origin, mins, maxs, trtest, playerEntity->client->ps.clientNum, MASK_PLAYERSOLID);
 	if ((tr.fraction != 1 && tr.entityNum != playerEntity->client->ps.clientNum) || tr.startsolid || tr.allsolid)
 	{
-		G_AddEvent(&g_entities[playerEntity->client->ps.clientNum], EV_ITEMUSEFAIL, SENTRY_NOROOM);
 		return qfalse;
 	}
 	return qtrue;
@@ -329,10 +335,6 @@ void PropSpawn(gentity_t *playerEntity)
 	const char *propNameExtension;
 	int model;
 	int i;
-	if (!PropSpawnable(playerEntity))
-	{
-		return;
-	}
 	yawonly[ROLL] = 0;
 	yawonly[PITCH] = 0;
 	yawonly[YAW] = playerEntity->client->ps.viewangles[YAW];
@@ -381,7 +383,7 @@ void PropSpawn(gentity_t *playerEntity)
 	//playerEntity->client->ps.fd.sentryDeployed = qtrue;
 	trap_LinkEntity(prop);
 	prop->s.owner = playerEntity->client->ps.clientNum;
-	prop->s.shouldtarget = qtrue;
+	prop->s.shouldtarget = qfalse;
 	if (g_gametype.integer >= GT_TEAM)
 	{
 		prop->s.teamowner = playerEntity->client->sess.sessionTeam;
@@ -397,8 +399,8 @@ void PropSpawn(gentity_t *playerEntity)
 	prop->s.bolt1 = 1;
 	prop->s.bolt2 = ENTITYNUM_NONE;
 	prop->damage = 0;
-	VectorSet(prop->r.mins, -8, -8, 0);
-	VectorSet(prop->r.maxs, 8, 8, 24);
+	VectorCopy(propHuntModelsBounds[model][PROPHUNT_BOUNDS_MINS], prop->r.mins);
+	VectorCopy(propHuntModelsBounds[model][PROPHUNT_BOUNDS_MAXS], prop->r.maxs);
 	G_RunObject(prop);
 	prop->think = PropThink;
 	prop->nextthink = level.time + FRAMETIME;
@@ -413,7 +415,7 @@ void PropSpawn(gentity_t *playerEntity)
 	playerEntity->client->propHunt.attachedModelEntityNumber = prop->s.number;
 	playerEntity->client->propHunt.isModelAttached = qtrue;
 	G_Sound(prop, CHAN_BODY, G_SoundIndex("sound/chars/turret/startup.wav"));
-	G_AddEvent(playerEntity, EV_USE_ITEM0 + HI_SENTRY_GUN, 0);
+	//G_AddEvent(playerEntity, EV_USE_ITEM0 + HI_SENTRY_GUN, 0);
 }
 
 qboolean PropSelect(gentity_t *playerEntity, int model, qboolean checkBounds)
@@ -562,6 +564,12 @@ qboolean PropPlace(gentity_t *playerEntity)
 		return qfalse;
 	}
 
+	if (!PropPlaceable(playerEntity))
+	{
+		G_ClientPrint(playerEntity->client->ps.clientNum, "There is no room to place the prop here\n");
+		return qfalse;
+	}
+
 	G_ClientPrint(playerEntity->client->ps.clientNum, "Placed model %d: \'%s\'\n", propHunt->selectedModel, propHuntModels[propHunt->selectedModel]);
 
 	attachedModel = &g_entities[propHunt->attachedModelEntityNumber];
@@ -577,6 +585,82 @@ qboolean PropPlace(gentity_t *playerEntity)
 	attachedModel->clipmask = MASK_SOLID;
 
 	G_RunObject(attachedModel);
+	return qtrue;
+}
+
+qboolean PropClear(gentity_t *playerEntity)
+{
+	gentity_t *ent;
+	gclient_t *client;
+	propHuntClientData_t *ph;
+	int i;
+	int clientNum;
+	int clearedProps = 0;
+
+	client = playerEntity->client;
+	ph = &client->propHunt;
+	clientNum = client->ps.clientNum;
+
+	if (!propHuntEnabled)
+	{
+		G_ClientPrint(clientNum, "PropHunt disabled\n");
+		return qfalse;
+	}
+
+	if (!client->pers.isSurvivor)
+	{
+		G_ClientPrint(clientNum, "Hunter can't place props\n");
+		return qfalse;
+	}
+
+	if (ph->placedModelsCount == 0 && !ph->isModelAttached)
+	{
+		G_ClientPrint(clientNum, "You have zero props\n");
+		return qfalse;
+	}
+
+	if (ph->isHidingInModel)
+	{
+		ent = &g_entities[ph->hidingModelEntityNumber];
+		ent->use(ent, NULL, playerEntity);
+	}
+
+	for (i = 0; i < MAX_GENTITIES; i++)
+	{
+		ent = &g_entities[i];
+
+		if (!ent->inuse)
+		{
+			continue;
+		}
+
+		if (Q_stricmp(ent->classname, "prop") != 0)
+		{
+			continue;
+		}
+
+		if (ent->parent == NULL || ent->parent->client == NULL)
+		{
+			continue;
+		}
+
+		if (ent->parent->client->ps.clientNum == clientNum)
+		{
+			G_FreeEntity(ent);
+			clearedProps++;
+		}
+	}
+
+	ph->selectedModel = 0;
+	ph->placedModelsCount = 0;
+	ph->attachedModelEntityNumber = 0;
+	ph->hidingModelEntityNumber = 0;
+	ph->isModelAttached = qfalse;
+	ph->isHidingInModel = qfalse;
+	playerEntity->r.svFlags &= ~SVF_NOCLIENT;
+	playerEntity->client->ps.pm_type = PM_NORMAL;
+
+	G_ClientPrint(clientNum, "Cleared %d props\n", clearedProps);
 	return qtrue;
 }
 
@@ -752,8 +836,8 @@ void PropHuntFrame(void)
 
 	if (survivors == 0 && hunters > 1 && !propHuntCountdown)
 	{
-		G_ClientPrint(-1, "New round will begin in 6 seconds\n");
-		propHuntRoundStartTime = level.time + 6000;
+		G_ClientPrint(-1, "New round will begin in %d seconds\n", g_propHuntRoundStartTime.integer);
+		propHuntRoundStartTime = level.time + (g_propHuntRoundStartTime.integer * 1000);
 		propHuntCountdown = qtrue;
 	}
 

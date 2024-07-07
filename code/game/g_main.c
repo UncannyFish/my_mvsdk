@@ -122,6 +122,7 @@ vmCvar_t	g_forceDodge;
 vmCvar_t	g_timeouttospec;
 vmCvar_t	g_propHunt;
 vmCvar_t	g_propHuntRounds;
+vmCvar_t	g_propHuntRoundStartTime;
 vmCvar_t	g_propHuntMaxPlacedModels;
 vmCvar_t	g_propHuntModels;
 
@@ -293,6 +294,7 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &g_timeouttospec, "g_timeouttospec", "70", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_propHunt, "g_propHunt", "0", CVAR_ARCHIVE, 0, qtrue },
 	{ &g_propHuntRounds, "g_propHuntRounds", "3", CVAR_ARCHIVE, 0, qtrue },
+	{ &g_propHuntRoundStartTime, "g_propHuntRoundStartTime", "6", CVAR_ARCHIVE, 0, qtrue },
 	{ &g_propHuntMaxPlacedModels, "g_propHuntMaxPlacedModels", "3", CVAR_ARCHIVE, 0, qtrue },
 	{ &g_propHuntModels, "g_propHuntModels", "models.cfg", CVAR_ARCHIVE, 0, qtrue },
 

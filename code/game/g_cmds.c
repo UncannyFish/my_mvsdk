@@ -644,6 +644,11 @@ void SetTeam( gentity_t *ent, char *s ) {
 			*/
 				team = PickTeam( clientNum );
 			//}
+
+				if (propHuntEnabled)
+				{
+					team = TEAM_RED;
+				}
 		}
 
 		if ( g_teamForceBalance.integer && !g_trueJedi.integer ) {
@@ -1091,12 +1096,12 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 	switch ( mode ) {
 	default:
 	case SAY_ALL:
-		G_LogPrintf( "say: %s: %s\n", ent->client->pers.netname, chatText );
+		G_LogPrintf( "%d: say: %s: \"%s\"\n", ent->s.number, ent->client->pers.netname, chatText );
 		Com_sprintf (name, sizeof(name), "%s%c%c"EC": ", ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE );
 		color = COLOR_GREEN;
 		break;
 	case SAY_TEAM:
-		G_LogPrintf( "sayteam: %s: %s\n", ent->client->pers.netname, chatText );
+		G_LogPrintf( "%d: sayteam: %s: \"%s\"\n", ent->s.number, ent->client->pers.netname, chatText );
 		if (Team_GetLocationMsg(ent, location, sizeof(location)))
 			Com_sprintf (name, sizeof(name), EC"(%s%c%c"EC") (%s)"EC": ", 
 				ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE, location);
@@ -2682,6 +2687,10 @@ void ClientCommand( int clientNum ) {
 		{
 			giveError = qtrue;
 		}
+		else if (!Q_stricmp(cmd, "propClear"))
+		{
+			giveError = qtrue;
+		}
 		else if (!Q_stricmp(cmd, "propHelp") || !Q_stricmp(cmd, "help") || !Q_stricmp(cmd, "info") || !Q_stricmp(cmd, "amhelp") || !Q_stricmp(cmd, "aminfo"))
 		{
 			giveError = qtrue;
@@ -2752,6 +2761,8 @@ void ClientCommand( int clientNum ) {
 		Cmd_PropDeselect_f(ent);
 	else if (Q_stricmp(cmd, "propPlace") == 0)
 		Cmd_PropPlace_f(ent);
+	else if (Q_stricmp(cmd, "propClear") == 0)
+		Cmd_PropClear_f(ent);
 	else if (!Q_stricmp(cmd, "propHelp") || !Q_stricmp(cmd, "help") || !Q_stricmp(cmd, "info") || !Q_stricmp(cmd, "amhelp") || !Q_stricmp(cmd, "aminfo"))
 		Cmd_PropHelp_f(ent);
 

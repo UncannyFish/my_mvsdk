@@ -981,6 +981,7 @@ void Cmd_PropLast_f(gentity_t *playerEntity);
 void Cmd_PropSelect_f(gentity_t *playerEntity);
 void Cmd_PropDeselect_f(gentity_t *playerEntity);
 void Cmd_PropPlace_f(gentity_t *playerEntity);
+void Cmd_PropClear_f(gentity_t *playerEntity);
 void Cmd_PropHelp_f(gentity_t *playerEntity);
 
 void Svcmd_PropAdd_f(void);
@@ -990,11 +991,12 @@ void PropTouch(gentity_t *ent, gentity_t *other, trace_t *trace);
 void PropUse(gentity_t *self, gentity_t *other, gentity_t *activator);
 void PropThink(gentity_t *ent);
 void PropDie(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod);
-qboolean PropSpawnable(gentity_t *playerEntity);
+qboolean PropPlaceable(gentity_t *playerEntity);
 void PropSpawn(gentity_t *playerEntity);
 qboolean PropSelect(gentity_t *playerEntity, int model, qboolean checkBounds);
 qboolean PropDeselect(gentity_t *playerEntity);
 qboolean PropPlace(gentity_t *playerEntity);
+qboolean PropClear(gentity_t *playerEntity);
 void PropResetInfo(gentity_t *playerEntity);
 
 void PropHuntInit(void);
@@ -1126,6 +1128,7 @@ extern	vmCvar_t	g_forceDodge;
 extern	vmCvar_t	g_timeouttospec;
 extern	vmCvar_t	g_propHunt;
 extern	vmCvar_t	g_propHuntRounds;
+extern	vmCvar_t	g_propHuntRoundStartTime;
 extern	vmCvar_t	g_propHuntMaxPlacedModels;
 extern	vmCvar_t	g_propHuntModels;
 
