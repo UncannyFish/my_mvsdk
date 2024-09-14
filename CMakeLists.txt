@@ -17,7 +17,7 @@ if(NOT InMV)
 endif()
 
 include(GetGitRevisionDescription)
-git_describe(MVSDK_VERSION --tags)
+git_describe(MVSDK_VERSION --tags --match 1.0.1 origin/master)
 if(NOT MVSDK_VERSION OR MVSDK_VERSION STREQUAL "GIT-NOTFOUND" OR MVSDK_VERSION STREQUAL "HEAD-HASH-NOTFOUND")
 	set(MVSDK_VERSION "UNKNOWN")
 	message(WARNING "Could not find git or git repository. Install git and make sure you actually cloned the repository (Directory named .git must exist) for correct versioning.")
