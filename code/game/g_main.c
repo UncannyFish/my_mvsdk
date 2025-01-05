@@ -148,6 +148,9 @@ vmCvar_t	g_botTeamAutoBalance;
 
 vmCvar_t	g_MVSDK;
 
+vmCvar_t	g_kick;
+vmCvar_t	g_blackName;
+
 int gDuelist1 = -1;
 int gDuelist2 = -1;
 
@@ -327,6 +330,9 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &g_botTeamAutoBalance, "g_botTeamAutoBalance", "1", CVAR_ARCHIVE, 0, qtrue },
 
 	{ &g_MVSDK, "g_MVSDK", MVSDK_VERSION, CVAR_ROM | CVAR_SERVERINFO, 0, qfalse },
+
+	{ &g_kick, "g_kick", "1", CVAR_ARCHIVE, 0, qtrue, qfalse },
+	{ &g_blackName, "g_blackName", "0", CVAR_ARCHIVE, 0, qtrue, qfalse },
 };
 
 // bk001129 - made static to avoid aliasing

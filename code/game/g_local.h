@@ -1088,6 +1088,9 @@ extern	vmCvar_t	g_mv_forcePowerDisableMode;
 extern	vmCvar_t	g_submodelWorkaround;
 extern	vmCvar_t	g_botTeamAutoBalance;
 
+extern	vmCvar_t	g_kick;
+extern	vmCvar_t	g_blackName;
+
 void	trap_Printf( const char *fmt );
 Q_NORETURN void	trap_Error( const char *fmt );
 int		trap_Milliseconds( void );
